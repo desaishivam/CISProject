@@ -1,0 +1,3 @@
+Django
+gunicorn
+# Add any other dependencies your project uses below 
