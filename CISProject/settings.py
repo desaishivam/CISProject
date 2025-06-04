@@ -25,7 +25,13 @@ SECRET_KEY = 'django-insecure-n&@ufrn8f-t)wxz%9jlv%9*)6s)!#!s1y(2^b#*(ai77976tl0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://cisproject-production.up.railway.app',
+]
 
 
 # Application definition
