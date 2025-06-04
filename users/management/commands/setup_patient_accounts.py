@@ -90,4 +90,4 @@ class Command(BaseCommand):
                     f"Created patient: {patient_data['first_name']} {patient_data['last_name']} ({patient_data['username']}) with provider {patient_data['provider']}"
                 ))
 
-        self.stdout.write(self.style.SUCCESS("Patient accounts setup complete!")) 
+        self.stdout.write(self.style.SUCCESS("Patient accounts setup complete.")) 
