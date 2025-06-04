@@ -149,6 +149,17 @@ def take_task(request, task_id):
                 'time': time_taken
             }
             handled = True
+        # Handle pairs game responses
+        elif task.task_type == 'pairs' and 'complete_task' in request.POST:
+            score = request.POST.get('score', 0)
+            moves = request.POST.get('moves', 0)
+            time_taken = request.POST.get('time', 0)
+            task_response.responses = {
+                'score': score,
+                'moves': moves,
+                'time': time_taken
+            }
+            handled = True
         # Handle memory questionnaire responses
         elif task.task_type == 'memory_questionnaire' and 'complete_task' in request.POST:
             # Collect all relevant answers from POST
@@ -311,6 +322,31 @@ def task_results(request, task_id):
             'score': score,
             'max_score': max_score,
             'tries': tries,
+            'time': formatted_time,
+            'efficiency': f"{efficiency:.1f}",
+            'analysis': analysis
+        }
+    elif task.task_type == 'pairs' and task_response:
+        score = int(task_response.responses.get('score', 0))
+        moves = int(task_response.responses.get('moves', 0))
+        time_sec = int(task_response.responses.get('time', 0))
+        # Format time as mm:ss
+        minutes = time_sec // 60
+        seconds = time_sec % 60
+        formatted_time = f"{minutes:02d}:{seconds:02d}"
+        total_pairs = 8  # 8 pairs in the game
+        efficiency = (total_pairs / moves) * 100 if moves > 0 else 0
+        if score >= 80:
+            analysis = "Outstanding performance! Excellent memory and quick matching."
+        elif score >= 60:
+            analysis = "Good performance! Shows good memory and matching skills."
+        elif score >= 40:
+            analysis = "Fair performance. Room for improvement in speed and accuracy."
+        else:
+            analysis = "Needs improvement. Consider more practice to enhance memory skills."
+        context['pairs_results'] = {
+            'score': score,
+            'moves': moves,
             'time': formatted_time,
             'efficiency': f"{efficiency:.1f}",
             'analysis': analysis

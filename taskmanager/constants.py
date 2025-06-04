@@ -8,6 +8,7 @@ TASK_TYPES = (
     ('checklist', 'Checklist'),
     ('puzzle', 'Memory Puzzle'),
     ('color', 'Color Matching'),
+    ('pairs', 'Pairs Game'),
 )
 
 # Task Status Configuration
@@ -35,5 +36,9 @@ TASK_TEMPLATES = {
     'color': {
         'template_name': 'tasks/color/take.html',
         'results_template': 'tasks/color/results.html',
+    },
+    'pairs': {
+        'template_name': 'tasks/pairs/take.html',
+        'results_template': 'tasks/pairs/results.html',
     },
 } 
