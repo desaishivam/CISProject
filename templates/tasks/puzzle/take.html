@@ -1,0 +1,228 @@
+{# Unified structure: .container, .section, .card, .mdc-button #}
+{% extends 'layouts/base.html' %}
+
+{% block title %}Memory Match Puzzle - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h2>🧠 Memory Match Puzzle</h2>
+        <div class="stats card">
+            <div class="stat-number" id="timer">00:00</div>
+            <div class="stat-label">Time</div>
+        </div>
+    </div>
+    <div class="card">
+        <form method="post" id="puzzle-form">
+            {% csrf_token %}
+            <div class="section">
+                {% for item in puzzle_words %}
+                <div class="word-pair" data-id="{{ item.id }}">
+                    <span class="word">{{ item.word }}</span>
+                    <select id="{{ item.id }}" name="{{ item.id }}">
+                        <option value="">-- Choose --</option>
+                        <option value="fruit">🍎 Fruit</option>
+                        <option value="city">🏙️ City</option>
+                        <option value="animal">🐘 Animal</option>
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="mdc-button mdc-button--raised" type="submit" name="complete_task">Submit</button>
+        </form>
+    </div>
+</div>
+
+  <style>
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .stat-number {
+        font-size: 36px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label {
+        font-size: 20px;
+        font-weight: 600;
+      color: #666;
+    }
+    .word-pair {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .word {
+      font-size: 18px;
+      font-weight: 600;
+      min-width: 100px;
+    }
+    select {
+      padding: 8px 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      background: white;
+    }
+    select:focus {
+      border-color: #667eea;
+      outline: none;
+    }
+    .form-actions {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .mdc-button {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      margin: 5px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s ease;
+    }
+    .mdc-button:hover {
+      transform: translateY(-2px);
+    }
+    .btn-reset {
+      background: #6c757d;
+    }
+  </style>
+
+<script>
+  const answers = {
+    q1: "fruit",   // Apple
+    q2: "city",    // Paris  
+    q3: "animal",  // Elephant
+    q4: "city",    // Tokyo
+    q5: "fruit",   // Banana
+    q6: "animal",  // Lion
+    q7: "city",    // London
+    q8: "fruit",   // Orange
+    q9: "animal",  // Tiger
+    q10: "city"    // Berlin
+  };
+  
+  let startTime = null;
+  let timerInterval = null;
+
+  function startTimer() {
+    if (!startTime) {
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+  }
+
+  function updateTimer() {
+    if (!startTime) return;
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    document.getElementById('timer').textContent = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+    function resetGame() {
+        for (let id in answers) {
+            document.getElementById(id).value = "";
+        }
+        document.getElementById('timer').textContent = "00:00";
+        stopTimer();
+        startTime = null;
+    }
+    
+    document.addEventListener('change', function(e) {
+        if (e.target.tagName === 'SELECT') {
+            if (!startTime) startTimer();
+        }
+    });
+    
+    document.getElementById('puzzle-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        stopTimer();
+        
+        const userAnswers = {};
+        let score = 0;
+        
+    for (let id in answers) {
+            const select = document.getElementById(id);
+            userAnswers[id] = select.value;
+            if (select.value === answers[id]) {
+        score++;
+            }
+    }
+    
+        // Add hidden fields for score and time
+        const scoreInput = document.createElement('input');
+        scoreInput.type = 'hidden';
+        scoreInput.name = 'score';
+        scoreInput.value = score;
+        this.appendChild(scoreInput);
+        
+        const timeInput = document.createElement('input');
+        timeInput.type = 'hidden';
+        timeInput.name = 'time';
+        timeInput.value = document.getElementById('timer').textContent;
+        this.appendChild(timeInput);
+        
+        const answersInput = document.createElement('input');
+        answersInput.type = 'hidden';
+        answersInput.name = 'answers';
+        answersInput.value = JSON.stringify(userAnswers);
+        this.appendChild(answersInput);
+    
+        // Add complete_task field
+        const completeInput = document.createElement('input');
+        completeInput.type = 'hidden';
+        completeInput.name = 'complete_task';
+        completeInput.value = '1';
+        this.appendChild(completeInput);
+        
+        // Submit the form using the native form submission
+        const form = document.getElementById('puzzle-form');
+        form.submit();
+  });
+</script>
+{% endblock %}

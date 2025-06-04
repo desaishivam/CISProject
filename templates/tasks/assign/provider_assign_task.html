@@ -1,0 +1,141 @@
+{# Unified structure: .container, .section, .card, .mdc-button #}
+{% extends 'layouts/base.html' %}
+
+{% block title %}Assign Task - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1>Assign Task</h1>
+        <p class="subtitle">Assign a new task to {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
+    </div>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="card">
+        <form method="post" action="{% url 'taskmanager:assign_task' patient.id %}" class="task-form">
+            {% csrf_token %}
+            <div class="section">
+                <h3>Patient Information</h3>
+                <p><strong>Name:</strong> {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
+                <p><strong>Username:</strong> {{ patient.user.username }}</p>
+                <p><strong>Email:</strong> {{ patient.user.email }}</p>
+            </div>
+            <div class="form-group">
+                <label for="title">Task Title</label>
+                <input type="text" id="title" name="title" required placeholder="Enter a title for this task">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3" placeholder="Optional description or instructions for the patient"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="task_type">Task Type</label>
+                    <select id="task_type" name="task_type" required>
+                        <option value="">Select task type...</option>
+                        {% for value, label in task_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="due_date">Due Date (Optional)</label>
+                    <input type="datetime-local" id="due_date" name="due_date">
+                </div>
+            </div>
+            {% if templates %}
+            <div class="form-group">
+                <label for="template_id">Use Template (Optional)</label>
+                <select id="template_id" name="template_id">
+                    <option value="">Create custom task...</option>
+                    {% for template in templates %}
+                        <option value="{{ template.id }}">{{ template.name }} - {{ template.get_task_type_display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="form-actions">
+                <button type="submit" class="mdc-button mdc-button--raised">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Assign Task</span>
+                </button>
+                <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Cancel</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section {
+        margin-bottom: 1.5rem;
+    }
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+    }
+    .subtitle {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    .task-form {
+        width: 100%;
+    }
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+    .form-row .form-group {
+        flex: 1;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
+{% endblock %} 

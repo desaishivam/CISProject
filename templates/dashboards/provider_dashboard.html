@@ -1,0 +1,1001 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Provider Dashboard - CogniCare{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+    <h1>Welcome, {{ user.first_name }}!</h1>
+            <span class="user-type">{{ user_type }}</span>
+        </div>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Dashboard content -->
+    <div class="provider-dashboard">
+        <div class="dashboard-section">
+            <h2>Task Management</h2>
+            <div class="task-management-section">
+                <!-- Task Overview Stats -->
+                <div class="task-stats">
+                    <h4>My Task Overview</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number">{{ my_total_tasks|default:0 }}</span>
+                            <span class="stat-label">My Total Tasks</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">{{ my_pending_tasks|default:0 }}</span>
+                            <span class="stat-label">My Pending</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">{{ my_completed_tasks|default:0 }}</span>
+                            <span class="stat-label">My Completed</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">{{ my_overdue_tasks|default:0 }}</span>
+                            <span class="stat-label">My Overdue</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Task Assignment -->
+                <div class="quick-assign-section">
+                    <h4>Quick Task Assignment</h4>
+                    <form method="post" action="{% url 'create_patient' %}" class="quick-assign-form">
+                        {% csrf_token %}
+                        <div class="assign-row">
+                            <div class="form-group patient-select">
+                                <label for="patient_select">Assign Task To:</label>
+                                <select id="patient_select" name="patient_select" required>
+                                    <option value="">Select a patient...</option>
+                                    {% for patient in patients %}
+                                        <option value="{{ patient.id }}">{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group task-type">
+                                <label for="quick_task_type">Type:</label>
+                                <select id="quick_task_type" name="task_type" required>
+                                    <option value="">Select type...</option>
+                                    {% for value, label in task_types %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group assign-button">
+                                <button type="button" onclick="quickAssignTask()" class="mdc-button mdc-button--raised assign-btn">
+                                    <span class="mdc-button__label">Assign Task</span>
+                                </button>
+                            </div>
+                            <div class="form-group assign-all-button">
+                                <button type="button" onclick="assignAllTasksToPatient()" class="mdc-button mdc-button--outlined assign-all-btn">
+                                    <span class="mdc-button__label">Assign All Tasks</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="assign-all-status" style="margin-top:1rem;display:none;"></div>
+                </div>
+
+                <!-- Active Tasks Management -->
+                <div class="active-tasks-section">
+                    <h4>My Active Tasks</h4>
+                    <div class="tasks-table-container">
+                        <table class="tasks-table">
+                            <thead>
+                                <tr>
+                                    <th>Task Title</th>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Assigned</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_tasks %}
+                                    {% for task in recent_tasks %}
+                                    <tr>
+                                        <td>{{ task.title }}</td>
+                                        <td>{{ task.assigned_to.user.first_name }} {{ task.assigned_to.user.last_name }}</td>
+                                        <td>{{ task.get_task_type_display }}</td>
+                                        <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+                                        <td>{{ task.assigned_at|date:"M d, Y" }}</td>
+                                        <td class="task-actions">
+                                            <a href="{% url 'taskmanager:task_results' task.id %}" class="action-link">View</a>
+                                            {% if task.status != 'completed' %}
+                                            <button type="button" onclick="reassignTask({{ task.id }})" class="action-link">Reassign</button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="no-tasks-row">No tasks assigned yet</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-actions">
+                        <a href="{% url 'taskmanager:provider_task_management' %}" class="mdc-button mdc-button--outlined">
+                            <span class="mdc-button__label">View All My Tasks</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Task Cleanup Options -->
+                <div class="clear-actions">
+                    <h4>Patient Task Management</h4>
+                    <div class="patient-task-management">
+                        <form method="post" action="" class="patient-select-form" style="margin-bottom:1rem;">
+                            {% csrf_token %}
+                        <div class="patient-selection-row">
+                            <div class="form-group">
+                                    <label for="selected_patient">Select Patient:</label>
+                                    <select id="selected_patient" name="selected_patient" required>
+                                    <option value="">Choose a patient...</option>
+                                    {% for patient in patients %}
+                                            <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                    <button type="submit" class="mdc-button mdc-button--outlined" style="margin-left:1rem;">View Tasks</button>
+                            </div>
+                        </div>
+                        </form>
+                        {% if selected_patient %}
+                            <h5>Tasks for {{ selected_patient.user.get_full_name }}</h5>
+                            {% if patient_tasks %}
+                                <table class="tasks-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for task in patient_tasks %}
+                                        <tr>
+                                            <td>{{ task.title }}</td>
+                                            <td>{{ task.get_task_type_display }}</td>
+                                            <td>{{ task.get_status_display }}</td>
+                                            <td>
+                                                <form method="post" action="{% url 'taskmanager:delete_task' task.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="mdc-button mdc-button--outlined danger" onclick="return confirm('Delete this task?');">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <em>No tasks found for this patient.</em>
+                            {% endif %}
+                        {% endif %}
+                        <div class="action-buttons" style="margin-top:1rem;">
+                            <button onclick="managePatientTasks('archive')" class="mdc-button mdc-button--outlined clear-btn">
+                                <span class="mdc-button__label">Archive Completed Tasks</span>
+                            </button>
+                            <button onclick="managePatientTasks('delete')" class="mdc-button mdc-button--outlined clear-btn danger">
+                                <span class="mdc-button__label">Delete All Tasks</span>
+                            </button>
+                        </div>
+                        <p class="info-text">Manage tasks for a specific patient. Archived tasks are saved for reference.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-section">
+            <h2>Account Management</h2>
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab(event, 'patients-tab')">Patients</button>
+                <button class="tab-button" onclick="openTab(event, 'caregivers-tab')">Caregivers</button>
+            </div>
+            
+            <div id="patients-tab" class="tab-content active">
+                <h3>Patient Accounts</h3>
+                {% if patients %}
+                <div class="user-accounts">
+                    {% for patient in patients %}
+                    <div class="user-card">
+                        <div class="user-details">
+                            <h4>{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
+                            <p><strong>Username:</strong> {{ patient.user.username }}</p>
+                            <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                            
+                            <!-- Show caregivers assigned to this patient -->
+                            <div class="relationship-data">
+                                <p><strong>Assigned Caregivers:</strong></p>
+                                {% with caregivers=patient.caregivers.all %}
+                                    {% if caregivers %}
+                                        <ul class="relationship-list">
+                                        {% for caregiver in caregivers %}
+                                            <li>{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</li>
+                                        {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p class="no-relationships">No caregivers assigned</p>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'assign_caregiver' patient.user.id %}" class="mdc-button mdc-button--outlined action-btn">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Assign Caregivers</span>
+                            </a>
+                            <a href="{% url 'edit_account' patient.user.id %}" class="mdc-button mdc-button--outlined">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Edit</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No patient accounts found.</p>
+                {% endif %}
+            </div>
+            
+            <div id="caregivers-tab" class="tab-content">
+                <h3>Caregiver Accounts</h3>
+                {% if caregivers %}
+                <div class="user-accounts">
+                    {% for caregiver in caregivers %}
+                    <div class="user-card">
+                        <div class="user-details">
+                            <h4>{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
+                            <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
+                            <p><strong>Email:</strong> {{ caregiver.user.email }}</p>
+                            
+                            <!-- Show assigned patient -->
+                            <div class="relationship-data">
+                                <p><strong>Assigned Patient:</strong></p>
+                                {% if caregiver.patient %}
+                                    <p>{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</p>
+                                {% else %}
+                                    <p class="no-relationships">No patient assigned</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'edit_account' caregiver.user.id %}" class="mdc-button mdc-button--outlined">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Edit</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No caregiver accounts found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create New Accounts at the very bottom -->
+    <div class="dashboard-section">
+        <h2>Create New Patient Account</h2>
+        <form method="post" action="{% url 'create_patient' %}" class="account-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="patient_username">Username</label>
+                    <input type="text" id="patient_username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="patient_password">Password</label>
+                    <input type="password" id="patient_password" name="password" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="patient_first_name">First Name</label>
+                    <input type="text" id="patient_first_name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="patient_last_name">Last Name</label>
+                    <input type="text" id="patient_last_name" name="last_name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="patient_email">Email</label>
+                <input type="email" id="patient_email" name="email" required>
+            </div>
+            <button type="submit" class="mdc-button mdc-button--raised">
+            <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Create Patient Account</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Create New Caregiver Account</h2>
+        <form method="post" action="{% url 'create_caregiver' %}" class="account-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="caregiver_username">Username</label>
+                    <input type="text" id="caregiver_username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="caregiver_password">Password</label>
+                    <input type="password" id="caregiver_password" name="password" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="caregiver_first_name">First Name</label>
+                    <input type="text" id="caregiver_first_name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="caregiver_last_name">Last Name</label>
+                    <input type="text" id="caregiver_last_name" name="last_name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="caregiver_email">Email</label>
+                <input type="email" id="caregiver_email" name="email" required>
+            </div>
+            <button type="submit" class="mdc-button mdc-button--raised">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Create Caregiver Account</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .user-type {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-actions {
+        margin-top: 2rem;
+    }
+    
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    .dashboard-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+    }
+    
+    .dashboard-section h2 {
+        color: #003366;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tab-button {
+        padding: 0.75rem 1.5rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .tab-button.active {
+        color: #003366;
+        border-bottom-color: #003366;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .user-accounts {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+    
+    .user-card {
+        background: #f5f7fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .user-details h4 {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        color: #003366;
+    }
+    
+    .user-details p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .user-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+    
+    .action-btn {
+        font-size: 0.8rem;
+    }
+    
+    .relationship-data {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .relationship-data p {
+        margin: 0.25rem 0;
+    }
+    
+    .relationship-data p strong {
+        color: #003366;
+    }
+    
+    .relationship-list {
+        margin: 0.25rem 0 0.75rem 1.25rem;
+        padding: 0;
+    }
+    
+    .relationship-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .no-relationships {
+        color: #6b7280;
+        font-style: italic;
+        margin-left: 1rem;
+    }
+    
+    /* Development Tools Styles */
+    .task-management-section {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .task-stats {
+        margin-bottom: 2rem;
+    }
+    
+    .task-stats h4 {
+        color: #003366;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 6px;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .stat-number {
+        display: block;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #003366;
+    }
+    
+    .stat-label {
+        display: block;
+        font-size: 0.8rem;
+        color: #666;
+        text-transform: uppercase;
+        margin-top: 0.5rem;
+    }
+    
+    .clear-actions h4 {
+        color: #003366;
+        margin-bottom: 1rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .clear-btn {
+        background: white !important;
+        border-color: #003366 !important;
+        color: #003366 !important;
+    }
+    
+    .clear-btn:hover {
+        background: #003366 !important;
+        color: white !important;
+    }
+    
+    .clear-btn.danger {
+        border-color: #dc2626 !important;
+        color: #dc2626 !important;
+    }
+    
+    .clear-btn.danger:hover {
+        background: #dc2626 !important;
+        color: white !important;
+    }
+    
+    .info-text {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    /* Quick Task Assignment Styles */
+    .quick-assign-section {
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: 6px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .quick-assign-section h4 {
+        color: #003366;
+        margin-bottom: 1rem;
+    }
+    
+    .assign-row {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .assign-row .form-group {
+        margin-bottom: 0;
+    }
+    
+    .assign-row label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .assign-row input, .assign-row select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .assign-btn {
+        height: fit-content;
+        white-space: nowrap;
+    }
+    
+    /* Active Tasks Table Styles */
+    .active-tasks-section {
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: 6px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .active-tasks-section h4 {
+        color: #003366;
+        margin-bottom: 1rem;
+    }
+    
+    .tasks-table-container {
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+    
+    .tasks-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    
+    .tasks-table th,
+    .tasks-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .tasks-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .tasks-table tr:hover {
+        background: #f8fafc;
+    }
+    
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+    
+    .status-assigned {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-in_progress {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-completed {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-overdue {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    .action-link {
+        color: #003366;
+        text-decoration: none;
+        margin-right: 0.5rem;
+        font-size: 0.85rem;
+        border: none;
+        background: none;
+        cursor: pointer;
+    }
+    
+    .action-link:hover {
+        text-decoration: underline;
+    }
+    
+    .no-tasks-row {
+        text-align: center;
+        color: #6b7280;
+        font-style: italic;
+        padding: 2rem;
+    }
+    
+    .table-actions {
+        text-align: right;
+    }
+    
+    /* Patient Task Management Styles */
+    .patient-task-management {
+        background: white;
+        border-radius: 6px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .patient-selection-row {
+        margin-bottom: 1.5rem;
+    }
+    
+    .patient-selection-row .form-group {
+        margin-bottom: 0;
+    }
+    
+    .patient-selection-row label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .patient-selection-row select {
+        width: 100%;
+        max-width: 300px;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .assign-row {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .assign-row .form-group {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .logout-btn {
+        margin-left: auto;
+        background: #003366;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+    .logout-btn:hover {
+        background: #0055a5;
+    }
+</style>
+
+<script>
+    function openTab(evt, tabName) {
+        // Hide all tab content
+        var tabContents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+        
+        // Remove active class from all tab buttons
+        var tabButtons = document.getElementsByClassName("tab-button");
+        for (var i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+        
+        // Show the selected tab and add active class to the button
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+    
+    function managePatientTasks(action) {
+        const patientId = document.getElementById('selected_patient').value;
+        
+        if (!patientId) {
+            alert('Please select a patient first.');
+            return;
+        }
+        
+        let confirmMessage;
+        let endpoint;
+        
+        switch(action) {
+            case 'archive':
+                confirmMessage = 'Archive all completed tasks for this patient? This will save them for reference but remove them from active view.';
+                endpoint = `/tasks/provider/archive-patient-tasks/${patientId}/`;
+                break;
+            case 'delete':
+                confirmMessage = 'Delete ALL tasks for this patient? This action is irreversible and will remove all task data.';
+                endpoint = `/tasks/provider/delete-patient-tasks/${patientId}/`;
+                break;
+            default:
+                return;
+        }
+        
+        if (confirm(confirmMessage)) {
+            // Show loading state
+            const buttons = document.querySelectorAll('.clear-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            });
+            
+            // Make the request
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Patient task management operation completed successfully!');
+                    location.reload(); // Refresh to update stats
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during the task management operation.');
+            })
+            .finally(() => {
+                // Re-enable buttons
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+            });
+        }
+    }
+    
+    function quickAssignTask() {
+        const patientId = document.getElementById('patient_select').value;
+        const taskType = document.getElementById('quick_task_type').value;
+        
+        if (!patientId || !taskType) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        // Redirect to the assign task page with pre-filled data
+        const assignUrl = `/tasks/assign-task/${patientId}/`;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = assignUrl;
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        // Add form fields
+        const typeInput = document.createElement('input');
+        typeInput.type = 'hidden';
+        typeInput.name = 'task_type';
+        typeInput.value = taskType;
+        form.appendChild(typeInput);
+        
+        // Submit form
+        document.body.appendChild(form);
+        form.submit();
+    }
+    
+    function reassignTask(taskId) {
+        if (confirm('Reassign this task? This will reset the task status and notify the patient.')) {
+            // You can implement reassignment logic here
+            alert('Reassignment feature coming soon!');
+        }
+    }
+
+    function assignAllTasksToPatient() {
+        const patientId = document.getElementById('patient_select').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const taskTypes = Array.from(document.querySelectorAll('#quick_task_type option'))
+            .filter(opt => opt.value)
+            .map(opt => ({ value: opt.value, label: opt.textContent }));
+        const statusDiv = document.getElementById('assign-all-status');
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = 'Assigning all tasks...';
+        if (!patientId) {
+            statusDiv.innerHTML = '<span style="color:red">Please select a patient first.</span>';
+            return;
+        }
+        let completed = 0;
+        let errors = [];
+        taskTypes.forEach((taskType, idx) => {
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', csrfToken);
+            formData.append('task_type', taskType.value);
+            // Optionally, you can set a default title/description here
+            fetch(`/tasks/assign-task/${patientId}/`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(taskType.label);
+                completed++;
+                if (completed === taskTypes.length) {
+                    if (errors.length === 0) {
+                        statusDiv.innerHTML = '<span style="color:green">All tasks assigned successfully!</span>';
+                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 1200);
+                    } else {
+                        statusDiv.innerHTML = '<span style="color:red">Some tasks failed: ' + errors.join(', ') + '</span>';
+                    }
+                }
+            })
+            .catch(() => {
+                errors.push(taskType.label);
+                completed++;
+                if (completed === taskTypes.length) {
+                    if (errors.length === 0) {
+                        statusDiv.innerHTML = '<span style="color:green">All tasks assigned successfully!</span>';
+                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 1200);
+                    } else {
+                        statusDiv.innerHTML = '<span style="color:red">Some tasks failed: ' + errors.join(', ') + '</span>';
+                    }
+                }
+            });
+        });
+    }
+</script>
+{% endblock %} 

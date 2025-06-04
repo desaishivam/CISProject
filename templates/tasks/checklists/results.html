@@ -1,0 +1,235 @@
+{# Unified structure: .container, .section, .card, .mdc-button #}
+{% extends 'layouts/base.html' %}
+
+{% block title %}Checklist Results - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+    <h1>Checklist Results</h1>
+    <p class="subtitle">Results for {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
+    </div>
+    <div class="section">
+    <div class="results-grid">
+            {% if task_response %}
+            <div class="card">
+                <div class="result-header">
+                    <h3>{{ task.title }}</h3>
+                    <span class="completion-date">{{ task_response.completed_at|date:"F j, Y" }}</span>
+                </div>
+                <div class="checklist-summary">
+                    <p><strong>Mood:</strong> 
+                        {% if task_response.responses.mood == 'happy' %}😊
+                        {% elif task_response.responses.mood == 'neutral' %}😐
+                        {% elif task_response.responses.mood == 'sad' %}😢
+                        {% else %}Not provided{% endif %}
+                    </p>
+                    <p><strong>Memory Entry:</strong><br>
+                        {{ task_response.responses.memory_entry|default:"No memory entry provided." }}
+                    </p>
+                </div>
+                <div class="completion-stats">
+                    <div class="stat">
+                        <span class="stat-label">Items Completed</span>
+                        {% with completed_count=0 %}
+                        {% if task_response.responses.item_1 %}{% widthratio 1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.item_2 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.item_3 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.item_5 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.item_6 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.item_7 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.mood %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if task_response.responses.memory_entry %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        <span class="stat-value">{{ completed_count }}/8</span>
+                        {% endwith %}
+                    </div>
+                </div>
+                <div class="checklist-items">
+                    <h4>Completed Items</h4>
+                    <ul>
+                        <li><span class="item-status">{% if task_response.responses.item_1 %}✓{% else %}×{% endif %}</span> Identify today's date and day of the week</li>
+                        <li><span class="item-status">{% if task_response.responses.item_2 %}✓{% else %}×{% endif %}</span> Read today's weather forecast aloud</li>
+                        <li><span class="item-status">{% if task_response.responses.item_3 %}✓{% else %}×{% endif %}</span> Look at and name 3 people in your photo album</li>
+                        <li><span class="item-status">{% if task_response.responses.mood %}✓{% else %}×{% endif %}</span> Selected mood</li>
+                        <li><span class="item-status">{% if task_response.responses.item_5 %}✓{% else %}×{% endif %}</span> Take your scheduled medications</li>
+                        <li><span class="item-status">{% if task_response.responses.item_6 %}✓{% else %}×{% endif %}</span> Drink 8 cups of water</li>
+                        <li><span class="item-status">{% if task_response.responses.item_7 %}✓{% else %}×{% endif %}</span> Call or message a family member</li>
+                        <li><span class="item-status">{% if task_response.responses.memory_entry %}✓{% else %}×{% endif %}</span> Wrote one memory from today</li>
+                    </ul>
+                </div>
+            </div>
+            {% elif results %}
+        {% for result in results %}
+            <div class="card">
+            <div class="result-header">
+                <h3>{{ result.task.title }}</h3>
+                <span class="completion-date">{{ result.completed_at|date:"F j, Y" }}</span>
+            </div>
+                <div class="checklist-summary">
+                    <p><strong>Mood:</strong> 
+                        {% if result.responses.mood == 'happy' %}😊
+                        {% elif result.responses.mood == 'neutral' %}😐
+                        {% elif result.responses.mood == 'sad' %}😢
+                        {% else %}Not provided{% endif %}
+                    </p>
+                    <p><strong>Memory Entry:</strong><br>
+                        {{ result.responses.memory_entry|default:"No memory entry provided." }}
+                    </p>
+                </div>
+            <div class="completion-stats">
+                <div class="stat">
+                    <span class="stat-label">Items Completed</span>
+                        {% with completed_count=0 %}
+                        {% if result.responses.item_1 %}{% widthratio 1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_2 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_3 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_5 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_6 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_7 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.mood %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.memory_entry %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        <span class="stat-value">{{ completed_count }}/8</span>
+                        {% endwith %}
+                </div>
+                </div>
+            <div class="checklist-items">
+                <h4>Completed Items</h4>
+                <ul>
+                        <li><span class="item-status">{% if result.responses.item_1 %}✓{% else %}×{% endif %}</span> Identify today's date and day of the week</li>
+                        <li><span class="item-status">{% if result.responses.item_2 %}✓{% else %}×{% endif %}</span> Read today's weather forecast aloud</li>
+                        <li><span class="item-status">{% if result.responses.item_3 %}✓{% else %}×{% endif %}</span> Look at and name 3 people in your photo album</li>
+                        <li><span class="item-status">{% if result.responses.mood %}✓{% else %}×{% endif %}</span> Selected mood</li>
+                        <li><span class="item-status">{% if result.responses.item_5 %}✓{% else %}×{% endif %}</span> Take your scheduled medications</li>
+                        <li><span class="item-status">{% if result.responses.item_6 %}✓{% else %}×{% endif %}</span> Drink 8 cups of water</li>
+                        <li><span class="item-status">{% if result.responses.item_7 %}✓{% else %}×{% endif %}</span> Call or message a family member</li>
+                        <li><span class="item-status">{% if result.responses.memory_entry %}✓{% else %}×{% endif %}</span> Wrote one memory from today</li>
+                </ul>
+            </div>
+        </div>
+            {% endfor %}
+            {% else %}
+            <div class="card no-results">
+            <p>No checklist results available for this patient.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="results-actions" style="display: flex; justify-content: center; margin-top: 2rem;">
+        <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+            <span class="mdc-button__label">Back to Dashboard</span>
+        </a>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+        gap: 2rem;
+    }
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .result-header h3 {
+        margin: 0;
+        color: #003366;
+    }
+    .completion-date {
+        color: #666;
+        font-size: 0.875rem;
+    }
+    .completion-stats {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .stat {
+        flex: 1;
+    }
+    .stat-label {
+        display: block;
+        color: #666;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #003366;
+    }
+    .checklist-items {
+        margin-bottom: 1.5rem;
+    }
+    .checklist-items h4 {
+        color: #003366;
+        margin-bottom: 1rem;
+    }
+    .checklist-items ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .checklist-items li {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .checklist-items li:last-child {
+        border-bottom: none;
+    }
+    .item-status {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        border-radius: 50%;
+        font-size: 1rem;
+    }
+    .completed .item-status {
+        background: #4CAF50;
+        color: white;
+    }
+    .item-text {
+        color: #333;
+    }
+    .no-results {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .no-results p {
+        color: #666;
+        margin: 0;
+    }
+</style>
+{% endblock %} 

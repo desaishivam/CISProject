@@ -1,0 +1,196 @@
+{# Unified structure: .container, .section, .card, .mdc-button #}
+{% extends 'layouts/base.html' %}
+
+{% block title %}Puzzle Results - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1>Puzzle Results: {{ task.title }}</h1>
+        <div class="task-info">
+            <p><strong>Patient:</strong> {{ task.assigned_to.user.first_name }} {{ task.assigned_to.user.last_name }}</p>
+            <p><strong>Completed:</strong> {{ task_response.completed_at|date:"M d, Y g:i A" }}</p>
+        </div>
+    </div>
+    
+    {% if puzzle_results %}
+    <div class="card">
+        <div class="result-header">
+            <h3>Performance Summary</h3>
+        </div>
+        <div class="performance-summary">
+            <div class="summary-item">
+                <span class="summary-label">Score</span>
+                <span class="summary-value">{{ puzzle_results.score }}/10</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Time</span>
+                <span class="summary-value">{{ puzzle_results.time }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Accuracy</span>
+                {% widthratio puzzle_results.score 10 100 as accuracy %}
+                <span class="summary-value">{{ accuracy|floatformat:0 }}%</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="result-header">
+            <h3>Detailed Results</h3>
+        </div>
+        <div class="detailed-results">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Word</th>
+                        <th>Correct Category</th>
+                        <th>Your Answer</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in puzzle_results.items %}
+                    <tr class="{% if item.correct %}correct{% else %}incorrect{% endif %}">
+                        <td>{{ item.word }}</td>
+                        <td>{{ item.correct_category|title }}</td>
+                        <td>{{ item.user_category|title }}</td>
+                        <td>
+                            {% if item.correct %}
+                                <span class="badge badge-success">Correct</span>
+                            {% else %}
+                                <span class="badge badge-danger">Incorrect</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="no-results">
+            <p>No results available for this task.</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="results-actions">
+        <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+            <span class="mdc-button__label">Back to Dashboard</span>
+        </a>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+    }
+    .task-info {
+        margin-top: 1rem;
+        color: #666;
+    }
+    .task-info p {
+        margin: 0.5rem 0;
+    }
+    .result-header h3 {
+        margin: 0 0 1rem 0;
+        color: #003366;
+    }
+    .performance-summary {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1rem;
+    }
+    .summary-item {
+        flex: 1;
+        text-align: center;
+    }
+    .summary-label {
+        display: block;
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+    .summary-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #003366;
+    }
+    .detailed-results {
+        overflow-x: auto;
+    }
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1rem;
+    }
+    .results-table th, .results-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+    }
+    .results-table th {
+        background: #f8fafc;
+        color: #374151;
+        font-weight: 600;
+    }
+    .results-table tr.correct {
+        background-color: #f0fdf4;
+    }
+    .results-table tr.incorrect {
+        background-color: #fef2f2;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25em 0.75em;
+        border-radius: 12px;
+        font-size: 0.95em;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .badge-danger {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+    .results-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+        .performance-summary {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .results-table {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %} 

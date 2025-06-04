@@ -1,0 +1,406 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - CogniCare{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+    <h1>Welcome, {{ user.first_name }}!</h1>
+            <span class="user-type">{{ user_type }}</span>
+        </div>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Dashboard content -->
+    <div class="admin-dashboard">
+        <div class="dashboard-section">
+            <h2>Create New Provider Account</h2>
+            <form method="post" action="{% url 'create_provider' %}" class="account-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <button type="submit" class="mdc-button mdc-button--raised">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Create Provider Account</span>
+                </button>
+            </form>
+        </div>
+        
+        <div class="dashboard-section">
+            <h2>User Accounts</h2>
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab(event, 'provider-tab')">Providers</button>
+                <button class="tab-button" onclick="openTab(event, 'caregiver-tab')">Caregivers</button>
+                <button class="tab-button" onclick="openTab(event, 'patient-tab')">Patients</button>
+            </div>
+            
+            <div id="provider-tab" class="tab-content active">
+                <h3>Provider Accounts</h3>
+                {% if providers %}
+                <div class="user-accounts">
+                    {% for provider_data in providers %}
+                    <div class="user-card">
+                        <div class="user-details">
+                            <h4>{{ provider_data.profile.user.first_name }} {{ provider_data.profile.user.last_name }}</h4>
+                            <p><strong>Username:</strong> {{ provider_data.profile.user.username }}</p>
+                            <p><strong>Email:</strong> {{ provider_data.profile.user.email }}</p>
+                            
+                            <!-- Show managed patients -->
+                            <div class="relationship-data">
+                                <p><strong>Manages Patients:</strong></p>
+                                {% if provider_data.managed_patients %}
+                                    <ul class="relationship-list">
+                                    {% for patient in provider_data.managed_patients %}
+                                        <li>{{ patient.user.first_name }} {{ patient.user.last_name }} ({{ patient.user.username }})</li>
+                                    {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="no-relationships">No patients assigned</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'edit_account' provider_data.profile.user.id %}" class="mdc-button mdc-button--outlined">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Edit</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No provider accounts found.</p>
+                {% endif %}
+            </div>
+            
+            <div id="caregiver-tab" class="tab-content">
+                <h3>Caregiver Accounts</h3>
+                {% if caregivers %}
+                <div class="user-accounts">
+                    {% for caregiver_data in caregivers %}
+                    <div class="user-card">
+                        <div class="user-details">
+                            <h4>{{ caregiver_data.profile.user.first_name }} {{ caregiver_data.profile.user.last_name }}</h4>
+                            <p><strong>Username:</strong> {{ caregiver_data.profile.user.username }}</p>
+                            <p><strong>Email:</strong> {{ caregiver_data.profile.user.email }}</p>
+                            
+                            <!-- Show assigned patient -->
+                            <div class="relationship-data">
+                                <p><strong>Assigned Patient:</strong></p>
+                                {% if caregiver_data.assigned_patient %}
+                                    <p>{{ caregiver_data.assigned_patient.first_name }} {{ caregiver_data.assigned_patient.last_name }} ({{ caregiver_data.assigned_patient.username }})</p>
+                                {% else %}
+                                    <p class="no-relationships">No patient assigned</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'edit_account' caregiver_data.profile.user.id %}" class="mdc-button mdc-button--outlined">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Edit</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No caregiver accounts found.</p>
+                {% endif %}
+            </div>
+            
+            <div id="patient-tab" class="tab-content">
+                <h3>Patient Accounts</h3>
+                {% if patients %}
+                <div class="user-accounts">
+                    {% for patient_data in patients %}
+                    <div class="user-card">
+                        <div class="user-details">
+                            <h4>{{ patient_data.profile.user.first_name }} {{ patient_data.profile.user.last_name }}</h4>
+                            <p><strong>Username:</strong> {{ patient_data.profile.user.username }}</p>
+                            <p><strong>Email:</strong> {{ patient_data.profile.user.email }}</p>
+                            
+                            <!-- Show provider and caregivers -->
+                            <div class="relationship-data">
+                                <p><strong>Healthcare Provider:</strong></p>
+                                {% if patient_data.provider %}
+                                    <p>{{ patient_data.provider.first_name }} {{ patient_data.provider.last_name }} ({{ patient_data.provider.username }})</p>
+                                {% else %}
+                                    <p class="no-relationships">No provider assigned</p>
+                                {% endif %}
+                                
+                                <p><strong>Caregivers:</strong></p>
+                                {% if patient_data.caregivers %}
+                                    <ul class="relationship-list">
+                                    {% for caregiver in patient_data.caregivers %}
+                                        <li>{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</li>
+                                    {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="no-relationships">No caregivers assigned</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'assign_caregiver' patient_data.profile.user.id %}" class="mdc-button mdc-button--outlined action-btn">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Assign Caregivers</span>
+                            </a>
+                            <a href="{% url 'edit_account' patient_data.profile.user.id %}" class="mdc-button mdc-button--outlined">
+                                <span class="mdc-button__ripple"></span>
+                                <span class="mdc-button__label">Edit</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No patient accounts found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .user-type {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    .dashboard-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+    }
+    
+    .dashboard-section h2 {
+        color: #003366;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tab-button {
+        padding: 0.75rem 1.5rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .tab-button.active {
+        color: #003366;
+        border-bottom-color: #003366;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .user-accounts {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+    
+    .user-card {
+        background: #f5f7fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .user-details h4 {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        color: #003366;
+    }
+    
+    .user-details p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .user-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+    
+    .action-btn {
+        font-size: 0.8rem;
+    }
+    
+    .relationship-data {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .relationship-data p {
+        margin: 0.25rem 0;
+    }
+    
+    .relationship-data p strong {
+        color: #003366;
+    }
+    
+    .relationship-list {
+        margin: 0.25rem 0 0.75rem 1.25rem;
+        padding: 0;
+    }
+    
+    .relationship-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .no-relationships {
+        color: #6b7280;
+        font-style: italic;
+        margin-left: 1rem;
+    }
+    
+    .logout-btn {
+        margin-left: auto;
+        background: #003366;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+    
+    .logout-btn:hover {
+        background: #0055a5;
+    }
+</style>
+
+<script>
+    function openTab(evt, tabName) {
+        // Hide all tab content
+        var tabContents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+        
+        // Remove active class from all tab buttons
+        var tabButtons = document.getElementsByClassName("tab-button");
+        for (var i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+        
+        // Show the selected tab and add active class to the button
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+{% endblock %} 

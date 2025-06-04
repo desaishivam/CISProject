@@ -1,0 +1,146 @@
+{# Unified structure: .container, .section, .card, .mdc-button, .table, .grid #}
+{% extends 'layouts/base.html' %}
+
+{% block title %}My Tasks - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1>My Tasks</h1>
+        <p>Complete your assigned questionnaires and assessments</p>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Pending Tasks -->
+    {% if pending_tasks %}
+    <div class="section">
+        <h2>Pending Tasks</h2>
+        <div class="grid">
+            {% for task in pending_tasks %}
+            <div class="card pending">
+                <div class="task-header">
+                    <h3>{{ task.title }}</h3>
+                    <span class="task-status status-{{ task.status }}">{{ task.get_status_display }}</span>
+                </div>
+                <div class="task-info">
+                    <p><strong>Type:</strong> {{ task.get_task_type_display }}</p>
+                    <p><strong>Assigned by:</strong> {{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</p>
+                    <p><strong>Assigned:</strong> {{ task.created_at|date:"M d, Y g:i A" }}</p>
+                    {% if task.due_date %}
+                        <p><strong>Due:</strong> {{ task.due_date|date:"M d, Y g:i A" }}</p>
+                    {% endif %}
+                </div>
+                {% if task.description %}
+                <div class="task-description">
+                    <p>{{ task.description }}</p>
+                </div>
+                {% endif %}
+                <div class="task-actions">
+                    <a href="{% url 'taskmanager:take_task' task.id %}" class="mdc-button mdc-button--raised">
+                        <span class="mdc-button__label">
+                            {% if task.status == 'assigned' %}Start Task{% else %}Continue Task{% endif %}
+                        </span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Completed Tasks -->
+    {% if completed_tasks %}
+    <div class="section">
+        <h2>Completed Tasks</h2>
+        <div class="grid">
+            {% for task in completed_tasks %}
+            <div class="card completed">
+                <div class="task-header">
+                    <h3>{{ task.title }}</h3>
+                    <span class="task-status status-{{ task.status }}">{{ task.get_status_display }}</span>
+                </div>
+                <div class="task-info">
+                    <p><strong>Type:</strong> {{ task.get_task_type_display }}</p>
+                    <p><strong>Assigned by:</strong> {{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</p>
+                    <p><strong>Completed:</strong> {{ task.completed_at|date:"M d, Y g:i A" }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Tasks Message -->
+    {% if not pending_tasks and not completed_tasks %}
+    <div class="section">
+        <div class="card no-tasks">
+            <h3>No Tasks Assigned</h3>
+            <p>You don't have any tasks assigned at the moment. Your healthcare provider will assign questionnaires and assessments as needed.</p>
+            <a href="{% url 'patient_dashboard' %}" class="mdc-button mdc-button--outlined">
+                <span class="mdc-button__label">Back to Dashboard</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+    .task-header h3 {
+        margin: 0;
+        color: #003366;
+    }
+    .task-status {
+        font-weight: 600;
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    .status-assigned { background-color: #e0f2fe; color: #0369a1; }
+    .status-in_progress { background-color: #fef3c7; color: #92400e; }
+    .status-completed { background-color: #d1fae5; color: #065f46; }
+    .status-overdue { background-color: #fee2e2; color: #b91c1c; }
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
+{% endblock %} 

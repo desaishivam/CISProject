@@ -1,0 +1,108 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Color Matching Results - CogniCare{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1>Color Matching Results</h1>
+        <div class="task-info">
+            <p><strong>Patient:</strong> {{ task.assigned_to.user.first_name }} {{ task.assigned_to.user.last_name }}</p>
+            <p><strong>Completed:</strong> {{ task_response.completed_at|date:"M d, Y g:i A" }}</p>
+        </div>
+    </div>
+    {% if color_results %}
+    <div class="card">
+        <div class="result-header">
+            <h3>Performance Analysis</h3>
+        </div>
+        <div class="performance-summary">
+            <div class="summary-item">
+                <span class="summary-label">Score</span>
+                <span class="summary-value">{{ color_results.score }}/{{ color_results.max_score }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Time</span>
+                <span class="summary-value">{{ color_results.time }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Tries</span>
+                <span class="summary-value">{{ color_results.tries }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Efficiency</span>
+                <span class="summary-value">{{ color_results.efficiency }}%</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="no-results">
+            <p>No results available for this task.</p>
+        </div>
+    </div>
+    {% endif %}
+    <div class="results-actions">
+        <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+            <span class="mdc-button__label">Back to Dashboard</span>
+        </a>
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+.section {
+    margin-bottom: 2rem;
+}
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+}
+.task-info {
+    margin-top: 1rem;
+    color: #666;
+}
+.task-info p {
+    margin: 0.5rem 0;
+}
+.result-header h3 {
+    margin: 0 0 1rem 0;
+    color: #003366;
+}
+.performance-summary {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+.summary-item {
+    flex: 1;
+    text-align: center;
+}
+.summary-label {
+    display: block;
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #003366;
+}
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+.results-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+</style>
+{% endblock %} 

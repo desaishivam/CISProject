@@ -1,0 +1,37 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Welcome to CogniCare{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Welcome to CogniCare!</h1>
+        <p class="hero-tagline">Your one stop memory care platform. You won't forget us.</p>
+        <div class="hero-buttons">
+            <a href="/about" class="mdc-button mdc-button--raised">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Learn More</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature-card">
+        <i class="fas fa-user-md"></i>
+        <h3>Expert Care</h3>
+        <p>Access to qualified speech language professionals.</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-clock"></i>
+        <h3>24/7 Support</h3>
+        <p>Round-the-clock assistance for your needs.</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-shield-alt"></i>
+        <h3>Secure Platform</h3>
+        <p>Your health information is always protected.</p>
+    </div>
+</div>
+{% endblock %} 

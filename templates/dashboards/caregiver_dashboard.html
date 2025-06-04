@@ -1,0 +1,201 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Caregiver Dashboard - CogniCare{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+    <h1>Welcome, {{ user.first_name }}!</h1>
+            <span class="user-type">{{ user_type }}</span>
+        </div>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Dashboard content -->
+    <div class="dashboard-section">
+        <h2>Your Patient</h2>
+        {% if assigned_patient %}
+            <div class="patient-card">
+                <h3>{{ assigned_patient.first_name }} {{ assigned_patient.last_name }}</h3>
+                <p><strong>Username:</strong> {{ assigned_patient.username }}</p>
+                <p><strong>Email:</strong> {{ assigned_patient.email }}</p>
+                <div class="patient-actions">
+                    <button class="mdc-button mdc-button--raised">
+                        <span class="mdc-button__ripple"></span>
+                        <span class="mdc-button__label">View Details</span>
+                    </button>
+                </div>
+            </div>
+        {% else %}
+            <p>You are not currently assigned to any patient.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Pending Tasks Section -->
+    <div class="dashboard-section">
+        <h2>Pending Tasks</h2>
+        {% if pending_tasks %}
+            <table class="mdc-data-table__table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in pending_tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.get_status_display }}</td>
+                        <td>{% if task.due_date %}{{ task.due_date|date:"M d, Y g:i A" }}{% else %}-{% endif %}</td>
+                        <td>
+                            <a href="{% url 'taskmanager:task_results' task.id %}" class="mdc-button mdc-button--outlined">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No pending tasks at this time.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Completed Tasks Section -->
+    <div class="dashboard-section">
+        <h2>Completed Tasks</h2>
+        {% if completed_tasks %}
+            <table class="mdc-data-table__table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Completed At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in completed_tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.completed_at|date:"M d, Y g:i A" }}</td>
+                        <td>
+                            <a href="{% url 'taskmanager:task_results' task.id %}" class="mdc-button mdc-button--raised">View Results</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No completed tasks yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .logout-btn {
+        margin-left: auto;
+        background: #003366;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+    
+    .logout-btn:hover {
+        background: #0055a5;
+    }
+    
+    .user-type {
+        color: #666;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-actions {
+        margin-top: 2rem;
+    }
+    
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    .dashboard-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+    }
+    
+    .dashboard-section h2 {
+        color: #003366;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+    
+    .patient-card {
+        background: #f5f7fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    
+    .patient-card h3 {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        color: #003366;
+    }
+    
+    .patient-card p {
+        margin: 0.25rem 0;
+    }
+    
+    .patient-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+</style>
+{% endblock %} 

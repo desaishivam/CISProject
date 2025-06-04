@@ -1,0 +1,162 @@
+{# Unified structure: .container, .section, .card, .mdc-button, .table #}
+{% extends 'layouts/base.html' %}
+
+{% block title %}Task Management - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1>Task Management</h1>
+        <p>View and manage all tasks you've assigned to patients</p>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Pending Tasks -->
+    {% if pending_tasks %}
+    <div class="section">
+        <h2>Pending Tasks</h2>
+        <div class="card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Patient</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in pending_tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.assigned_to.user.get_full_name }}</td>
+                        <td>{{ task.get_task_type_display }}</td>
+                        <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+                        <td>{% if task.due_date %}{{ task.due_date|date:"M d, Y g:i A" }}{% else %}-{% endif %}</td>
+                        <td>
+                            <a href="{% url 'taskmanager:task_results' task.id %}" class="mdc-button mdc-button--outlined">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Completed Tasks -->
+    {% if completed_tasks %}
+    <div class="section">
+        <h2>Completed Tasks</h2>
+        <div class="card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Patient</th>
+                        <th>Completed At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in completed_tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.assigned_to.user.get_full_name }}</td>
+                        <td>{{ task.completed_at|date:"M d, Y g:i A" }}</td>
+                        <td>
+                            <a href="{% url 'taskmanager:task_results' task.id %}" class="mdc-button mdc-button--raised">View Results</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Tasks Message -->
+    {% if not pending_tasks and not completed_tasks %}
+    <div class="section">
+        <div class="card no-tasks">
+            <h3>No Tasks Found</h3>
+            <p>You haven't assigned any tasks yet. Start by assigning tasks to your patients.</p>
+            <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+                <span class="mdc-button__label">Back to Dashboard</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+        padding: 2rem;
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table th,
+    .table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .table th {
+        background-color: #f9fafb;
+        font-weight: 600;
+    }
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .status-assigned { background-color: #e0f2fe; color: #0369a1; }
+    .status-in_progress { background-color: #fef3c7; color: #92400e; }
+    .status-completed { background-color: #d1fae5; color: #065f46; }
+    .status-overdue { background-color: #fee2e2; color: #b91c1c; }
+    .no-tasks {
+        text-align: center;
+        padding: 3rem;
+    }
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
+{% endblock %} 

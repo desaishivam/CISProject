@@ -1,0 +1,169 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Assign Caregivers - CogniCare{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Assign Caregivers</h1>
+    <p class="subtitle">Manage caregiver assignments for {{ patient.first_name }} {{ patient.last_name }}</p>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" action="{% url 'assign_caregiver' patient.id %}" class="edit-form">
+        {% csrf_token %}
+        
+        <div class="patient-info">
+            <h3>Patient Information</h3>
+            <p><strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }}</p>
+            <p><strong>Username:</strong> {{ patient.username }}</p>
+            <p><strong>Email:</strong> {{ patient.email }}</p>
+        </div>
+        
+        <div class="caregiver-list">
+            <h3>Select Caregivers</h3>
+            {% if available_caregivers %}
+                <div class="caregivers">
+                    {% for caregiver in available_caregivers %}
+                        <div class="caregiver-item">
+                            <input 
+                                type="checkbox" 
+                                id="caregiver-{{ caregiver.id }}" 
+                                name="caregivers" 
+                                value="{{ caregiver.id }}"
+                                {% if caregiver in assigned_caregivers %}checked{% endif %}
+                            >
+                            <label for="caregiver-{{ caregiver.id }}">
+                                {{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-caregivers">No caregivers available.</p>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="mdc-button mdc-button--raised">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Save Assignments</span>
+            </button>
+            
+            {% if user.profile.user_type == 'admin' %}
+                <a href="{% url 'admin_dashboard' %}" class="mdc-button mdc-button--outlined">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Cancel</span>
+                </a>
+            {% else %}
+                <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Cancel</span>
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .subtitle {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .edit-form {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+    }
+    
+    .patient-info {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .patient-info h3, .caregiver-list h3 {
+        color: #003366;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .patient-info p {
+        margin: 0.5rem 0;
+    }
+    
+    .caregiver-list {
+        margin-bottom: 1.5rem;
+    }
+    
+    .caregivers {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem 1rem;
+    }
+    
+    .caregiver-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        border-radius: 4px;
+    }
+    
+    .caregiver-item:hover {
+        background-color: #f5f7fa;
+    }
+    
+    .caregiver-item input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+    
+    .no-caregivers {
+        color: #6b7280;
+        font-style: italic;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .message {
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .message.success {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .message.error {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    @media (max-width: 600px) {
+        .caregivers {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %} 
