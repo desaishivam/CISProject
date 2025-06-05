@@ -11,14 +11,54 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
+        :root {
+            /* Patient Theme */
+            --patient-primary: #9333ea;
+            --patient-secondary: #7c3aed;
+            --patient-accent: #8b5cf6;
+            
+            /* Caregiver Theme */
+            --caregiver-primary: #059669;
+            --caregiver-secondary: #047857;
+            --caregiver-accent: #10b981;
+            
+            /* Provider Theme */
+            --provider-primary: #1e3a8a;
+            --provider-secondary: #1e40af;
+            --provider-accent: #3730a3;
+            
+            /* Admin Theme */
+            --admin-primary: #1a202c;
+            --admin-secondary: #2d3748;
+            --admin-accent: #fbbf24;
+            
+            /* Neutral Colors */
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-300: #cbd5e1;
+            --neutral-400: #94a3b8;
+            --neutral-500: #64748b;
+            --neutral-600: #475569;
+            --neutral-700: #334155;
+            --neutral-800: #1e293b;
+            --neutral-900: #0f172a;
+        }
+
+        * {
             margin: 0;
-            background-color: #f5f7fa;
-            font-family: Roboto, sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
-            color: #333333;
+            color: var(--neutral-700);
+            line-height: 1.6;
         }
 
         .top-nav {
@@ -26,255 +66,548 @@
             top: 0;
             left: 0;
             right: 0;
-            background-color: #ffffff;
-            color: #003366;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 2rem;
-            height: 64px;
-            z-index: 100;
+            height: 72px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .top-nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--provider-primary), var(--provider-accent), var(--patient-primary), var(--caregiver-primary), var(--admin-accent));
+            background-size: 300% 100%;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 25% 50%; }
+            50% { background-position: 50% 50%; }
+            75% { background-position: 75% 50%; }
         }
 
         .site-title {
-            color: #003366;
-            font-weight: 500;
-            font-size: 1.25rem;
+            color: var(--neutral-800);
+            font-weight: 700;
+            font-size: 1.5rem;
             text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .site-title::before {
+            content: '🧠';
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .site-title:hover {
+            transform: translateY(-2px);
+            color: var(--provider-primary);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
-        .nav-links a {
-            color: #003366;
+        .nav-link {
+            color: var(--neutral-600);
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .nav-links a:hover {
-            background-color: rgba(0, 51, 102, 0.1);
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(16, 185, 129, 0.1));
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        .nav-link:hover {
+            color: var(--neutral-800);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Role-specific nav styling */
+        .nav-link.patient-link {
+            border: 2px solid transparent;
+        }
+        
+        .nav-link.patient-link:hover {
+            border-color: var(--patient-primary);
+            color: var(--patient-primary);
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(124, 58, 237, 0.05));
+        }
+
+        .nav-link.caregiver-link:hover {
+            border-color: var(--caregiver-primary);
+            color: var(--caregiver-primary);
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(4, 120, 87, 0.05));
+        }
+
+        .nav-link.provider-link:hover {
+            border-color: var(--provider-primary);
+            color: var(--provider-primary);
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(30, 64, 175, 0.05));
+        }
+
+        .nav-link.admin-link:hover {
+            border-color: var(--admin-accent);
+            color: var(--admin-primary);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(245, 158, 11, 0.05));
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--neutral-600);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: var(--neutral-100);
+            color: var(--neutral-800);
         }
 
         main {
-            padding-top: 80px;
-            min-height: calc(100vh - 80px);
+            padding-top: 88px;
+            min-height: calc(100vh - 88px);
         }
 
         .content-wrapper {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        @media (max-width: 768px) {
-            .content-wrapper {
-                padding: 1rem;
-            }
-        }
-
-        /* MDC Overrides */
+        /* Enhanced MDC Overrides */
         .mdc-button {
-            height: 36px;
-            padding: 0 16px;
-            border-radius: 4px;
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: none;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
         }
 
         .mdc-button--raised {
-            background-color: #003366;
+            background: linear-gradient(135deg, var(--provider-primary), var(--provider-secondary));
             color: white;
-            }
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+        }
+
+        .mdc-button--raised:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.4);
+        }
 
         .mdc-button__label {
             text-transform: none;
+            font-weight: 600;
         }
 
-        /* Landing page styles */
+        /* Enhanced Landing page styles */
         .hero-section {
             text-align: center;
-            padding: 3rem 1rem;
-            margin-bottom: 2rem;
+            padding: 4rem 1rem;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.9));
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--patient-primary), var(--caregiver-primary));
         }
 
         .hero-content h1 {
-            font-size: 2.5rem;
-            color: #003366;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--neutral-800), var(--provider-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
         }
 
         .hero-tagline {
             font-size: 1.25rem;
             margin-bottom: 2rem;
+            color: var(--neutral-600);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-button {
             display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: #003366;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--provider-primary), var(--provider-secondary));
             color: white;
             text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.3s;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
         }
 
         .hero-button:hover {
-            background-color: #4285F4;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.4);
+            background: linear-gradient(135deg, var(--provider-secondary), var(--provider-accent));
         }
 
         .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
-            margin: 2rem 0;
+            margin: 3rem 0;
         }
 
         .feature-card {
-            background-color: #ffffff;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
             padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            flex: 1;
-            min-width: 250px;
-            max-width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--patient-primary), var(--caregiver-primary));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
         }
 
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
         .feature-card i {
-            font-size: 2.5rem;
-            color: #003366;
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--provider-primary), var(--patient-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            display: block;
         }
 
         .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--neutral-800);
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
         }
 
-        /* About page styles */
+        .feature-card p {
+            color: var(--neutral-600);
+            line-height: 1.6;
+        }
+
+        /* Enhanced About and Services pages */
         .about-container h1, 
         .services-container h1 {
-            color: #003366;
+            background: linear-gradient(135deg, var(--neutral-800), var(--provider-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 2rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
         }
 
         .section {
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .section h2 {
-            color: #4285F4;
+            color: var(--provider-primary);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
         }
 
-        /* Services grid */
         .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
         }
 
         .service-card {
-            background-color: #ffffff;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
             padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
         .service-card i {
-            font-size: 2.5rem;
-            color: #003366;
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--caregiver-primary), var(--caregiver-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            display: block;
         }
 
-        /* CogniCon page styles */
+        /* Enhanced CogniCon styles */
         .cognicon-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         .cognicon-container h1 {
-            color: #003366;
-            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--neutral-800), var(--admin-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3rem;
             text-align: center;
             margin-bottom: 1rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
         }
 
         .hero-description {
             text-align: center;
             max-width: 800px;
-            margin: 0 auto 2rem;
+            margin: 0 auto 3rem;
+            color: var(--neutral-600);
+            font-size: 1.1rem;
+            line-height: 1.7;
         }
 
         .section-divider {
-            height: 2px;
-            background-image: linear-gradient(to right, transparent, #003366, transparent);
-            margin: 3rem 0;
+            height: 3px;
+            background: linear-gradient(135deg, transparent, var(--provider-primary), var(--patient-primary), transparent);
+            margin: 4rem 0;
+            border-radius: 2px;
         }
 
         .features-section, .benefits-section {
-            margin: 3rem 0;
+            margin: 4rem 0;
         }
 
         .features-section h2, .benefits-section h2 {
-            color: #4285F4;
+            background: linear-gradient(135deg, var(--provider-primary), var(--patient-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-align: center;
             margin-bottom: 2rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
         }
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
         }
 
         .benefits-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
         }
 
         .benefit-item {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .benefit-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
         .benefit-item h3 {
-            color: #003366;
-            margin-bottom: 0.5rem;
+            color: var(--neutral-800);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0 1rem;
+                height: 64px;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .nav-links.mobile-open {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-link {
+                width: 100%;
+                text-align: center;
+                padding: 1rem;
+                margin: 0.2rem 0;
+            }
+
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+
+            .cognicon-container h1 {
+                font-size: 2.2rem;
+            }
+
+            main {
+                padding-top: 80px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .nav-link:focus,
+        .site-title:focus,
+        .hero-button:focus {
+            outline: 2px solid var(--provider-primary);
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
     <header class="top-nav">
         <a href="/" class="site-title">CogniCare</a>
-        <div style="display: flex; align-items: center;">
-                <nav class="nav-links">
-                <a href="/about">About</a>
-                <a href="/carecenter">Care Center</a>
-                <a href="/cognicon">CogniCon</a>
-                <a href="/caregiver-login">Caregiver</a>
-                <a href="/patient-login">Patient</a>
-                <a href="/provider-login">Provider</a>
-                <a href="/admin-login">Admin</a>
-                </nav>
+        <div class="nav-container">
+            <nav class="nav-links" id="navLinks">
+                <a href="/about" class="nav-link">About</a>
+                <a href="/carecenter" class="nav-link">Care Center</a>
+                <a href="/cognicon" class="nav-link">CogniCon</a>
+                <a href="/caregiver-login" class="nav-link caregiver-link">🤝 Caregiver</a>
+                <a href="/patient-login" class="nav-link patient-link">👤 Patient</a>
+                <a href="/provider-login" class="nav-link provider-link">👨‍⚕️ Provider</a>
+                <a href="/admin-login" class="nav-link admin-link">🔒 Admin</a>
+            </nav>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </header>
 
@@ -289,6 +622,49 @@
         window.addEventListener('load', function() {
             document.querySelectorAll('.mdc-button').forEach(function(button) {
                 mdc.ripple.MDCRipple.attachTo(button);
+            });
+        });
+
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navLinks = document.getElementById('navLinks');
+            
+            if (mobileMenuBtn && navLinks) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    navLinks.classList.toggle('mobile-open');
+                    const icon = this.querySelector('i');
+                    if (navLinks.classList.contains('mobile-open')) {
+                        icon.className = 'fas fa-times';
+                    } else {
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!mobileMenuBtn.contains(e.target) && !navLinks.contains(e.target)) {
+                        navLinks.classList.remove('mobile-open');
+                        const icon = mobileMenuBtn.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+            }
+        });
+
+        // Add smooth scrolling for anchor links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
             });
         });
     </script>

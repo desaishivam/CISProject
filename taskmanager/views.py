@@ -10,6 +10,7 @@ from .constants import TASK_TYPES, TASK_TEMPLATES
 from users.models import UserProfile
 import json
 from django.urls import reverse
+from django.contrib.messages import get_messages
 
 @login_required
 def assign_task(request, patient_id):
@@ -105,21 +106,35 @@ def patient_tasks(request):
 
 @login_required
 def take_task(request, task_id):
-    """Patient view to complete a task"""
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'patient':
+    """Patient or caregiver view to complete a task"""
+    if not hasattr(request.user, 'profile'):
         messages.error(request, 'You do not have permission to access this task.')
         return redirect('home')
-    
-    task = get_object_or_404(Task, id=task_id, assigned_to=request.user.profile)
-    
+    user_profile = request.user.profile
+    task = get_object_or_404(Task, id=task_id)
+    # Permission check
+    if user_profile.user_type == 'patient':
+        if task.assigned_to != user_profile:
+            messages.error(request, 'You do not have permission to access this task.')
+            return redirect('taskmanager:patient_tasks')
+    elif user_profile.user_type == 'caregiver':
+        if not user_profile.linked_patients.filter(id=task.assigned_to.id).exists():
+            messages.error(request, 'You do not have permission to access this task.')
+            return redirect('caregiver_dashboard')
+    else:
+        messages.error(request, 'You do not have permission to access this task.')
+        return redirect('home')
     # Check if task is already completed
     if task.status == 'completed':
         messages.info(request, 'This task has already been completed.')
-        return redirect('taskmanager:patient_tasks')
-    
+        if user_profile.user_type == 'patient':
+            return redirect('taskmanager:patient_tasks')
+        elif user_profile.user_type == 'caregiver':
+            return redirect('caregiver_dashboard')
+        else:
+            return redirect('home')
     # Get or create task response
     task_response = TaskResponse.objects.get_or_create(task=task)[0]
-    
     # Update task status to in_progress if it's assigned
     if task.status == 'assigned':
         task.status = 'in_progress'
@@ -196,13 +211,22 @@ def take_task(request, task_id):
                 message=f"Task completed: {task.title} by {request.user.first_name} {request.user.last_name}",
                 notification_type='completed'
             )
-            messages.success(request, f'Task "{task.title}" has been completed successfully.')
-            return redirect('taskmanager:patient_tasks')
+            # Only show success message to the user who completed the task if they are a patient
+            if user_profile.user_type == 'patient':
+                messages.success(request, f'Task "{task.title}" has been completed successfully.')
+            # Redirect based on user type
+            if user_profile.user_type == 'caregiver':
+                return redirect('caregiver_dashboard')
+            else:
+                return redirect('taskmanager:patient_tasks')
         # FINAL CATCH-ALL: If POST and 'complete_task', always redirect after saving
         if 'complete_task' in request.POST:
             task_response.save()
-            messages.success(request, 'Task submitted (catch-all redirect).')
-            return redirect('taskmanager:patient_tasks')
+            if user_profile.user_type == 'caregiver':
+                return redirect('caregiver_dashboard')
+            else:
+                messages.success(request, 'Task submitted (catch-all redirect).')
+                return redirect('taskmanager:patient_tasks')
         else:
             task_response.save()
             messages.success(request, 'Your progress has been saved.')
@@ -237,16 +261,14 @@ def task_results(request, task_id):
     if not hasattr(request.user, 'profile'):
         messages.error(request, 'You do not have permission to view task results.')
         return redirect('home')
-    
     task = get_object_or_404(Task, id=task_id)
     user_profile = request.user.profile
-    
     # Only allow the provider (caregiver) who assigned the task, caregivers assigned to the patient, or admin to view results
     if user_profile.user_type == 'provider' and task.assigned_by != user_profile:
         messages.error(request, 'You do not have permission to view this task.')
         return redirect('provider_dashboard')
     elif user_profile.user_type == 'caregiver':
-        if not hasattr(user_profile, 'patient') or not user_profile.patient or task.assigned_to != user_profile.patient:
+        if not user_profile.linked_patients.filter(id=task.assigned_to.id).exists():
             messages.error(request, 'You do not have permission to view this task.')
             return redirect('caregiver_dashboard')
     elif user_profile.user_type == 'patient':

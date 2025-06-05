@@ -6,8 +6,8 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <div>
-    <h1>Welcome, {{ user.first_name }}!</h1>
+        <div class="header-info">
+            <h1>Welcome, {{ user.first_name }}!</h1>
             <span class="user-type">{{ user_type }}</span>
         </div>
         <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
@@ -20,173 +20,180 @@
         {% endfor %}
     </div>
     {% endif %}
-    
+
     <!-- Dashboard content -->
     <div class="admin-dashboard">
         <div class="dashboard-section">
-            <h2>Create New Provider Account</h2>
+            <h2 class="section-title">⚡ Create New Provider Account</h2>
             <form method="post" action="{% url 'create_provider' %}" class="account-form">
                 {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
+                        <input type="text" id="username" name="username" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" class="form-input" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" required>
+                        <input type="text" id="first_name" name="first_name" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label for="last_name">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" required>
+                        <input type="text" id="last_name" name="last_name" class="form-input" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" class="form-input" required>
                 </div>
-                <button type="submit" class="mdc-button mdc-button--raised">
-                    <span class="mdc-button__ripple"></span>
-                    <span class="mdc-button__label">Create Provider Account</span>
+                <button type="submit" class="action-btn primary-btn large-btn">
+                    👨‍⚕️ Create Provider Account
                 </button>
             </form>
         </div>
         
         <div class="dashboard-section">
-            <h2>User Accounts</h2>
+            <h2 class="section-title">👥 User Account Management</h2>
             <div class="tabs">
-                <button class="tab-button active" onclick="openTab(event, 'provider-tab')">Providers</button>
-                <button class="tab-button" onclick="openTab(event, 'caregiver-tab')">Caregivers</button>
-                <button class="tab-button" onclick="openTab(event, 'patient-tab')">Patients</button>
+                <button class="tab-button active" onclick="openTab(event, 'provider-tab')">👨‍⚕️ Providers</button>
+                <button class="tab-button" onclick="openTab(event, 'caregiver-tab')">🤝 Caregivers</button>
+                <button class="tab-button" onclick="openTab(event, 'patient-tab')">👤 Patients</button>
             </div>
             
             <div id="provider-tab" class="tab-content active">
-                <h3>Provider Accounts</h3>
+                <h3 class="tab-title">Provider Accounts</h3>
                 {% if providers %}
                 <div class="user-accounts">
                     {% for provider_data in providers %}
                     <div class="user-card">
                         <div class="user-details">
-                            <h4>{{ provider_data.profile.user.first_name }} {{ provider_data.profile.user.last_name }}</h4>
-                            <p><strong>Username:</strong> {{ provider_data.profile.user.username }}</p>
-                            <p><strong>Email:</strong> {{ provider_data.profile.user.email }}</p>
+                            <h4 class="user-name">{{ provider_data.profile.user.first_name }} {{ provider_data.profile.user.last_name }}</h4>
+                            <div class="user-info">
+                                <p><strong>Username:</strong> {{ provider_data.profile.user.username }}</p>
+                                <p><strong>Email:</strong> {{ provider_data.profile.user.email }}</p>
+                            </div>
                             
                             <!-- Show managed patients -->
                             <div class="relationship-data">
-                                <p><strong>Manages Patients:</strong></p>
+                                <p class="relationship-title"><strong>👤 Manages Patients:</strong></p>
                                 {% if provider_data.managed_patients %}
                                     <ul class="relationship-list">
                                     {% for patient in provider_data.managed_patients %}
-                                        <li>{{ patient.user.first_name }} {{ patient.user.last_name }} ({{ patient.user.username }})</li>
+                                        <li class="relationship-item">{{ patient.user.first_name }} {{ patient.user.last_name }} ({{ patient.user.username }})</li>
                                     {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <p class="no-relationships">No patients assigned</p>
+                                    <p class="no-relationships">❌ No patients assigned</p>
                                 {% endif %}
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'edit_account' provider_data.profile.user.id %}" class="mdc-button mdc-button--outlined">
-                                <span class="mdc-button__ripple"></span>
-                                <span class="mdc-button__label">Edit</span>
+                            <a href="{% url 'edit_account' provider_data.profile.user.id %}" class="action-btn outline-btn">
+                                ✏️ Edit
                             </a>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p>No provider accounts found.</p>
+                <div class="empty-state">
+                    <p>👨‍⚕️ No provider accounts found.</p>
+                </div>
                 {% endif %}
             </div>
             
             <div id="caregiver-tab" class="tab-content">
-                <h3>Caregiver Accounts</h3>
+                <h3 class="tab-title">Caregiver Accounts</h3>
                 {% if caregivers %}
                 <div class="user-accounts">
                     {% for caregiver_data in caregivers %}
                     <div class="user-card">
                         <div class="user-details">
-                            <h4>{{ caregiver_data.profile.user.first_name }} {{ caregiver_data.profile.user.last_name }}</h4>
-                            <p><strong>Username:</strong> {{ caregiver_data.profile.user.username }}</p>
-                            <p><strong>Email:</strong> {{ caregiver_data.profile.user.email }}</p>
+                            <h4 class="user-name">{{ caregiver_data.profile.user.first_name }} {{ caregiver_data.profile.user.last_name }}</h4>
+                            <div class="user-info">
+                                <p><strong>Username:</strong> {{ caregiver_data.profile.user.username }}</p>
+                                <p><strong>Email:</strong> {{ caregiver_data.profile.user.email }}</p>
+                            </div>
                             
                             <!-- Show assigned patient -->
                             <div class="relationship-data">
-                                <p><strong>Assigned Patient:</strong></p>
+                                <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
                                 {% if caregiver_data.assigned_patient %}
-                                    <p>{{ caregiver_data.assigned_patient.first_name }} {{ caregiver_data.assigned_patient.last_name }} ({{ caregiver_data.assigned_patient.username }})</p>
+                                    <p class="relationship-item">{{ caregiver_data.assigned_patient.first_name }} {{ caregiver_data.assigned_patient.last_name }} ({{ caregiver_data.assigned_patient.username }})</p>
                                 {% else %}
-                                    <p class="no-relationships">No patient assigned</p>
+                                    <p class="no-relationships">❌ No patient assigned</p>
                                 {% endif %}
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'edit_account' caregiver_data.profile.user.id %}" class="mdc-button mdc-button--outlined">
-                                <span class="mdc-button__ripple"></span>
-                                <span class="mdc-button__label">Edit</span>
+                            <a href="{% url 'edit_account' caregiver_data.profile.user.id %}" class="action-btn outline-btn">
+                                ✏️ Edit
                             </a>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p>No caregiver accounts found.</p>
+                <div class="empty-state">
+                    <p>🤝 No caregiver accounts found.</p>
+                </div>
                 {% endif %}
             </div>
             
             <div id="patient-tab" class="tab-content">
-                <h3>Patient Accounts</h3>
+                <h3 class="tab-title">Patient Accounts</h3>
                 {% if patients %}
                 <div class="user-accounts">
                     {% for patient_data in patients %}
                     <div class="user-card">
                         <div class="user-details">
-                            <h4>{{ patient_data.profile.user.first_name }} {{ patient_data.profile.user.last_name }}</h4>
-                            <p><strong>Username:</strong> {{ patient_data.profile.user.username }}</p>
-                            <p><strong>Email:</strong> {{ patient_data.profile.user.email }}</p>
+                            <h4 class="user-name">{{ patient_data.profile.user.first_name }} {{ patient_data.profile.user.last_name }}</h4>
+                            <div class="user-info">
+                                <p><strong>Username:</strong> {{ patient_data.profile.user.username }}</p>
+                                <p><strong>Email:</strong> {{ patient_data.profile.user.email }}</p>
+                            </div>
                             
                             <!-- Show provider and caregivers -->
                             <div class="relationship-data">
-                                <p><strong>Healthcare Provider:</strong></p>
+                                <p class="relationship-title"><strong>👨‍⚕️ Healthcare Provider:</strong></p>
                                 {% if patient_data.provider %}
-                                    <p>{{ patient_data.provider.first_name }} {{ patient_data.provider.last_name }} ({{ patient_data.provider.username }})</p>
+                                    <p class="relationship-item">{{ patient_data.provider.first_name }} {{ patient_data.provider.last_name }} ({{ patient_data.provider.username }})</p>
                                 {% else %}
-                                    <p class="no-relationships">No provider assigned</p>
+                                    <p class="no-relationships">❌ No provider assigned</p>
                                 {% endif %}
                                 
-                                <p><strong>Caregivers:</strong></p>
+                                <p class="relationship-title"><strong>🤝 Caregivers:</strong></p>
                                 {% if patient_data.caregivers %}
                                     <ul class="relationship-list">
                                     {% for caregiver in patient_data.caregivers %}
-                                        <li>{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</li>
+                                        <li class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</li>
                                     {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <p class="no-relationships">No caregivers assigned</p>
+                                    <p class="no-relationships">❌ No caregivers assigned</p>
                                 {% endif %}
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'assign_caregiver' patient_data.profile.user.id %}" class="mdc-button mdc-button--outlined action-btn">
-                                <span class="mdc-button__ripple"></span>
-                                <span class="mdc-button__label">Assign Caregivers</span>
+                            <a href="{% url 'assign_caregiver' patient_data.profile.user.id %}" class="action-btn primary-btn">
+                                🔗 Assign Caregivers
                             </a>
-                            <a href="{% url 'edit_account' patient_data.profile.user.id %}" class="mdc-button mdc-button--outlined">
-                                <span class="mdc-button__ripple"></span>
-                                <span class="mdc-button__label">Edit</span>
+                            <a href="{% url 'edit_account' patient_data.profile.user.id %}" class="action-btn outline-btn">
+                                ✏️ Edit
                             </a>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p>No patient accounts found.</p>
+                <div class="empty-state">
+                    <p>👤 No patient accounts found.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -195,14 +202,12 @@
 
 <style>
     .dashboard-container {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 2rem;
-    }
-    
-    .user-type {
-        color: #666;
-        margin-bottom: 2rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
     }
     
     .dashboard-header {
@@ -210,51 +215,104 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 30%, #4a5568 70%, #2c5530 100%);
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 8px 32px rgba(26, 32, 44, 0.3);
+        position: relative;
+        overflow: hidden;
     }
     
-    .messages {
-        margin-bottom: 1.5rem;
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
     }
     
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
+    .header-info h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        font-weight: 600;
     }
     
-    .message.success {
-        background-color: #d1fae5;
-        color: #065f46;
+    .logout-btn {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(251, 191, 36, 0.3);
     }
     
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
+    .logout-btn:hover {
+        background: rgba(251, 191, 36, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    }
+    
+    .user-type {
+        color: rgba(251, 191, 36, 0.9);
+        font-size: 1.1rem;
+        font-weight: 400;
     }
     
     .dashboard-section {
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        margin-bottom: 2.5rem;
+        padding: 2rem;
+        border: 1px solid rgba(251, 191, 36, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
     }
     
-    .dashboard-section h2 {
-        color: #003366;
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
+    .dashboard-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+    }
+    
+    .dashboard-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    
+    .section-title {
+        color: #1a202c;
+        margin: 0 0 2rem 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(217, 119, 6, 0.05));
+        border-radius: 10px;
+        border-left: 4px solid #fbbf24;
+    }
+    
+    .tab-title {
+        color: #1a202c;
+        margin: 0 0 1.5rem 0;
+        font-size: 1.4rem;
+        font-weight: 600;
     }
     
     .form-row {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .form-row .form-group {
-        flex: 1;
     }
     
     .form-group {
@@ -264,36 +322,97 @@
     .form-group label {
         display: block;
         margin-bottom: 0.5rem;
-        font-weight: 500;
+        font-weight: 600;
+        color: #2d3748;
     }
     
-    .form-group input {
+    .form-input {
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
         font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f7fafc;
+        color: #2d3748;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #fbbf24;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+    }
+    
+    .action-btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        min-width: 120px;
+        margin: 0.2rem;
+    }
+    
+    .primary-btn {
+        background: linear-gradient(135deg, #1a202c, #2d3748);
+        color: #fbbf24;
+        box-shadow: 0 2px 10px rgba(26, 32, 44, 0.3);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    
+    .primary-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(26, 32, 44, 0.4);
+        background: linear-gradient(135deg, #2d3748, #4a5568);
+    }
+    
+    .outline-btn {
+        background: white;
+        color: #1a202c;
+        border: 2px solid #fbbf24;
+    }
+    
+    .outline-btn:hover {
+        background: #fbbf24;
+        color: #1a202c;
+        transform: translateY(-2px);
+    }
+    
+    .large-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        min-width: 200px;
     }
     
     .tabs {
         display: flex;
-        border-bottom: 1px solid #ddd;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #f1f5f9;
     }
     
     .tab-button {
-        padding: 0.75rem 1.5rem;
+        padding: 1rem 2rem;
         background: none;
         border: none;
-        border-bottom: 2px solid transparent;
+        font-weight: 600;
+        color: #4a5568;
         cursor: pointer;
-        font-weight: 500;
-        color: #666;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
     }
     
-    .tab-button.active {
-        color: #003366;
-        border-bottom-color: #003366;
+    .tab-button.active,
+    .tab-button:hover {
+        color: #1a202c;
+        border-bottom-color: #fbbf24;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(217, 119, 6, 0.02));
     }
     
     .tab-content {
@@ -306,82 +425,202 @@
     
     .user-accounts {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
+        gap: 1.5rem;
     }
     
     .user-card {
-        background: #f5f7fa;
-        border-radius: 8px;
+        background: white;
+        border-radius: 12px;
         padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .user-details h4 {
-        margin-top: 0;
-        margin-bottom: 0.75rem;
-        color: #003366;
-    }
-    
-    .user-details p {
-        margin: 0.25rem 0;
-        font-size: 0.9rem;
-    }
-    
-    .user-actions {
-        margin-top: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
         display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
     }
     
-    .action-btn {
-        font-size: 0.8rem;
+    .user-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        transition: width 0.3s ease;
     }
     
-    .relationship-data {
-        margin-top: 0.75rem;
-        padding-top: 0.75rem;
-        border-top: 1px solid #e5e7eb;
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
     
-    .relationship-data p {
-        margin: 0.25rem 0;
+    .user-card:hover::before {
+        width: 6px;
     }
     
-    .relationship-data p strong {
-        color: #003366;
+    .user-name {
+        color: #1a202c;
+        margin: 0 0 1rem 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+    
+    .user-info p {
+        margin: 0.5rem 0;
+        color: #4a5568;
+    }
+    
+    .relationship-title {
+        color: #2d3748;
+        font-weight: 600;
+        margin: 1rem 0 0.5rem 0;
     }
     
     .relationship-list {
-        margin: 0.25rem 0 0.75rem 1.25rem;
+        list-style: none;
         padding: 0;
+        margin: 0;
     }
     
-    .relationship-list li {
-        margin-bottom: 0.25rem;
+    .relationship-item {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(217, 119, 6, 0.05));
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        margin: 0.3rem 0;
+        color: #1a202c;
+        font-weight: 500;
+        border-left: 3px solid #fbbf24;
     }
     
     .no-relationships {
-        color: #6b7280;
+        color: #e53e3e;
         font-style: italic;
-        margin-left: 1rem;
+        margin: 0.5rem 0;
     }
     
-    .logout-btn {
-        margin-left: auto;
-        background: #003366;
-        color: #fff;
-        padding: 0.75rem 1.5rem;
-        border-radius: 4px;
-        text-decoration: none;
+    .user-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #4a5568;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(217, 119, 6, 0.02));
+        border-radius: 12px;
+        border: 2px dashed #fbbf24;
+    }
+    
+    .empty-state p {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .messages {
+        margin-bottom: 2rem;
+    }
+    
+    .message {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
         font-weight: 500;
-        transition: background 0.2s;
     }
     
-    .logout-btn:hover {
-        background: #0055a5;
+    .message.success {
+        background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+        color: #2f855a;
+        border: 1px solid #9ae6b4;
     }
+    
+    .message.error {
+        background: linear-gradient(135deg, #fed7d7, #feb2b2);
+        color: #c53030;
+        border: 1px solid #feb2b2;
+    }
+    
+    .message.info {
+        background: linear-gradient(135deg, #bee3f8, #90cdf4);
+        color: #2c5282;
+        border: 1px solid #90cdf4;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .user-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .user-actions {
+            justify-content: center;
+        }
+        
+        .tabs {
+            flex-wrap: wrap;
+        }
+        
+        .tab-button {
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+    
+    /* Animation for cards */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .dashboard-section {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .dashboard-section:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+    
+    .dashboard-section:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+    
+    .user-card {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .user-card:nth-child(1) { animation-delay: 0.1s; }
+    .user-card:nth-child(2) { animation-delay: 0.2s; }
+    .user-card:nth-child(3) { animation-delay: 0.3s; }
+    .user-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
 
 <script>

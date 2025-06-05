@@ -4,34 +4,716 @@
 {% block title %}Welcome to CogniCare{% endblock %}
 
 {% block content %}
-<div class="hero-section">
-    <div class="hero-content">
-        <h1>Welcome to CogniCare!</h1>
-        <p class="hero-tagline">Your one stop memory care platform. You won't forget us.</p>
-        <div class="hero-buttons">
-            <a href="/about" class="mdc-button mdc-button--raised">
-                <span class="mdc-button__ripple"></span>
-                <span class="mdc-button__label">Learn More</span>
+<div class="landing-page">
+    <!-- Enhanced Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">
+                🧠 Advanced Memory Care Platform
+            </div>
+            <h1>Transform Memory Care with CogniCare</h1>
+            <p class="hero-tagline">Empowering patients, caregivers, and healthcare professionals through innovative technology and compassionate care solutions.</p>
+            <div class="hero-buttons">
+                <a href="/about" class="hero-button primary">
+                    <span class="button-icon">🚀</span>
+                    <span class="button-text">Discover Our Mission</span>
+                </a>
+                <a href="/carecenter" class="hero-button secondary">
+                    <span class="button-icon">🏥</span>
+                    <span class="button-text">Explore CareCenter</span>
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Patients Helped</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Healthcare Providers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Support Available</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Features Section -->
+    <div class="features-section">
+        <div class="section-header">
+            <h2>Why Choose CogniCare?</h2>
+            <p class="section-subtitle">Comprehensive solutions designed for every aspect of memory care</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card patient-theme">
+                <div class="feature-icon">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+                <h3>Patient-Centered Care</h3>
+                <p>Personalized treatment plans and interactive tools that adapt to individual needs and preferences.</p>
+                <div class="feature-highlight">
+                    <span class="highlight-tag">For Patients</span>
+                </div>
+            </div>
+            <div class="feature-card caregiver-theme">
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>Caregiver Support</h3>
+                <p>Comprehensive resources and real-time communication tools to support caregivers in their vital role.</p>
+                <div class="feature-highlight">
+                    <span class="highlight-tag">For Caregivers</span>
+                </div>
+            </div>
+            <div class="feature-card provider-theme">
+                <div class="feature-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h3>Professional Tools</h3>
+                <p>Advanced task management and patient monitoring systems for healthcare professionals.</p>
+                <div class="feature-highlight">
+                    <span class="highlight-tag">For Providers</span>
+                </div>
+            </div>
+            <div class="feature-card admin-theme">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure & Compliant</h3>
+                <p>HIPAA-compliant platform with enterprise-grade security and administrative controls.</p>
+                <div class="feature-highlight">
+                    <span class="highlight-tag">Enterprise Ready</span>
+                </div>
+            </div>
+            <div class="feature-card cognicon-theme">
+                <div class="feature-icon">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <h3>CogniCon Smart Display</h3>
+                <p>Interactive at-home smart screen technology for daily routines and cognitive exercises.</p>
+                <div class="feature-highlight">
+                    <span class="highlight-tag">Smart Technology</span>
+                </div>
+            </div>
+            <div class="feature-card universal-theme">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>24/7 Availability</h3>
+                <p>Round-the-clock support and monitoring to ensure continuous care and peace of mind.</p>
+                <div class="feature-highlight">
+                    <span class="highlight-tag">Always There</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solutions Overview Section -->
+    <div class="solutions-section">
+        <div class="section-header">
+            <h2>Complete Care Ecosystem</h2>
+            <p class="section-subtitle">Integrated solutions for comprehensive memory care management</p>
+        </div>
+        <div class="solutions-grid">
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">🏥</div>
+                    <h3>CareCenter Platform</h3>
+                </div>
+                <p>Comprehensive task management and coordination tools for healthcare facilities.</p>
+                <a href="/carecenter" class="solution-link">
+                    Explore CareCenter <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="solution-card">
+                <div class="solution-header">
+                    <div class="solution-icon">📺</div>
+                    <h3>CogniCon Smart Display</h3>
+                </div>
+                <p>Interactive home-based technology for daily routines and cognitive engagement.</p>
+                <a href="/cognicon" class="solution-link">
+                    Discover CogniCon <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="quick-access-section">
+        <div class="section-header">
+            <h2>Access Your Portal</h2>
+            <p class="section-subtitle">Choose your role to access the appropriate dashboard</p>
+        </div>
+        <div class="access-grid">
+            <a href="/patient-login" class="access-card patient-access">
+                <div class="access-icon">👤</div>
+                <h3>Patient Portal</h3>
+                <p>Access your personal care plan and track progress</p>
+                <div class="access-arrow">→</div>
+            </a>
+            <a href="/caregiver-login" class="access-card caregiver-access">
+                <div class="access-icon">🤝</div>
+                <h3>Caregiver Portal</h3>
+                <p>Support your loved one with care coordination tools</p>
+                <div class="access-arrow">→</div>
+            </a>
+            <a href="/provider-login" class="access-card provider-access">
+                <div class="access-icon">👨‍⚕️</div>
+                <h3>Provider Portal</h3>
+                <p>Manage patients and coordinate care teams</p>
+                <div class="access-arrow">→</div>
+            </a>
+            <a href="/admin-login" class="access-card admin-access">
+                <div class="access-icon">🔒</div>
+                <h3>Admin Portal</h3>
+                <p>System administration and user management</p>
+                <div class="access-arrow">→</div>
             </a>
         </div>
     </div>
 </div>
 
-<div class="features">
-    <div class="feature-card">
-        <i class="fas fa-user-md"></i>
-        <h3>Expert Care</h3>
-        <p>Access to qualified speech language professionals.</p>
-    </div>
-    <div class="feature-card">
-        <i class="fas fa-clock"></i>
-        <h3>24/7 Support</h3>
-        <p>Round-the-clock assistance for your needs.</p>
-    </div>
-    <div class="feature-card">
-        <i class="fas fa-shield-alt"></i>
-        <h3>Secure Platform</h3>
-        <p>Your health information is always protected.</p>
-    </div>
-</div>
+<style>
+    .landing-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    /* Enhanced Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(248, 250, 252, 0.9) 30%,
+            rgba(236, 254, 255, 0.8) 70%,
+            rgba(240, 253, 244, 0.9) 100%);
+        border-radius: 24px;
+        padding: 4rem 2rem;
+        margin-bottom: 4rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, 
+            var(--patient-primary), 
+            var(--caregiver-primary), 
+            var(--provider-primary), 
+            var(--admin-accent));
+        background-size: 300% 100%;
+        animation: gradientShift 8s ease-in-out infinite;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(16, 185, 129, 0.1));
+        color: var(--provider-primary);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid rgba(147, 51, 234, 0.2);
+    }
+
+    .hero-content h1 {
+        font-size: 4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--neutral-800), var(--provider-primary), var(--patient-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .hero-tagline {
+        font-size: 1.4rem;
+        color: var(--neutral-600);
+        margin-bottom: 2.5rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 3rem;
+    }
+
+    .hero-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1.2rem 2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-button.primary {
+        background: linear-gradient(135deg, var(--provider-primary), var(--provider-secondary));
+        color: white;
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+    }
+
+    .hero-button.secondary {
+        background: white;
+        color: var(--provider-primary);
+        border: 2px solid var(--provider-primary);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-button:hover {
+        transform: translateY(-3px);
+    }
+
+    .hero-button.primary:hover {
+        box-shadow: 0 12px 35px rgba(30, 58, 138, 0.4);
+    }
+
+    .hero-button.secondary:hover {
+        background: var(--provider-primary);
+        color: white;
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+    }
+
+    .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--provider-primary), var(--patient-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .stat-label {
+        color: var(--neutral-600);
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    /* Enhanced Sections */
+    .features-section,
+    .solutions-section,
+    .quick-access-section {
+        margin-bottom: 5rem;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--neutral-800), var(--provider-primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .section-subtitle {
+        font-size: 1.2rem;
+        color: var(--neutral-600);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Enhanced Feature Cards */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--card-gradient, linear-gradient(135deg, var(--provider-primary), var(--patient-primary)));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--icon-bg, linear-gradient(135deg, var(--provider-primary), var(--patient-primary)));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 25px var(--icon-shadow, rgba(30, 58, 138, 0.3));
+    }
+
+    .feature-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .feature-card h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--neutral-800);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .feature-card p {
+        color: var(--neutral-600);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-highlight {
+        margin-top: 1rem;
+    }
+
+    .highlight-tag {
+        display: inline-block;
+        background: var(--tag-bg, linear-gradient(135deg, rgba(30, 58, 138, 0.1), rgba(147, 51, 234, 0.1)));
+        color: var(--tag-color, var(--provider-primary));
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid var(--tag-border, rgba(30, 58, 138, 0.2));
+    }
+
+    /* Theme-specific styling */
+    .patient-theme {
+        --card-gradient: linear-gradient(135deg, var(--patient-primary), var(--patient-accent));
+        --icon-bg: linear-gradient(135deg, var(--patient-primary), var(--patient-secondary));
+        --icon-shadow: rgba(147, 51, 234, 0.3);
+        --tag-bg: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(124, 58, 237, 0.1));
+        --tag-color: var(--patient-primary);
+        --tag-border: rgba(147, 51, 234, 0.2);
+    }
+
+    .caregiver-theme {
+        --card-gradient: linear-gradient(135deg, var(--caregiver-primary), var(--caregiver-accent));
+        --icon-bg: linear-gradient(135deg, var(--caregiver-primary), var(--caregiver-secondary));
+        --icon-shadow: rgba(5, 150, 105, 0.3);
+        --tag-bg: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(4, 120, 87, 0.1));
+        --tag-color: var(--caregiver-primary);
+        --tag-border: rgba(5, 150, 105, 0.2);
+    }
+
+    .provider-theme {
+        --card-gradient: linear-gradient(135deg, var(--provider-primary), var(--provider-accent));
+        --icon-bg: linear-gradient(135deg, var(--provider-primary), var(--provider-secondary));
+        --icon-shadow: rgba(30, 58, 138, 0.3);
+        --tag-bg: linear-gradient(135deg, rgba(30, 58, 138, 0.1), rgba(30, 64, 175, 0.1));
+        --tag-color: var(--provider-primary);
+        --tag-border: rgba(30, 58, 138, 0.2);
+    }
+
+    .admin-theme {
+        --card-gradient: linear-gradient(135deg, var(--admin-primary), var(--admin-accent));
+        --icon-bg: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+        --icon-shadow: rgba(26, 32, 44, 0.3);
+        --tag-bg: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+        --tag-color: var(--admin-primary);
+        --tag-border: rgba(251, 191, 36, 0.2);
+    }
+
+    .cognicon-theme {
+        --card-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+        --icon-bg: linear-gradient(135deg, #6366f1, #7c3aed);
+        --icon-shadow: rgba(99, 102, 241, 0.3);
+        --tag-bg: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        --tag-color: #6366f1;
+        --tag-border: rgba(99, 102, 241, 0.2);
+    }
+
+    .universal-theme {
+        --card-gradient: linear-gradient(135deg, #059669, #0891b2);
+        --icon-bg: linear-gradient(135deg, #059669, #0284c7);
+        --icon-shadow: rgba(5, 150, 105, 0.3);
+        --tag-bg: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(8, 145, 178, 0.1));
+        --tag-color: #059669;
+        --tag-border: rgba(5, 150, 105, 0.2);
+    }
+
+    /* Solutions Grid */
+    .solutions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .solution-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .solution-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .solution-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .solution-icon {
+        font-size: 2.5rem;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .solution-card h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--neutral-800);
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .solution-card p {
+        color: var(--neutral-600);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .solution-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--provider-primary);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--provider-primary);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .solution-link:hover {
+        background: var(--provider-primary);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    /* Quick Access Grid */
+    .access-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .access-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 2rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .access-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .access-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .access-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .access-card p {
+        color: var(--neutral-600);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .access-arrow {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .access-card:hover .access-arrow {
+        transform: translateX(5px);
+    }
+
+    /* Access card specific themes */
+    .patient-access:hover {
+        border-color: var(--patient-primary);
+        background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(124, 58, 237, 0.05));
+    }
+
+    .patient-access h3,
+    .patient-access .access-arrow {
+        color: var(--patient-primary);
+    }
+
+    .caregiver-access:hover {
+        border-color: var(--caregiver-primary);
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(4, 120, 87, 0.05));
+    }
+
+    .caregiver-access h3,
+    .caregiver-access .access-arrow {
+        color: var(--caregiver-primary);
+    }
+
+    .provider-access:hover {
+        border-color: var(--provider-primary);
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(30, 64, 175, 0.05));
+    }
+
+    .provider-access h3,
+    .provider-access .access-arrow {
+        color: var(--provider-primary);
+    }
+
+    .admin-access:hover {
+        border-color: var(--admin-accent);
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(245, 158, 11, 0.05));
+    }
+
+    .admin-access h3,
+    .admin-access .access-arrow {
+        color: var(--admin-primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-stats {
+            gap: 2rem;
+        }
+
+        .features-grid,
+        .solutions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .access-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+        }
+    }
+
+    /* Animation for elements */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .feature-card,
+    .solution-card,
+    .access-card {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+</style>
 {% endblock %} 

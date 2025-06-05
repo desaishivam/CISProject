@@ -3,61 +3,147 @@
 {% block title %}Provider Login - CogniCare{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <h1>Healthcare Provider Login</h1>
-    <p class="login-description">Access your provider dashboard to manage patient care and treatments.</p>
-    
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    
-    <form method="post" action="{% url 'provider_login' %}" class="login-form">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" class="mdc-text-field__input" required>
+<div class="login-page">
+    <div class="login-background">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-icon">👨‍⚕️</div>
+                <h1>Provider Portal</h1>
+                <p class="login-description">Access your provider dashboard to manage patient care and treatments</p>
+            </div>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="login-form-container">
+                <form method="post" action="{% url 'provider_login' %}" class="login-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="username">
+                            <span class="label-icon">👤</span>
+                            Username
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" name="username" class="form-input" required placeholder="Enter your username">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">
+                            <span class="label-icon">🔒</span>
+                            Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" name="password" class="form-input" required placeholder="Enter your password">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">
+                        <span class="btn-icon">🏥</span>
+                        <span class="btn-text">Access Portal</span>
+                    </button>
+                </form>
+                
+                <div class="login-help">
+                    <div class="help-header">
+                        <span class="help-icon">💡</span>
+                        <h3>Test Account</h3>
+                    </div>
+                    <div class="credentials">
+                        <div class="credential-item">
+                            <span class="cred-label">Username:</span>
+                            <span class="cred-value">provider</span>
+                        </div>
+                        <div class="credential-item">
+                            <span class="cred-label">Password:</span>
+                            <span class="cred-value">provider</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-footer">
+                <p>Empowering healthcare professionals with advanced patient management tools.</p>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" class="mdc-text-field__input" required>
-        </div>
-        
-        <button type="submit" class="mdc-button mdc-button--raised">
-            <span class="mdc-button__ripple"></span>
-            <span class="mdc-button__label">Login</span>
-        </button>
-    </form>
-    
-    <div class="login-help">
-        <p>For test purposes, use the following credentials:</p>
-        <p><strong>Username:</strong> provider</p>
-        <p><strong>Password:</strong> provider</p>
     </div>
 </div>
 
 <style>
-    .login-container {
-        max-width: 500px;
-        margin: 0 auto;
-        background: white;
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 30%, #3730a3 70%, #4c1d95 100%);
         padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .login-background {
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+    }
+    
+    .login-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .login-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #1e3a8a, #3730a3);
+    }
+    
+    .login-header {
+        text-align: center;
+        padding: 2.5rem 2rem 1.5rem;
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(55, 48, 163, 0.05));
+    }
+    
+    .login-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    }
+    
+    .login-header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: -0.5px;
     }
     
     .login-description {
-        margin-bottom: 2rem;
-        color: #666;
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+    
+    .login-form-container {
+        padding: 2rem;
     }
     
     .login-form {
-        display: flex;
-        flex-direction: column;
+        margin-bottom: 2rem;
     }
     
     .form-group {
@@ -65,50 +151,281 @@
     }
     
     label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-    }
-    
-    input[type="text"],
-    input[type="password"] {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+        color: #34495e;
         font-size: 1rem;
     }
     
-    button[type="submit"] {
+    .label-icon {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .input-wrapper {
+        position: relative;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        color: #2c3e50;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #1e3a8a;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .form-input::placeholder {
+        color: #adb5bd;
+    }
+    
+    .login-btn {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #1e3a8a, #3730a3);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
         margin-top: 1rem;
-        align-self: flex-start;
     }
     
-    .messages {
-        margin-bottom: 1.5rem;
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.5);
+        background: linear-gradient(135deg, #1e40af, #4c1d95);
     }
     
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
+    .login-btn:active {
+        transform: translateY(0);
     }
     
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
+    .btn-icon {
+        font-size: 1.2rem;
+    }
+    
+    .btn-text {
+        font-weight: 600;
     }
     
     .login-help {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #eee;
-        font-size: 0.9rem;
-        color: #666;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #dee2e6;
     }
     
-    .login-help p {
-        margin: 0.5rem 0;
+    .help-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .help-icon {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .help-header h3 {
+        margin: 0;
+        color: #495057;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .credentials {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .credential-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .cred-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .cred-value {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        background: linear-gradient(135deg, #1e3a8a, #3730a3);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .login-footer {
+        text-align: center;
+        padding: 1.5rem 2rem 2rem;
+        border-top: 1px solid #f1f3f4;
+        background: #fafbfc;
+    }
+    
+    .login-footer p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.95rem;
+        font-style: italic;
+    }
+    
+    .messages {
+        margin: 0 2rem 1rem;
+    }
+    
+    .message {
+        padding: 1rem 1.2rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .message.error {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .message.error::before {
+        content: '❌';
+        margin-right: 0.5rem;
+    }
+    
+    .message.success {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .message.success::before {
+        content: '✅';
+        margin-right: 0.5rem;
+    }
+    
+    .message.info {
+        background: linear-gradient(135deg, #cce7ff, #b3d9ff);
+        color: #004085;
+        border: 1px solid #b3d9ff;
+    }
+    
+    .message.info::before {
+        content: 'ℹ️';
+        margin-right: 0.5rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .login-page {
+            padding: 1rem;
+        }
+        
+        .login-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+        
+        .login-icon {
+            font-size: 3rem;
+        }
+        
+        .login-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .login-description {
+            font-size: 1rem;
+        }
+        
+        .login-form-container {
+            padding: 1.5rem;
+        }
+        
+        .form-input {
+            padding: 0.9rem 1rem;
+        }
+        
+        .login-btn {
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+        }
+        
+        .credential-item {
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: center;
+        }
+        
+        .messages {
+            margin: 0 1.5rem 1rem;
+        }
+    }
+    
+    /* Animation for form elements */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .login-container {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .form-group {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .form-group:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    
+    .form-group:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .login-btn {
+        animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+    
+    .login-help {
+        animation: fadeInUp 0.6s ease-out 0.4s both;
     }
 </style>
 {% endblock %} 

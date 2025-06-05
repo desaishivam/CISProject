@@ -323,28 +323,25 @@ def caregiver_dashboard(request):
         messages.error(request, 'You do not have permission to access the caregiver dashboard.')
         return redirect('home')
     
-    # Get the patient this caregiver is assigned to
     caregiver_profile = request.user.profile
-    assigned_patient = None
-    completed_tasks = []
-    pending_tasks = []
-    
-    if caregiver_profile.patient:
-        assigned_patient = caregiver_profile.patient.user
-        # Get completed tasks for this patient
-        completed_tasks = Task.objects.filter(assigned_to=caregiver_profile.patient, status='completed').order_by('-completed_at')
-        # Get pending/assigned tasks for this patient
+    # Get all linked patients
+    linked_patients = caregiver_profile.linked_patients.all()
+    patients_with_tasks = []
+    for patient in linked_patients:
+        completed_tasks = Task.objects.filter(assigned_to=patient, status='completed').order_by('-completed_at')
         pending_tasks = Task.objects.filter(
-            assigned_to=caregiver_profile.patient,
+            assigned_to=patient,
             status__in=['assigned', 'in_progress']
         ).order_by('due_date', 'created_at')
-    
+        patients_with_tasks.append({
+            'patient': patient,
+            'pending_tasks': pending_tasks,
+            'completed_tasks': completed_tasks
+        })
     context = {
         'user': request.user,
         'user_type': 'Caregiver',
-        'assigned_patient': assigned_patient,
-        'completed_tasks': completed_tasks,
-        'pending_tasks': pending_tasks
+        'patients_with_tasks': patients_with_tasks
     }
     return render(request, 'dashboards/caregiver_dashboard.html', context)
 
@@ -539,22 +536,22 @@ def assign_caregiver(request, patient_id):
             available_caregivers = UserProfile.objects.filter(user_type='caregiver')
         
         # Get currently assigned caregivers
-        assigned_caregivers = UserProfile.objects.filter(user_type='caregiver', patient=patient_profile)
+        assigned_caregivers = UserProfile.objects.filter(user_type='caregiver', linked_patients=patient_profile)
         
         if request.method == 'POST':
             # Get selected caregiver IDs from form
             selected_caregiver_ids = request.POST.getlist('caregivers')
             
-            # Clear all current assignments
-            for caregiver in assigned_caregivers:
-                caregiver.patient = None
+            # Clear all current assignments for this patient
+            for caregiver in UserProfile.objects.filter(user_type='caregiver'):
+                caregiver.linked_patients.remove(patient_profile)
                 caregiver.save()
             
             # Assign selected caregivers
             for caregiver_id in selected_caregiver_ids:
                 try:
                     caregiver_profile = UserProfile.objects.get(id=caregiver_id, user_type='caregiver')
-                    caregiver_profile.patient = patient_profile
+                    caregiver_profile.linked_patients.add(patient_profile)
                     caregiver_profile.save()
                 except UserProfile.DoesNotExist:
                     pass

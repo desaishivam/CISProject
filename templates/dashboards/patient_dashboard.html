@@ -5,8 +5,8 @@
 {% block content %}
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <div>
-    <h1>Welcome, {{ user.first_name }}!</h1>
+        <div class="header-info">
+            <h1>Welcome, {{ user.first_name }}!</h1>
             <span class="user-type">{{ user_type }}</span>
         </div>
         <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
@@ -22,24 +22,29 @@
     
     <!-- Dashboard content -->
     <div class="dashboard-section">
-        <h2>Quick Actions</h2>
+        <h2 class="section-title">🚀 Quick Actions</h2>
         <div class="quick-actions">
-            <a href="{% url 'taskmanager:patient_tasks' %}" class="action-card">
+            <a href="{% url 'taskmanager:patient_tasks' %}" class="action-card tasks-card">
                 <div class="action-icon">📋</div>
                 <h3>My Tasks</h3>
                 <p>View and complete assigned tasks and assessments</p>
+                <div class="card-overlay"></div>
             </a>
             
-            <div class="action-card">
+            <div class="action-card medications-card">
                 <div class="action-icon">💊</div>
                 <h3>My Medications</h3>
                 <p>Track medications, dosages, and set reminders</p>
+                <div class="card-overlay"></div>
+                <div class="coming-soon">Coming Soon</div>
             </div>
             
-            <div class="action-card">
+            <div class="action-card appointments-card">
                 <div class="action-icon">📅</div>
                 <h3>Appointments</h3>
                 <p>Manage your healthcare appointments</p>
+                <div class="card-overlay"></div>
+                <div class="coming-soon">Coming Soon</div>
             </div>
         </div>
     </div>
@@ -47,90 +52,10 @@
 
 <style>
     .dashboard-container {
-        max-width: 1000px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 2rem;
-    }
-    
-    .user-type {
-        color: #666;
-        margin-bottom: 2rem;
-    }
-    
-    .dashboard-section {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-        padding: 1.5rem;
-    }
-    
-    .dashboard-section h2 {
-        color: #003366;
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-    }
-    
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .action-card {
-        background: #f5f7fa;
-        border-radius: 8px;
-        padding: 1.5rem;
-        text-align: center;
-        text-decoration: none;
-        color: inherit;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .action-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        text-decoration: none;
-        color: inherit;
-    }
-    
-    .action-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .action-card h3 {
-        color: #003366;
-        margin: 0 0 0.5rem 0;
-        font-size: 1.2rem;
-    }
-    
-    .action-card p {
-        color: #666;
-        margin: 0;
-        font-size: 0.9rem;
-    }
-    
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-    
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .message.success {
-        background-color: #d1fae5;
-        color: #065f46;
-    }
-    
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     .dashboard-header {
@@ -138,21 +63,241 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .header-info h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        font-weight: 600;
     }
     
     .logout-btn {
-        margin-left: auto;
-        background: #003366;
-        color: #fff;
+        background: rgba(255,255,255,0.2);
+        color: white;
         padding: 0.75rem 1.5rem;
-        border-radius: 4px;
+        border-radius: 8px;
         text-decoration: none;
         font-weight: 500;
-        transition: background 0.2s;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.3);
     }
     
     .logout-btn:hover {
-        background: #0055a5;
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .user-type {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+    
+    .dashboard-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        margin-bottom: 2.5rem;
+        padding: 2rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .dashboard-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    
+    .section-title {
+        color: #34495e;
+        margin: 0 0 2rem 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+    
+    .action-card {
+        position: relative;
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: hidden;
+        min-height: 220px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .action-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .tasks-card:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    }
+    
+    .medications-card:hover {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(155, 89, 182, 0.05));
+    }
+    
+    .appointments-card:hover {
+        background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), rgba(241, 196, 15, 0.05));
+    }
+    
+    .action-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        transition: transform 0.3s ease;
+    }
+    
+    .action-card:hover .action-icon {
+        transform: scale(1.1);
+    }
+    
+    .action-card h3 {
+        color: #2c3e50;
+        margin: 0 0 1rem 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .action-card:hover h3 {
+        color: #667eea;
+    }
+    
+    .action-card p {
+        color: #7f8c8d;
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: color 0.3s ease;
+    }
+    
+    .action-card:hover p {
+        color: #5a6c7d;
+    }
+    
+    .coming-soon {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    }
+    
+    .messages {
+        margin-bottom: 2rem;
+    }
+    
+    .message {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    
+    .message.success {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .message.error {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .message.info {
+        background: linear-gradient(135deg, #cce7ff, #b3d9ff);
+        color: #004085;
+        border: 1px solid #b3d9ff;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+        
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .action-card {
+            padding: 1.5rem;
+            min-height: 180px;
+        }
+        
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .action-card h3 {
+            font-size: 1.2rem;
+        }
+        
+        .action-card p {
+            font-size: 0.9rem;
+        }
     }
 </style>
 {% endblock %} 
