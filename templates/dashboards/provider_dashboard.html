@@ -6,7 +6,7 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <div class="header-info">
-            <h1>Welcome, {{ user.first_name }}!</h1>
+    <h1>Welcome, {{ user.first_name }}!</h1>
             <span class="user-type">{{ user_type }}</span>
         </div>
         <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
@@ -19,7 +19,7 @@
         {% endfor %}
     </div>
     {% endif %}
-
+    
     <!-- Dashboard content -->
     <div class="provider-dashboard">
         <div class="dashboard-section">
@@ -144,18 +144,18 @@
                     <div class="patient-task-management">
                         <form method="post" action="" class="patient-select-form">
                             {% csrf_token %}
-                            <div class="patient-selection-row">
-                                <div class="form-group">
+                        <div class="patient-selection-row">
+                            <div class="form-group">
                                     <label for="selected_patient">Select Patient:</label>
                                     <select id="selected_patient" name="selected_patient" class="form-input" required>
-                                        <option value="">Choose a patient...</option>
-                                        {% for patient in patients %}
+                                    <option value="">Choose a patient...</option>
+                                    {% for patient in patients %}
                                             <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    {% endfor %}
+                                </select>
                                     <button type="submit" class="action-btn primary-btn">🔍 View Tasks</button>
-                                </div>
                             </div>
+                        </div>
                         </form>
                         {% if selected_patient %}
                             <h5 class="patient-tasks-title">Tasks for {{ selected_patient.user.get_full_name }}</h5>
@@ -223,8 +223,8 @@
                         <div class="user-details">
                             <h4 class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
                             <div class="user-info">
-                                <p><strong>Username:</strong> {{ patient.user.username }}</p>
-                                <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                            <p><strong>Username:</strong> {{ patient.user.username }}</p>
+                            <p><strong>Email:</strong> {{ patient.user.email }}</p>
                             </div>
                             
                             <!-- Show caregivers assigned to this patient -->
@@ -270,8 +270,8 @@
                         <div class="user-details">
                             <h4 class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
                             <div class="user-info">
-                                <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
-                                <p><strong>Email:</strong> {{ caregiver.user.email }}</p>
+                            <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
+                            <p><strong>Email:</strong> {{ caregiver.user.email }}</p>
                             </div>
                             
                             <!-- Show assigned patient -->
@@ -333,8 +333,8 @@
                     ➕ Create Patient Account
                 </button>
             </form>
-        </div>
-
+    </div>
+    
         <div class="dashboard-section">
             <h2 class="section-title">➕ Create New Caregiver Account</h2>
             <form method="post" action="{% url 'create_caregiver' %}" class="account-form">

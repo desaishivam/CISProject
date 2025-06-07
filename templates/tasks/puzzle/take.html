@@ -1,128 +1,54 @@
-{# Unified structure: .container, .section, .card, .mdc-button #}
 {% extends 'layouts/base.html' %}
 
 {% block title %}Memory Match Puzzle - CogniCare{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="section">
-        <h2>🧠 Memory Match Puzzle</h2>
-        <div class="stats card">
-            <div class="stat-number" id="timer">00:00</div>
-            <div class="stat-label">Time</div>
+<div class="task-container">
+    <div class="task-header">
+        <h1 class="task-title">🧠 Memory Match Puzzle</h1>
+        <p class="task-description">Match each word with its correct category</p>
+    </div>
+    
+    <div class="task-stats">
+        <div class="stat-item">
+            <span class="stat-number" id="timer">00:00</span>
+            <span class="stat-label">Time</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{{ puzzle_words|length }}</span>
+            <span class="stat-label">Questions</span>
         </div>
     </div>
-    <div class="card">
+    
+    <div class="task-content">
         <form method="post" id="puzzle-form">
             {% csrf_token %}
-            <div class="section">
-                {% for item in puzzle_words %}
-                <div class="word-pair" data-id="{{ item.id }}">
-                    <span class="word">{{ item.word }}</span>
-                    <select id="{{ item.id }}" name="{{ item.id }}">
-                        <option value="">-- Choose --</option>
-                        <option value="fruit">🍎 Fruit</option>
-                        <option value="city">🏙️ City</option>
-                        <option value="animal">🐘 Animal</option>
-                    </select>
-                </div>
-                {% endfor %}
+            {% for item in puzzle_words %}
+            <div class="task-item" data-id="{{ item.id }}">
+                <span class="task-question">{{ item.word }}</span>
+                <select id="{{ item.id }}" name="{{ item.id }}" class="form-select">
+                    <option value="">-- Choose Category --</option>
+                    <option value="fruit">🍎 Fruit</option>
+                    <option value="city">🏙️ City</option>
+                    <option value="animal">🐘 Animal</option>
+                </select>
             </div>
-            <button class="mdc-button mdc-button--raised" type="submit" name="complete_task">Submit</button>
+            {% endfor %}
+            
+            <div class="text-center mt-4">
+                <button class="btn provider large" type="submit" name="complete_task">
+                    <span>✅</span>
+                    <span>Submit Answers</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
 
-  <style>
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    }
-    .section {
-        margin-bottom: 2rem;
-    }
-    .card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 30px;
-    }
-    .stats {
-      display: flex;
-      justify-content: space-around;
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    .stat-number {
-        font-size: 36px;
-      font-weight: bold;
-      color: #667eea;
-    }
-    .stat-label {
-        font-size: 20px;
-        font-weight: 600;
-      color: #666;
-    }
-    .word-pair {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 15px 0;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-    .word {
-      font-size: 18px;
-      font-weight: 600;
-      min-width: 100px;
-    }
-    select {
-      padding: 8px 12px;
-      font-size: 16px;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      background: white;
-    }
-    select:focus {
-      border-color: #667eea;
-      outline: none;
-    }
-    .form-actions {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .mdc-button {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 12px 25px;
-      margin: 5px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: transform 0.2s ease;
-    }
-    .mdc-button:hover {
-      transform: translateY(-2px);
-    }
-    .btn-reset {
-      background: #6c757d;
-    }
-  </style>
+<style>
+    /* All task styling now handled by design system! */
+    /* Only puzzle-specific JavaScript interactions remain */
+</style>
 
 <script>
   const answers = {

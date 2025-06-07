@@ -4,9 +4,9 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <div class="dashboard-header">
+    <div class="dashboard-header patient">
         <div class="header-info">
-            <h1>Welcome, {{ user.first_name }}!</h1>
+    <h1>Welcome, {{ user.first_name }}!</h1>
             <span class="user-type">{{ user_type }}</span>
         </div>
         <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
@@ -22,7 +22,7 @@
     
     <!-- Dashboard content -->
     <div class="dashboard-section">
-        <h2 class="section-title">🚀 Quick Actions</h2>
+        <h2 class="section-title patient">🚀 Quick Actions</h2>
         <div class="quick-actions">
             <a href="{% url 'taskmanager:patient_tasks' %}" class="action-card tasks-card">
                 <div class="action-icon">📋</div>
@@ -51,80 +51,7 @@
 </div>
 
 <style>
-    .dashboard-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding: 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
-        color: white;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .header-info h1 {
-        margin: 0 0 0.5rem 0;
-        font-size: 2rem;
-        font-weight: 600;
-    }
-    
-    .logout-btn {
-        background: rgba(255,255,255,0.2);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(255,255,255,0.3);
-    }
-    
-    .logout-btn:hover {
-        background: rgba(255,255,255,0.3);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .user-type {
-        color: rgba(255,255,255,0.9);
-        font-size: 1.1rem;
-        font-weight: 400;
-    }
-    
-    .dashboard-section {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        margin-bottom: 2.5rem;
-        padding: 2rem;
-        border: 1px solid rgba(0,0,0,0.05);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    
-    .dashboard-section:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    }
-    
-    .section-title {
-        color: #34495e;
-        margin: 0 0 2rem 0;
-        font-size: 1.8rem;
-        font-weight: 600;
-        text-align: center;
-        padding: 1rem;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 10px;
-        border-left: 4px solid #667eea;
-    }
+    /* Patient Dashboard Specific Styles */
     
     .quick-actions {
         display: grid;
@@ -233,35 +160,6 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
-    }
-    
-    .messages {
-        margin-bottom: 2rem;
-    }
-    
-    .message {
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        font-weight: 500;
-    }
-    
-    .message.success {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    
-    .message.error {
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
-    .message.info {
-        background: linear-gradient(135deg, #cce7ff, #b3d9ff);
-        color: #004085;
-        border: 1px solid #b3d9ff;
     }
     
     /* Responsive Design */

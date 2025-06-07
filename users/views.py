@@ -222,7 +222,7 @@ def provider_dashboard(request):
         except UserProfile.DoesNotExist:
             selected_patient = None
             patient_tasks = []
-
+    
     context = {
         'user': request.user,
         'user_type': 'Healthcare Provider',

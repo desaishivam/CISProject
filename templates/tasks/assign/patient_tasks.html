@@ -7,8 +7,8 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <div class="header-info">
-            <h1>My Tasks</h1>
-            <p>Complete your assigned questionnaires and assessments</p>
+        <h1>My Tasks</h1>
+        <p>Complete your assigned questionnaires and assessments</p>
         </div>
         <a href="{% url 'patient_dashboard' %}" class="back-btn">← Back to Dashboard</a>
     </div>
@@ -38,15 +38,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for task in pending_tasks %}
+            {% for task in pending_tasks %}
                     <tr>
                         <td class="task-title">
-                            <div class="task-info">
+                <div class="task-info">
                                 <h4>{{ task.title }}</h4>
                                 {% if task.description %}
                                     <p class="task-description">{{ task.description }}</p>
-                                {% endif %}
-                            </div>
+                    {% endif %}
+                </div>
                         </td>
                         <td>
                             <span class="task-type">{{ task.get_task_type_display }}</span>
@@ -70,11 +70,11 @@
                                     🚀 Start Task
                                 {% else %}
                                     ⏳ Continue Task
-                                {% endif %}
-                            </a>
+                {% endif %}
+                    </a>
                         </td>
                     </tr>
-                    {% endfor %}
+            {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -97,15 +97,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for task in completed_tasks %}
+            {% for task in completed_tasks %}
                     <tr>
                         <td class="task-title">
-                            <div class="task-info">
+                <div class="task-info">
                                 <h4>{{ task.title }}</h4>
                                 {% if task.description %}
                                     <p class="task-description">{{ task.description }}</p>
                                 {% endif %}
-                            </div>
+                </div>
                         </td>
                         <td>
                             <span class="task-type">{{ task.get_task_type_display }}</span>
@@ -118,7 +118,7 @@
                             </span>
                         </td>
                     </tr>
-                    {% endfor %}
+            {% endfor %}
                 </tbody>
             </table>
         </div>
