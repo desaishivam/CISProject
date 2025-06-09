@@ -767,39 +767,6 @@ def get_provider_task_statistics(provider_profile):
 
 @login_required
 @require_POST
-def archive_patient_tasks(request, patient_id):
-    """Provider view to archive completed tasks for a specific patient"""
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
-        return JsonResponse({'success': False, 'message': 'Permission denied'})
-    
-    try:
-        # Verify the patient belongs to this provider
-        patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient', provider=request.user.profile)
-        
-        # Get completed tasks for this patient assigned by this provider
-        completed_tasks = Task.objects.filter(
-            status='completed',
-            assigned_by=request.user.profile,
-            assigned_to=patient_profile
-        )
-        count = completed_tasks.count()
-        
-        # Archive the tasks (delete them as they're already completed and saved)
-        TaskResponse.objects.filter(task__in=completed_tasks).delete()
-        TaskNotification.objects.filter(task__in=completed_tasks).delete()
-        completed_tasks.delete()
-        
-        return JsonResponse({
-            'success': True, 
-            'message': f'Successfully archived {count} completed tasks for {patient_profile.user.first_name} {patient_profile.user.last_name}'
-        })
-    except UserProfile.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Patient not found or access denied'})
-    except Exception:
-        return JsonResponse({'success': False, 'message': 'An error occurred while archiving patient tasks'})
-
-@login_required
-@require_POST
 def delete_patient_tasks(request, patient_id):
     """Provider view to delete all tasks for a specific patient"""
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':

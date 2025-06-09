@@ -57,8 +57,8 @@
                     <h4 class="subsection-title">⚡ Quick Task Assignment</h4>
                     <form id="quick-assign-form" class="quick-assign-form">
                         {% csrf_token %}
-                        <!-- Patient and Task Type Selection -->
-                        <div class="assign-row top-row">
+                        <!-- Top Row: Patient, Task Type, Difficulty -->
+                        <div class="assign-row compact-top-row">
                             <div class="form-group patient-select">
                                 <label for="patient_select">Assign Task To:</label>
                                 <select id="patient_select" name="patient_select" class="form-input" required>
@@ -79,12 +79,8 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                        </div>
-
-                        <!-- Difficulty Selection -->
-                        <div class="assign-row middle-row">
-                            <div class="form-group difficulty-select" id="difficulty-group">
-                                <label for="quick_difficulty">🎯 Select Difficulty Level:</label>
+                            <div class="form-group" id="difficulty-group">
+                                <label for="quick_difficulty">🎯 Difficulty:</label>
                                 <select id="quick_difficulty" name="difficulty" class="form-input">
                                     {% for value, label in difficulty_levels %}
                                         <option value="{{ value }}" {% if value == 'mild' %}selected{% endif %}>
@@ -95,12 +91,11 @@
                                         </option>
                                     {% endfor %}
                                 </select>
-                                <small class="help-text">🎮 Sets difficulty for games (applies to individual assignment and "Assign All Tasks")</small>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="assign-row button-row">
+                        <!-- Bottom Row: Action Buttons -->
+                        <div class="assign-row compact-button-row">
                             <div class="form-group assign-button">
                                 <button type="button" onclick="quickAssignTask()" class="action-btn primary-btn">
                                     🎯 Assign Task
@@ -115,7 +110,9 @@
                                 <button type="button" onclick="assignAllDifficulties()" class="action-btn tertiary-btn">
                                     🎮 Assign All Difficulties
                                 </button>
-                                <small class="help-text">Assigns the selected game at Mild, Moderate, and Major difficulty levels</small>
+                            </div>
+                            <div class="form-group help-text-group">
+                                <small class="help-text">🎮 Difficulty sets game levels • "All Difficulties" assigns selected game at all 3 levels</small>
                             </div>
                         </div>
                     </form>
@@ -251,14 +248,11 @@
                             {% endif %}
                         {% endif %}
                         <div class="action-buttons">
-                            <button onclick="managePatientTasks('archive')" class="action-btn outline-btn">
-                                📦 Archive Completed Tasks
-                            </button>
                             <button onclick="managePatientTasks('delete')" class="action-btn danger-btn">
                                 🗑️ Delete All Tasks
                             </button>
                         </div>
-                        <p class="info-text">💡 Manage tasks for a specific patient. Archived tasks are saved for reference.</p>
+                        <p class="info-text">💡 Manage tasks for a specific patient. Deleted tasks are permanently removed.</p>
                     </div>
                 </div>
             </div>
@@ -819,16 +813,56 @@
     }
     
     .assign-row {
-        display: grid;
-        grid-template-columns: 2fr 1fr auto auto auto;
+        display: flex;
         gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
         align-items: end;
+    }
+    
+    .assign-row.compact-top-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: end;
+    }
+    
+    .assign-row.compact-button-row {
+        display: flex;
+        gap: 0.8rem;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .assign-row.compact-button-row .form-group {
+        flex: 0 1 auto;
+    }
+    
+    .assign-row.compact-button-row .help-text-group {
+        margin-left: auto;
+        flex: 0 1 auto;
+    }
+    
+    .assign-row.compact-button-row .help-text {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #6c757d;
+        white-space: nowrap;
     }
     
     .patient-selection-row {
         display: flex;
         align-items: end;
         gap: 1rem;
+    }
+    
+    .quick-assign-form {
+        padding: 1.2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #e0e6ed;
     }
     
     .tabs {
@@ -1226,21 +1260,6 @@
         }
     }
 
-    .difficulty-select {
-        margin-top: 1rem;
-        padding: 1rem;
-        border: 2px dashed #e0e6ed;
-        border-radius: 8px;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-
-    .difficulty-select.fade-in {
-        animation: fadeIn 0.3s ease-in;
-        border-color: #4a90e2;
-        background-color: #f0f7ff;
-    }
-
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -1275,41 +1294,6 @@
         color: #6c757d;
         font-style: italic;
     }
-
-    /* Improved Quick Task Assignment Layout */
-        .assign-row {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .assign-row.top-row .form-group {
-        flex: 1;
-        min-width: 250px;
-    }
-
-    .assign-row.middle-row .form-group {
-        flex: 1;
-        max-width: 400px;
-    }
-
-    .assign-row.button-row {
-        justify-content: center;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .assign-row.button-row .form-group {
-        flex: 0 1 auto;
-    }
-
-    .quick-assign-form {
-        padding: 1.5rem;
-        background: #f8f9fa;
-        border-radius: 10px;
-        border: 1px solid #e0e6ed;
-    }
 </style>
 
 <script>
@@ -1343,10 +1327,6 @@
         let endpoint;
         
         switch(action) {
-            case 'archive':
-                confirmMessage = 'Archive all completed tasks for this patient? This will save them for reference but remove them from active view.';
-                endpoint = `/tasks/provider/archive-patient-tasks/${patientId}/`;
-                break;
             case 'delete':
                 confirmMessage = 'Delete ALL tasks for this patient? This action is irreversible and will remove all task data.';
                 endpoint = `/tasks/provider/delete-patient-tasks/${patientId}/`;
