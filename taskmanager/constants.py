@@ -11,6 +11,10 @@ TASK_TYPES = (
     ('pairs', 'Pairs Game'),
 )
 
+# Task Categories
+GAME_TYPES = ('puzzle', 'color', 'pairs')
+ASSESSMENT_TYPES = ('memory_questionnaire', 'checklist')
+
 # Task Status Configuration
 TASK_STATUS = (
     ('assigned', 'Assigned'),
@@ -19,26 +23,29 @@ TASK_STATUS = (
     ('overdue', 'Overdue'),
 )
 
-# Task Templates Configuration
+# Task Templates Configuration - Updated for games/non-games structure
 TASK_TEMPLATES = {
+    # Non-game assessments
     'memory_questionnaire': {
-        'template_name': 'tasks/questionnaires/take.html',
-        'results_template': 'tasks/questionnaires/results.html',
+        'template_name': 'tasks/non-games/questionnaires/take.html',
+        'results_template': 'tasks/non-games/questionnaires/results.html',
     },
     'checklist': {
-        'template_name': 'tasks/checklists/take.html',
-        'results_template': 'tasks/checklists/results.html',
+        'template_name': 'tasks/non-games/checklists/take.html',
+        'results_template': 'tasks/non-games/checklists/results.html',
     },
+    
+    # Cognitive training games
     'puzzle': {
-        'template_name': 'tasks/puzzle/take.html',
-        'results_template': 'tasks/puzzle/results.html',
+        'template_name': 'tasks/games/puzzle/take.html',
+        'results_template': 'tasks/games/puzzle/results.html',
     },
     'color': {
-        'template_name': 'tasks/color/take.html',
-        'results_template': 'tasks/color/results.html',
+        'template_name': 'tasks/games/color/take.html',
+        'results_template': 'tasks/games/color/results.html',
     },
     'pairs': {
-        'template_name': 'tasks/pairs/take.html',
-        'results_template': 'tasks/pairs/results.html',
+        'template_name': 'tasks/games/pairs/take.html',
+        'results_template': 'tasks/games/pairs/results.html',
     },
 } 

@@ -28,7 +28,7 @@ class Task(models.Model):
         ordering = ['-created_at']
 
 class QuestionnaireTemplate(models.Model):
-    """Template for different types of tasks (formerly questionnaires)"""
+    """Template for different types of tasks and assessments"""
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     task_type = models.CharField(max_length=50, choices=TASK_TYPES)
@@ -49,7 +49,7 @@ class TaskResponse(models.Model):
     responses = models.JSONField(default=dict)  # Question ID -> Answer mapping
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    score = models.FloatField(null=True, blank=True)  # For scored questionnaires
+    score = models.FloatField(null=True, blank=True)  # For scored tasks and games
     notes = models.TextField(blank=True)
     
     def __str__(self):

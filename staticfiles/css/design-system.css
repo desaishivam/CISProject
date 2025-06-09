@@ -1,0 +1,535 @@
+/* ========================================
+   COGNICARE DESIGN SYSTEM
+   ========================================
+   
+   This file contains reusable components and utilities
+   that can be used across all templates to maintain
+   consistency and reduce code duplication.
+======================================== */
+
+/* ========================================
+   FORM COMPONENTS
+======================================== */
+
+/* Form Pages (Login, Registration, etc.) */
+.form-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.form-page.patient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.form-page.caregiver { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+.form-page.provider { background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%); }
+.form-page.admin { background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); }
+
+.form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    position: relative;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.form-container.patient::before { background: linear-gradient(135deg, #9333ea, #7c3aed); }
+.form-container.caregiver::before { background: linear-gradient(135deg, #059669, #047857); }
+.form-container.provider::before { background: linear-gradient(135deg, #1e3a8a, #1e40af); }
+.form-container.admin::before { background: linear-gradient(135deg, #1a202c, #fbbf24); }
+
+.form-header {
+    text-align: center;
+    padding: 2.5rem 2rem 1.5rem;
+    background: linear-gradient(135deg, rgba(0,0,0,0.02), rgba(0,0,0,0.05));
+}
+
+.form-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+.form-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
+}
+
+.form-description {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.form-content {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    color: #34495e;
+    font-size: 1rem;
+}
+
+.label-icon {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    color: #2c3e50;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.form-input.patient:focus, .form-select.patient:focus, .form-textarea.patient:focus {
+    border-color: #9333ea;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+}
+
+.form-input.caregiver:focus, .form-select.caregiver:focus, .form-textarea.caregiver:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.form-input.provider:focus, .form-select.provider:focus, .form-textarea.provider:focus {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.form-input.admin:focus, .form-select.admin:focus, .form-textarea.admin:focus {
+    border-color: #1a202c;
+    box-shadow: 0 0 0 3px rgba(26, 32, 44, 0.1);
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: #adb5bd;
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ========================================
+   BUTTON SYSTEM
+======================================== */
+
+.btn {
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-width: 120px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn.full-width { width: 100%; }
+.btn.large { padding: 1.2rem 2rem; font-size: 1.1rem; min-width: 180px; }
+.btn.small { padding: 0.6rem 1rem; font-size: 0.9rem; min-width: 100px; }
+
+/* Role-specific button styles */
+.btn.patient {
+    background: linear-gradient(135deg, #9333ea, #7c3aed);
+    color: white;
+    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+}
+
+.btn.patient:hover {
+    box-shadow: 0 8px 25px rgba(147, 51, 234, 0.5);
+}
+
+.btn.caregiver {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+}
+
+.btn.caregiver:hover {
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.5);
+}
+
+.btn.provider {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
+    color: white;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+}
+
+.btn.provider:hover {
+    box-shadow: 0 8px 25px rgba(30, 58, 138, 0.5);
+}
+
+.btn.admin {
+    background: linear-gradient(135deg, #1a202c, #2d3748);
+    color: white;
+    box-shadow: 0 4px 15px rgba(26, 32, 44, 0.4);
+}
+
+.btn.admin:hover {
+    box-shadow: 0 8px 25px rgba(26, 32, 44, 0.5);
+}
+
+/* Outline button variants */
+.btn.outline {
+    background: white;
+    border: 2px solid;
+}
+
+.btn.outline.patient { border-color: #9333ea; color: #9333ea; }
+.btn.outline.patient:hover { background: #9333ea; color: white; }
+
+.btn.outline.caregiver { border-color: #059669; color: #059669; }
+.btn.outline.caregiver:hover { background: #059669; color: white; }
+
+.btn.outline.provider { border-color: #1e3a8a; color: #1e3a8a; }
+.btn.outline.provider:hover { background: #1e3a8a; color: white; }
+
+.btn.outline.admin { border-color: #1a202c; color: #1a202c; }
+.btn.outline.admin:hover { background: #1a202c; color: white; }
+
+/* Secondary buttons */
+.btn.secondary {
+    background: #6c757d;
+    color: white;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+}
+
+.btn.secondary:hover {
+    background: #5a6268;
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.5);
+}
+
+/* ========================================
+   TASK COMPONENTS
+======================================== */
+
+.task-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.task-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 16px;
+    border: 1px solid #dee2e6;
+}
+
+.task-title {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.task-description {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.task-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    display: block;
+}
+
+.stat-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #666;
+}
+
+.task-content {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.task-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.task-question {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* ========================================
+   CARD COMPONENTS
+======================================== */
+
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-title {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.card-content {
+    padding: 2rem;
+}
+
+.card-footer {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ========================================
+   GRID SYSTEM
+======================================== */
+
+.grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.grid.cols-1 { grid-template-columns: 1fr; }
+.grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+.grid.responsive {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* ========================================
+   UTILITY CLASSES
+======================================== */
+
+/* Text Alignment */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Spacing */
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.ml-1 { margin-left: 0.5rem; }
+.ml-2 { margin-left: 1rem; }
+.ml-3 { margin-left: 1.5rem; }
+.ml-4 { margin-left: 2rem; }
+
+.mr-1 { margin-right: 0.5rem; }
+.mr-2 { margin-right: 1rem; }
+.mr-3 { margin-right: 1.5rem; }
+.mr-4 { margin-right: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+.px-1 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.px-2 { padding-left: 1rem; padding-right: 1rem; }
+.px-3 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.px-4 { padding-left: 2rem; padding-right: 2rem; }
+
+.py-1 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-2 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-3 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-4 { padding-top: 2rem; padding-bottom: 2rem; }
+
+/* Display */
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+.d-none { display: none; }
+
+/* Flexbox utilities */
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.flex-column { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+
+/* Width utilities */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+
+/* Height utilities */
+.h-full { height: 100%; }
+.h-screen { height: 100vh; }
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+
+@media (max-width: 768px) {
+    .form-page {
+        padding: 1rem;
+    }
+    
+    .form-container {
+        max-width: none;
+        margin: 0;
+    }
+    
+    .form-header {
+        padding: 2rem 1.5rem 1rem;
+    }
+    
+    .form-content {
+        padding: 1.5rem;
+    }
+    
+    .form-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .btn.large {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .task-container {
+        padding: 1rem;
+    }
+    
+    .task-header {
+        padding: 1.5rem;
+    }
+    
+    .task-title {
+        font-size: 1.5rem;
+    }
+    
+    .task-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .task-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .card-content {
+        padding: 1.5rem;
+    }
+} 
