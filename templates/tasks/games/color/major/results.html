@@ -12,24 +12,41 @@
     {% if color_results %}
     <div class="card">
         <div class="result-header">
-            <h3>Performance Analysis</h3>
+            <h3>Performance Analysis - {{ color_results.difficulty }} Difficulty</h3>
         </div>
         <div class="performance-summary">
             <div class="summary-item">
                 <span class="summary-label">Score</span>
                 <span class="summary-value">{{ color_results.score }}/{{ color_results.max_score }}</span>
+                <span class="summary-subtitle">({{ color_results.score_percentage }}%)</span>
             </div>
             <div class="summary-item">
                 <span class="summary-label">Total Time</span>
                 <span class="summary-value">{{ color_results.time }}</span>
             </div>
             <div class="summary-item">
-                <span class="summary-label">Total Tries</span>
-                <span class="summary-value">{{ color_results.tries }}</span>
+                <span class="summary-label">Attempts</span>
+                <span class="summary-value">{{ color_results.attempts }}</span>
             </div>
+            {% if color_results.accuracy %}
+            <div class="summary-item">
+                <span class="summary-label">Accuracy</span>
+                <span class="summary-value">{{ color_results.accuracy }}%</span>
+            </div>
+            {% endif %}
             <div class="summary-item">
                 <span class="summary-label">Efficiency</span>
                 <span class="summary-value">{{ color_results.efficiency }}%</span>
+            </div>
+        </div>
+        <div class="analysis-section">
+            <h4>Clinical Analysis</h4>
+            <div class="analysis-text">{{ color_results.analysis }}</div>
+            <div class="pairs-info">
+                <strong>Pairs Matched:</strong> {{ color_results.pairs }} pairs total
+            </div>
+            <div class="clinical-disclaimer">
+                <p><em><strong>Clinical Note:</strong> This assessment is a cognitive screening tool. Results should be interpreted within the context of comprehensive clinical evaluation. Not intended for diagnostic purposes.</em></p>
             </div>
         </div>
     </div>
@@ -93,6 +110,45 @@
     font-size: 1.5rem;
     font-weight: bold;
     color: #003366;
+}
+.summary-subtitle {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+.analysis-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+.analysis-section h4 {
+    margin: 0 0 1rem 0;
+    color: #003366;
+}
+.analysis-text {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    color: #444;
+    line-height: 1.5;
+}
+.pairs-info {
+    color: #666;
+    font-size: 0.95rem;
+}
+.clinical-disclaimer {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.clinical-disclaimer p {
+    margin: 0;
+    color: #856404;
 }
 .no-results {
     text-align: center;

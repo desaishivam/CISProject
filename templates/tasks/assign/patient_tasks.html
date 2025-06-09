@@ -31,6 +31,7 @@
                     <tr>
                         <th>Task</th>
                         <th>Type</th>
+                        <th>Difficulty</th>
                         <th>Status</th>
                         <th>Assigned By</th>
                         <th>Due Date</th>
@@ -50,6 +51,15 @@
                         </td>
                         <td>
                             <span class="task-type">{{ task.get_task_type_display }}</span>
+                        </td>
+                        <td>
+                            {% if task.get_difficulty_display_for_games %}
+                                <span class="difficulty-badge difficulty-{{ task.difficulty }}">
+                                    {{ task.get_difficulty_display_for_games }}
+                                </span>
+                            {% else %}
+                                <span class="no-difficulty">-</span>
+                            {% endif %}
                         </td>
                         <td>
                             <span class="status-badge status-{{ task.status }}">
@@ -91,6 +101,7 @@
                     <tr>
                         <th>Task</th>
                         <th>Type</th>
+                        <th>Difficulty</th>
                         <th>Assigned By</th>
                         <th>Completed At</th>
                         <th>Status</th>
@@ -109,6 +120,15 @@
                         </td>
                         <td>
                             <span class="task-type">{{ task.get_task_type_display }}</span>
+                        </td>
+                        <td>
+                            {% if task.get_difficulty_display_for_games %}
+                                <span class="difficulty-badge difficulty-{{ task.difficulty }}">
+                                    {{ task.get_difficulty_display_for_games }}
+                                </span>
+                            {% else %}
+                                <span class="no-difficulty">-</span>
+                            {% endif %}
                         </td>
                         <td>{{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</td>
                         <td>{{ task.completed_at|date:"M d, Y g:i A" }}</td>
@@ -291,6 +311,39 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+    }
+    
+    .difficulty-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: center;
+        display: inline-block;
+        min-width: 60px;
+    }
+    
+    .difficulty-mild {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+    }
+    
+    .difficulty-moderate {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+    }
+    
+    .difficulty-major {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+    
+    .no-difficulty {
+        color: #bdc3c7;
+        font-style: italic;
+        font-size: 0.9rem;
     }
     
     .status-badge {

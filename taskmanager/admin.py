@@ -3,14 +3,14 @@ from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ['title', 'task_type', 'assigned_by', 'assigned_to', 'status', 'created_at', 'due_date']
-    list_filter = ['task_type', 'status', 'created_at']
+    list_display = ['title', 'task_type', 'difficulty', 'assigned_by', 'assigned_to', 'status', 'created_at', 'due_date']
+    list_filter = ['task_type', 'difficulty', 'status', 'created_at']
     search_fields = ['title', 'assigned_to__user__username', 'assigned_by__user__username']
     readonly_fields = ['created_at', 'assigned_at']
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'description', 'task_type')
+            'fields': ('title', 'description', 'task_type', 'difficulty')
         }),
         ('Assignment', {
             'fields': ('assigned_by', 'assigned_to', 'status')

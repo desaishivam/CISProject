@@ -39,10 +39,21 @@
                     <select id="task_type" name="task_type" required>
                         <option value="">Select task type...</option>
                         {% for value, label in task_types %}
-                            <option value="{{ value }}">{{ label }}</option>
+                            <option value="{{ value }}" data-has-difficulty="{% if value in 'puzzle,color,pairs' %}true{% else %}false{% endif %}">{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-group" id="difficulty-group" style="display: none;">
+                    <label for="difficulty">Difficulty Level</label>
+                    <select id="difficulty" name="difficulty">
+                        {% for value, label in difficulty_levels %}
+                            <option value="{{ value }}" {% if value == 'mild' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="help-text">Select cognitive difficulty level for games</small>
+                </div>
+            </div>
+            <div class="form-row">
                 <div class="form-group">
                     <label for="due_date">Due Date (Optional)</label>
                     <input type="datetime-local" id="due_date" name="due_date">
@@ -137,5 +148,35 @@
         background-color: #fee2e2;
         color: #b91c1c;
     }
+    .help-text {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #666;
+    }
+    #difficulty-group {
+        transition: all 0.3s ease;
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const taskTypeSelect = document.getElementById('task_type');
+    const difficultyGroup = document.getElementById('difficulty-group');
+    
+    function toggleDifficultyField() {
+        const selectedOption = taskTypeSelect.options[taskTypeSelect.selectedIndex];
+        const hasDifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
+        
+        if (hasDifficulty) {
+            difficultyGroup.style.display = 'block';
+        } else {
+            difficultyGroup.style.display = 'none';
+        }
+    }
+    
+    taskTypeSelect.addEventListener('change', toggleDifficultyField);
+    toggleDifficultyField(); // Initial check
+});
+</script>
 {% endblock %} 

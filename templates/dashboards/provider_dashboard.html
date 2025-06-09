@@ -55,9 +55,10 @@
                 <!-- Quick Task Assignment -->
                 <div class="quick-assign-section">
                     <h4 class="subsection-title">⚡ Quick Task Assignment</h4>
-                    <form method="post" action="{% url 'create_patient' %}" class="quick-assign-form">
+                    <form id="quick-assign-form" class="quick-assign-form">
                         {% csrf_token %}
-                        <div class="assign-row">
+                        <!-- Patient and Task Type Selection -->
+                        <div class="assign-row top-row">
                             <div class="form-group patient-select">
                                 <label for="patient_select">Assign Task To:</label>
                                 <select id="patient_select" name="patient_select" class="form-input" required>
@@ -68,14 +69,38 @@
                                 </select>
                             </div>
                             <div class="form-group task-type">
-                                <label for="quick_task_type">Type:</label>
+                                <label for="quick_task_type">Task Type:</label>
                                 <select id="quick_task_type" name="task_type" class="form-input" required>
                                     <option value="">Select type...</option>
                                     {% for value, label in task_types %}
-                                        <option value="{{ value }}">{{ label }}</option>
+                                        <option value="{{ value }}" data-has-difficulty="{% if value == 'puzzle' or value == 'color' or value == 'pairs' %}true{% else %}false{% endif %}">
+                                            {% if value == 'puzzle' or value == 'color' or value == 'pairs' %}🎮 {% endif %}{{ label }}
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Difficulty Selection -->
+                        <div class="assign-row middle-row">
+                            <div class="form-group difficulty-select" id="difficulty-group">
+                                <label for="quick_difficulty">🎯 Select Difficulty Level:</label>
+                                <select id="quick_difficulty" name="difficulty" class="form-input">
+                                    {% for value, label in difficulty_levels %}
+                                        <option value="{{ value }}" {% if value == 'mild' %}selected{% endif %}>
+                                            {% if value == 'mild' %}🟢 {{ label }}
+                                            {% elif value == 'moderate' %}🟡 {{ label }}
+                                            {% elif value == 'major' %}🔴 {{ label }}
+                                            {% else %}{{ label }}{% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="help-text">🎮 Sets difficulty for games (applies to individual assignment and "Assign All Tasks")</small>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="assign-row button-row">
                             <div class="form-group assign-button">
                                 <button type="button" onclick="quickAssignTask()" class="action-btn primary-btn">
                                     🎯 Assign Task
@@ -85,6 +110,12 @@
                                 <button type="button" onclick="assignAllTasksToPatient()" class="action-btn secondary-btn">
                                     📝 Assign All Tasks
                                 </button>
+                            </div>
+                            <div class="form-group assign-all-difficulties-button" id="assign-all-difficulties-group">
+                                <button type="button" onclick="assignAllDifficulties()" class="action-btn tertiary-btn">
+                                    🎮 Assign All Difficulties
+                                </button>
+                                <small class="help-text">Assigns the selected game at Mild, Moderate, and Major difficulty levels</small>
                             </div>
                         </div>
                     </form>
@@ -101,6 +132,7 @@
                                     <th>Task Title</th>
                                     <th>Patient</th>
                                     <th>Type</th>
+                                    <th>Difficulty</th>
                                     <th>Status</th>
                                     <th>Assigned</th>
                                     <th>Actions</th>
@@ -113,6 +145,18 @@
                                         <td class="task-title">{{ task.title }}</td>
                                         <td>{{ task.assigned_to.user.first_name }} {{ task.assigned_to.user.last_name }}</td>
                                         <td><span class="task-type-badge">{{ task.get_task_type_display }}</span></td>
+                                        <td>
+                                            {% if task.task_type in game_types %}
+                                                <span class="difficulty-badge difficulty-{{ task.difficulty }}">
+                                                    {% if task.difficulty == 'mild' %}🟢 Mild
+                                                    {% elif task.difficulty == 'moderate' %}🟡 Moderate  
+                                                    {% elif task.difficulty == 'major' %}🔴 Major
+                                                    {% else %}🟢 Mild{% endif %}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
                                         <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
                                         <td>{{ task.assigned_at|date:"M d, Y" }}</td>
                                         <td class="task-actions">
@@ -125,7 +169,7 @@
                                     {% endfor %}
                                 {% else %}
                                     <tr>
-                                        <td colspan="6" class="no-tasks-row">📋 No tasks assigned yet</td>
+                                        <td colspan="7" class="no-tasks-row">📋 No tasks assigned yet</td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -166,6 +210,7 @@
                                             <tr>
                                                 <th>Title</th>
                                                 <th>Type</th>
+                                                <th>Difficulty</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -175,6 +220,18 @@
                                             <tr>
                                                 <td class="task-title">{{ task.title }}</td>
                                                 <td><span class="task-type-badge">{{ task.get_task_type_display }}</span></td>
+                                                <td>
+                                                    {% if task.task_type in game_types %}
+                                                        <span class="difficulty-badge difficulty-{{ task.difficulty }}">
+                                                            {% if task.difficulty == 'mild' %}🟢 Mild
+                                                            {% elif task.difficulty == 'moderate' %}🟡 Moderate  
+                                                            {% elif task.difficulty == 'major' %}🔴 Major
+                                                            {% else %}🟢 Mild{% endif %}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-muted">N/A</span>
+                                                    {% endif %}
+                                                </td>
                                                 <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
                                                 <td>
                                                     <form method="post" action="{% url 'taskmanager:delete_task' task.id %}" style="display:inline;">
@@ -467,7 +524,7 @@
     
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
@@ -652,6 +709,17 @@
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
     
+    .tertiary-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+    
+    .tertiary-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    
     .outline-btn {
         background: white;
         color: #1e3a8a;
@@ -752,7 +820,7 @@
     
     .assign-row {
         display: grid;
-        grid-template-columns: 2fr 1fr auto auto;
+        grid-template-columns: 2fr 1fr auto auto auto;
         gap: 1rem;
         align-items: end;
     }
@@ -945,7 +1013,7 @@
     /* Responsive Design */
     @media (max-width: 768px) {
         .dashboard-container {
-            padding: 1rem;
+        padding: 1rem;
         }
         
         .dashboard-header {
@@ -986,13 +1054,261 @@
         }
         
         .enhanced-table {
-            font-size: 0.9rem;
+        font-size: 0.9rem;
         }
         
         .enhanced-table th,
         .enhanced-table td {
             padding: 0.8rem 0.6rem;
         }
+    }
+
+    /* Task Overview Section Improvements */
+    .task-stats {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.8rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #6c757d, #6c757d);
+    }
+
+    .stat-card.pending::before {
+        background: linear-gradient(90deg, #ffc107, #ffdb4d);
+    }
+
+    .stat-card.completed::before {
+        background: linear-gradient(90deg, #28a745, #4caf50);
+    }
+
+    .stat-card.overdue::before {
+        background: linear-gradient(90deg, #dc3545, #e74c3c);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+        display: block;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        display: block;
+        color: #2c3e50;
+        margin: 0.5rem 0;
+    }
+
+    .stat-label {
+        font-size: 0.95rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    /* Active Tasks Section Improvements */
+    .active-tasks-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .subsection-title {
+        color: #2c3e50;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin: 1.5rem 0;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        background: white;
+    }
+
+    .enhanced-table th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.2rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .enhanced-table td {
+        padding: 1.2rem;
+        border-bottom: 1px solid #f1f3f4;
+        vertical-align: middle;
+    }
+
+    .enhanced-table tr:nth-child(even) {
+        background-color: #fafbfc;
+    }
+
+    .enhanced-table tr:hover {
+        background-color: #f0f7ff;
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+
+    .table-actions {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid #e9ecef;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            padding: 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+        }
+        
+        .task-stats {
+            padding: 1.5rem;
+        }
+        
+        .active-tasks-section {
+            padding: 1.5rem;
+        }
+    }
+
+    .difficulty-select {
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 2px dashed #e0e6ed;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .difficulty-select.fade-in {
+        animation: fadeIn 0.3s ease-in;
+        border-color: #4a90e2;
+        background-color: #f0f7ff;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .difficulty-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .difficulty-mild {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .difficulty-moderate {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .difficulty-major {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .text-muted {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Improved Quick Task Assignment Layout */
+        .assign-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .assign-row.top-row .form-group {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .assign-row.middle-row .form-group {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .assign-row.button-row {
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .assign-row.button-row .form-group {
+        flex: 0 1 auto;
+    }
+
+    .quick-assign-form {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #e0e6ed;
     }
 </style>
 
@@ -1081,6 +1397,7 @@
     function quickAssignTask() {
         const patientId = document.getElementById('patient_select').value;
         const taskType = document.getElementById('quick_task_type').value;
+        const difficulty = document.getElementById('quick_difficulty').value;
         
         if (!patientId || !taskType) {
             alert('Please fill in all required fields.');
@@ -1108,6 +1425,15 @@
         typeInput.value = taskType;
         form.appendChild(typeInput);
         
+        // Add difficulty if it's visible (for games only)
+        if (document.getElementById('difficulty-group').style.display !== 'none') {
+            const difficultyInput = document.createElement('input');
+            difficultyInput.type = 'hidden';
+            difficultyInput.name = 'difficulty';
+            difficultyInput.value = difficulty;
+            form.appendChild(difficultyInput);
+        }
+        
         // Submit form
         document.body.appendChild(form);
         form.submit();
@@ -1115,31 +1441,65 @@
     
     function reassignTask(taskId) {
         if (confirm('Reassign this task? This will reset the task status and notify the patient.')) {
-            // You can implement reassignment logic here
-            alert('Reassignment feature coming soon!');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            fetch(`/tasks/reassign-task/${taskId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Task reassigned successfully! The patient will be notified.');
+                    location.reload(); // Refresh to update the task list
+                } else {
+                    alert('Error reassigning task: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while reassigning the task.');
+            });
         }
     }
 
     function assignAllTasksToPatient() {
         const patientId = document.getElementById('patient_select').value;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const currentDifficulty = document.getElementById('quick_difficulty').value || 'mild';
         const taskTypes = Array.from(document.querySelectorAll('#quick_task_type option'))
             .filter(opt => opt.value)
-            .map(opt => ({ value: opt.value, label: opt.textContent }));
+            .map(opt => ({ 
+                value: opt.value, 
+                label: opt.textContent,
+                hasdifficulty: opt.getAttribute('data-has-difficulty') === 'true'
+            }));
         const statusDiv = document.getElementById('assign-all-status');
         statusDiv.style.display = 'block';
         statusDiv.innerHTML = 'Assigning all tasks...';
+        
         if (!patientId) {
             statusDiv.innerHTML = '<span style="color:red">Please select a patient first.</span>';
             return;
         }
+        
         let completed = 0;
         let errors = [];
+        
         taskTypes.forEach((taskType, idx) => {
             const formData = new FormData();
             formData.append('csrfmiddlewaretoken', csrfToken);
             formData.append('task_type', taskType.value);
-            // Optionally, you can set a default title/description here
+            
+            // Add difficulty level for games only
+            if (taskType.hasdifficulty) {
+                formData.append('difficulty', currentDifficulty);
+            }
+            
             fetch(`/tasks/assign-task/${patientId}/`, {
                 method: 'POST',
                 body: formData
@@ -1149,8 +1509,9 @@
                 completed++;
                 if (completed === taskTypes.length) {
                     if (errors.length === 0) {
-                        statusDiv.innerHTML = '<span style="color:green">All tasks assigned successfully!</span>';
-                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 1200);
+                        const difficultyText = currentDifficulty ? ` (Games at ${currentDifficulty} difficulty)` : '';
+                        statusDiv.innerHTML = `<span style="color:green">All tasks assigned successfully!${difficultyText}</span>`;
+                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
                     } else {
                         statusDiv.innerHTML = '<span style="color:red">Some tasks failed: ' + errors.join(', ') + '</span>';
                     }
@@ -1161,8 +1522,9 @@
                 completed++;
                 if (completed === taskTypes.length) {
                     if (errors.length === 0) {
-                        statusDiv.innerHTML = '<span style="color:green">All tasks assigned successfully!</span>';
-                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 1200);
+                        const difficultyText = currentDifficulty ? ` (Games at ${currentDifficulty} difficulty)` : '';
+                        statusDiv.innerHTML = `<span style="color:green">All tasks assigned successfully!${difficultyText}</span>`;
+                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
                     } else {
                         statusDiv.innerHTML = '<span style="color:red">Some tasks failed: ' + errors.join(', ') + '</span>';
                     }
@@ -1170,5 +1532,101 @@
             });
         });
     }
+
+    function assignAllDifficulties() {
+        const patientId = document.getElementById('patient_select').value;
+        const taskType = document.getElementById('quick_task_type').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const statusDiv = document.getElementById('assign-all-status');
+        
+        if (!patientId || !taskType) {
+            alert('Please select a patient and task type first.');
+            return;
+        }
+        
+        // Check if selected task type is a game
+        const selectedOption = document.querySelector(`#quick_task_type option[value="${taskType}"]`);
+        const hasdifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
+        
+        if (!hasdifficulty) {
+            alert('Selected task type does not have difficulty levels.');
+            return;
+        }
+        
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = 'Assigning all difficulty levels...';
+        
+        const difficulties = ['mild', 'moderate', 'major'];
+        let completed = 0;
+        let errors = [];
+        
+        difficulties.forEach((difficulty, idx) => {
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', csrfToken);
+            formData.append('task_type', taskType);
+            formData.append('difficulty', difficulty);
+            
+            fetch(`/tasks/assign-task/${patientId}/`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`${difficulty} difficulty`);
+                completed++;
+                if (completed === difficulties.length) {
+                    if (errors.length === 0) {
+                        statusDiv.innerHTML = `<span style="color:green">All difficulty levels assigned successfully! (Mild, Moderate, Major)</span>`;
+                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
+                    } else {
+                        statusDiv.innerHTML = '<span style="color:red">Some difficulties failed: ' + errors.join(', ') + '</span>';
+                    }
+                }
+            })
+            .catch(() => {
+                errors.push(`${difficulty} difficulty`);
+                completed++;
+                if (completed === difficulties.length) {
+                    if (errors.length === 0) {
+                        statusDiv.innerHTML = `<span style="color:green">All difficulty levels assigned successfully! (Mild, Moderate, Major)</span>`;
+                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
+                    } else {
+                        statusDiv.innerHTML = '<span style="color:red">Some difficulties failed: ' + errors.join(', ') + '</span>';
+                    }
+                }
+            });
+        });
+    }
+
+    // Handle dynamic difficulty field visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        const taskTypeSelect = document.getElementById('quick_task_type');
+        const difficultyGroup = document.getElementById('difficulty-group');
+        
+        // Always keep difficulty field visible for "Assign All Tasks" functionality
+        difficultyGroup.style.display = 'block';
+        difficultyGroup.classList.add('fade-in');
+        
+        function highlightDifficultyField() {
+            const selectedOption = taskTypeSelect.options[taskTypeSelect.selectedIndex];
+            const hasDifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
+            
+            // Always show, but highlight when game is selected
+            if (hasDifficulty) {
+                difficultyGroup.classList.add('fade-in');
+                difficultyGroup.style.borderColor = '#4a90e2';
+                difficultyGroup.style.backgroundColor = '#f0f7ff';
+            } else {
+                difficultyGroup.classList.remove('fade-in');
+                difficultyGroup.style.borderColor = '#e0e6ed';
+                difficultyGroup.style.backgroundColor = '#f8f9fa';
+            }
+        }
+        
+        // Initial check
+        highlightDifficultyField();
+        
+        // Listen for changes
+        taskTypeSelect.addEventListener('change', highlightDifficultyField);
+    });
 </script>
-{% endblock %} 
+{% endblock %}

@@ -3,14 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_POST
 from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
 from .constants import TASK_TYPES, TASK_TEMPLATES
 from users.models import UserProfile
 import json
-from django.urls import reverse
-from django.contrib.messages import get_messages
 
 @login_required
 def assign_task(request, patient_id):
@@ -36,19 +33,18 @@ def assign_task(request, patient_id):
             description = request.POST.get('description')
             due_date = request.POST.get('due_date')
             template_id = request.POST.get('template_id')
+            difficulty = request.POST.get('difficulty', 'mild')  # Default to mild
             
             # Generate default title if none provided
             if not title:
-                if task_type == 'memory_questionnaire':
-                    title = f"Memory Questionnaire for {patient_profile.user.first_name}"
-                else:
-                    title = f"{task_type.replace('_', ' ').title()} for {patient_profile.user.first_name}"
+                title = "Memory Questionnaire" if task_type == 'memory_questionnaire' else task_type.replace('_', ' ').title()
             
             # Create the task
             task = Task.objects.create(
                 title=title,
                 description=description,
                 task_type=task_type,
+                difficulty=difficulty,
                 assigned_by=request.user.profile,
                 assigned_to=patient_profile,
                 due_date=due_date if due_date else None
@@ -77,10 +73,14 @@ def assign_task(request, patient_id):
             messages.success(request, f'Task "{title}" has been assigned to {patient_profile.user.first_name} {patient_profile.user.last_name}.')
             return redirect('provider_dashboard')
         
+        from .constants import DIFFICULTY_LEVELS, TASK_TEMPLATES
+        
         context = {
             'patient': patient_profile,
             'templates': templates,
-            'task_types': Task.TASK_TYPES
+            'task_types': TASK_TYPES,
+            'difficulty_levels': DIFFICULTY_LEVELS,
+            'task_configs': TASK_TEMPLATES
         }
         return render(request, 'tasks/assign/provider_assign_task.html', context)
     
@@ -142,6 +142,23 @@ def take_task(request, task_id):
     
     if request.method == 'POST':
         handled = False
+        
+        # Handle JSON submissions for modern games
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+                if task.task_type == 'color':
+                    task_response.responses = {
+                        'score': data.get('score', 0),
+                        'attempts': data.get('attempts', 0),
+                        'totalTime': data.get('totalTime', 0),
+                        'accuracy': data.get('accuracy', 0),
+                        'difficulty': data.get('difficulty', task.difficulty or 'mild')
+                    }
+                    handled = True
+            except (json.JSONDecodeError, ValueError):
+                pass
+        
         # Handle puzzle task responses
         if task.task_type == 'puzzle' and 'complete_task' in request.POST:
             score = request.POST.get('score', 0)
@@ -153,7 +170,7 @@ def take_task(request, task_id):
                 'answers': answers
             }
             handled = True
-        # Handle color task responses
+        # Handle color task responses (form-based fallback)
         elif task.task_type == 'color' and 'complete_task' in request.POST:
             score = request.POST.get('score', 0)
             tries = request.POST.get('tries', 0)
@@ -253,6 +270,13 @@ def take_task(request, task_id):
         ]
     template_config = TASK_TEMPLATES.get(task.task_type, {})
     template_name = template_config.get('template_name', 'tasks/questionnaires/take.html')
+    
+    # Use difficulty-specific template for games if available
+    if hasattr(task, 'difficulty') and task.difficulty and template_config.get('has_difficulty', False):
+        difficulty_templates = template_config.get('difficulty_templates', {})
+        if task.difficulty in difficulty_templates:
+            template_name = difficulty_templates[task.difficulty]
+    
     return render(request, template_name, context)
 
 @login_required
@@ -324,29 +348,77 @@ def task_results(request, task_id):
             'items': items
         }
     elif task.task_type == 'color' and task_response:
-        score = int(task_response.responses.get('score', 0))
-        max_score = 60  # 6 pairs, 10 points each
-        tries = int(task_response.responses.get('tries', 0))
-        time_sec = int(task_response.responses.get('time', 0))
+        responses = task_response.responses
+        
+        # Handle both old and new data formats
+        score = int(responses.get('score', 0))
+        attempts = int(responses.get('attempts', responses.get('tries', 0)))
+        time_sec = int(responses.get('totalTime', responses.get('time', 0)))
+        accuracy = int(responses.get('accuracy', 0))
+        difficulty = responses.get('difficulty', task.difficulty or 'mild')
+        
+        # Determine max score and pairs based on difficulty
+        if difficulty == 'mild':
+            pairs = 8
+            max_score = pairs * 20  # 160 points max
+        elif difficulty == 'moderate':
+            pairs = 6
+            max_score = pairs * 15  # 90 points max
+        else:  # major
+            pairs = 6
+            max_score = pairs * 10  # 60 points max
+        
         # Format time as mm:ss
         minutes = time_sec // 60
         seconds = time_sec % 60
         formatted_time = f"{minutes:02d}:{seconds:02d}"
-        pairs = 6
-        efficiency = (pairs / tries) * 100 if tries > 0 else 0
-        if score >= 50:
-            analysis = "Excellent performance! All or nearly all pairs matched."
-        elif score >= 30:
-            analysis = "Good effort! Most pairs matched."
-        else:
-            analysis = "Needs improvement. Encourage more practice."
+        
+        # Calculate efficiency
+        efficiency = (pairs / attempts) * 100 if attempts > 0 else 0
+        
+        # Generate analysis based on difficulty and performance
+        score_percentage = (score / max_score) * 100 if max_score > 0 else 0
+        
+        if difficulty == 'mild':
+            if score_percentage >= 80:
+                analysis = "Performance indicates strong cognitive engagement. Results suggest intact memory and processing abilities within this assessment context."
+            elif score_percentage >= 60:
+                analysis = "Performance demonstrates adequate cognitive function. Results show solid task completion abilities within normal variation."
+            elif score_percentage >= 40:
+                analysis = "Performance suggests some cognitive challenges. Results may indicate need for additional support or assessment."
+            else:
+                analysis = "Performance indicates significant cognitive challenges. Clinical follow-up recommended for comprehensive evaluation."
+        elif difficulty == 'moderate':
+            if score_percentage >= 70:
+                analysis = "Performance shows good task adaptation. Results indicate positive response to structured cognitive activities."
+            elif score_percentage >= 50:
+                analysis = "Performance demonstrates consistent engagement. Results show adequate participation in simplified cognitive tasks."
+            elif score_percentage >= 30:
+                analysis = "Performance indicates ongoing cognitive engagement. Results suggest benefit from continued supportive activities."
+            else:
+                analysis = "Performance shows cognitive challenges. Results indicate need for enhanced support and simplified interventions."
+        else:  # major
+            if score_percentage >= 60:
+                analysis = "Performance demonstrates strong engagement with supportive environment. Results indicate positive response to maximally simplified tasks."
+            elif score_percentage >= 40:
+                analysis = "Performance shows meaningful participation. Results indicate retained cognitive abilities with appropriate support."
+            elif score_percentage >= 20:
+                analysis = "Performance demonstrates cognitive engagement. Results suggest maintained capacity for simple memory tasks."
+            else:
+                analysis = "Performance indicates significant cognitive challenges. Results suggest need for comprehensive care planning and support."
+        
         context['color_results'] = {
             'score': score,
             'max_score': max_score,
-            'tries': tries,
+            'attempts': attempts,
+            'tries': attempts,  # For backward compatibility
             'time': formatted_time,
+            'accuracy': accuracy,
             'efficiency': f"{efficiency:.1f}",
-            'analysis': analysis
+            'difficulty': difficulty.title(),
+            'pairs': pairs,
+            'analysis': analysis,
+            'score_percentage': f"{score_percentage:.1f}"
         }
     elif task.task_type == 'pairs' and task_response:
         score = int(task_response.responses.get('score', 0))
@@ -377,6 +449,12 @@ def task_results(request, task_id):
     # Get the appropriate template
     template_config = TASK_TEMPLATES.get(task.task_type, {})
     template_name = template_config.get('results_template', 'tasks/questionnaires/results.html')
+    
+    # Use difficulty-specific results template for games if available
+    if hasattr(task, 'difficulty') and task.difficulty and template_config.get('has_difficulty', False):
+        difficulty_results = template_config.get('difficulty_results', {})
+        if task.difficulty in difficulty_results:
+            template_name = difficulty_results[task.difficulty]
     
     return render(request, template_name, context)
 

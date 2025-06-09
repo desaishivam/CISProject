@@ -12,89 +12,39 @@ import logging
 # Set up logging
 logger = logging.getLogger(__name__)
 
-def admin_login(request):
+def _handle_login(request, user_type, template_name, redirect_url):
+    """Helper function to handle login for different user types"""
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        logger.info(f"Admin login attempt for user: {username}")
+        logger.info(f"{user_type.title()} login attempt for user: {username}")
         
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            if hasattr(user, 'profile') and user.profile.user_type == 'admin':
+            if hasattr(user, 'profile') and user.profile.user_type == user_type:
                 login(request, user)
                 messages.success(request, f"Welcome {user.first_name}! You are now logged in.")
-                return redirect('admin_dashboard')
+                return redirect(redirect_url)
             else:
-                messages.error(request, 'You do not have admin privileges.')
+                messages.error(request, f'You do not have {user_type} privileges.')
         else:
             messages.error(request, 'Invalid username or password.')
     
-    return render(request, 'auth/admin_login.html')
+    return render(request, template_name)
+
+def admin_login(request):
+    return _handle_login(request, 'admin', 'auth/admin_login.html', 'admin_dashboard')
 
 def provider_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        logger.info(f"Provider login attempt for user: {username}")
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if hasattr(user, 'profile') and user.profile.user_type == 'provider':
-                login(request, user)
-                messages.success(request, f"Welcome {user.first_name}! You are now logged in.")
-                return redirect('provider_dashboard')
-            else:
-                messages.error(request, 'You do not have provider privileges.')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    
-    return render(request, 'auth/provider_login.html')
+    return _handle_login(request, 'provider', 'auth/provider_login.html', 'provider_dashboard')
 
 def caregiver_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        logger.info(f"Caregiver login attempt for user: {username}")
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if hasattr(user, 'profile') and user.profile.user_type == 'caregiver':
-                login(request, user)
-                messages.success(request, f"Welcome {user.first_name}! You are now logged in.")
-                return redirect('caregiver_dashboard')
-            else:
-                messages.error(request, 'You do not have caregiver privileges.')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    
-    return render(request, 'auth/caregiver_login.html')
+    return _handle_login(request, 'caregiver', 'auth/caregiver_login.html', 'caregiver_dashboard')
 
 def patient_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        logger.info(f"Patient login attempt for user: {username}")
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if hasattr(user, 'profile') and user.profile.user_type == 'patient':
-                login(request, user)
-                messages.success(request, f"Welcome {user.first_name}! You are now logged in.")
-                return redirect('patient_dashboard')
-            else:
-                messages.error(request, 'You do not have patient privileges.')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    
-    return render(request, 'auth/patient_login.html')
+    return _handle_login(request, 'patient', 'auth/patient_login.html', 'patient_dashboard')
 
 @login_required
 def user_logout(request):
@@ -223,6 +173,8 @@ def provider_dashboard(request):
             selected_patient = None
             patient_tasks = []
     
+    from taskmanager.constants import GAME_TYPES, DIFFICULTY_LEVELS
+    
     context = {
         'user': request.user,
         'user_type': 'Healthcare Provider',
@@ -230,6 +182,8 @@ def provider_dashboard(request):
         'caregivers': caregivers,
         'recent_tasks': recent_tasks,
         'task_types': TASK_TYPES,  # Use the constant directly
+        'game_types': GAME_TYPES,  # Add game types for template
+        'difficulty_levels': DIFFICULTY_LEVELS,  # Add difficulty levels
         **task_statistics,
         'selected_patient': selected_patient,
         'patient_tasks': patient_tasks,

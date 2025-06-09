@@ -1,0 +1,448 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Color Matching Game - CogniCare{% endblock %}
+{% block content %}
+<div class="color-game-outer">
+    <div class="color-game-header">
+        <h1>Color Matching Game</h1>
+        <p>Find the matching color pairs!</p>
+    </div>
+    <div class="color-game-container">
+        <div class="color-game-instructions">
+            Click on cards to find matching colors. Take your time to study them!
+        </div>
+        <div class="show-timer" id="show-timer" style="display: none;"></div>
+        <div class="game-stats">
+            <div class="stat-item">Score: <span id="score">0</span></div>
+            <div class="stat-item">Pairs: <span id="pairs">0</span>/6</div>
+        </div>
+        <div class="color-grid" id="color-grid"></div>
+        <div class="game-controls">
+            <button class="color-game-btn" onclick="startNewGame()">New Game</button>
+        </div>
+        <div id="feedback" class="feedback" style="display: none;"></div>
+    </div>
+</div>
+
+<style>
+    body, .color-game-outer {
+        font-family: 'Arial', sans-serif;
+    }
+    .color-game-outer {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+        background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+    }
+    .color-game-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    .color-game-header h1 {
+        font-size: 2.5em;
+        color: white;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .color-game-header p {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.3em;
+    }
+    .color-game-container {
+        background: rgba(255,255,255,0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        padding: 40px 30px;
+        max-width: 500px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .color-game-instructions {
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+        font-size: 1.2em;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+    .game-stats {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 300px;
+        margin-bottom: 25px;
+        padding: 15px;
+        background: linear-gradient(90deg, #f39c12, #f1c40f);
+        border-radius: 12px;
+        color: white;
+    }
+    .stat-item {
+        text-align: center;
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+    .color-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        max-width: 400px;
+        margin: 0 auto 30px auto;
+        width: 100%;
+    }
+    .color-card {
+        aspect-ratio: 1;
+        border-radius: 15px;
+        border: 4px solid #ddd;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+        position: relative;
+        background: #eee;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        user-select: none;
+        height: 90px;
+    }
+    .color-card:hover {
+        transform: scale(1.08);
+        border-color: #f39c12;
+        z-index: 2;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    .color-card.matched {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: scale(0.95);
+        border-color: #27ae60;
+        border-width: 5px;
+    }
+    .color-card.selected {
+        border-color: #f39c12 !important;
+        border-width: 5px !important;
+        box-shadow: 0 0 25px rgba(243,156,18,0.5);
+        transform: scale(1.1);
+    }
+    .color-card.hidden {
+        background: #f8f8f8 !important;
+        color: transparent !important;
+        border-color: #ddd;
+    }
+    .color-card.hidden::after {
+        content: '?';
+        position: absolute;
+        font-size: 3em;
+        color: #999;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+        pointer-events: none;
+    }
+    .show-timer {
+        text-align: center;
+        font-size: 1.5em;
+        color: #e74c3c;
+        font-weight: bold;
+        margin: 15px 0;
+        background: rgba(231,76,60,0.1);
+        padding: 12px 20px;
+        border-radius: 10px;
+        border: 2px solid rgba(231,76,60,0.3);
+    }
+    .game-controls {
+        text-align: center;
+        margin: 20px 0 0 0;
+    }
+    .color-game-btn {
+        padding: 16px 40px;
+        font-size: 1.2em;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: bold;
+        background: linear-gradient(90deg, #f39c12 0%, #f1c40f 100%);
+        color: white;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    .color-game-btn:hover {
+        background: linear-gradient(90deg, #f1c40f 0%, #f39c12 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .feedback {
+        text-align: center;
+        font-size: 1.3em;
+        font-weight: bold;
+        margin: 20px 0 0 0;
+        padding: 15px 20px;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    .feedback.success {
+        background: linear-gradient(90deg, #27ae60, #2ecc71);
+        color: white;
+        box-shadow: 0 6px 15px rgba(39,174,96,0.3);
+    }
+    .feedback.error {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+        color: white;
+        box-shadow: 0 6px 15px rgba(231,76,60,0.3);
+    }
+    @media (max-width: 600px) {
+        .color-game-container {
+            padding: 25px 20px;
+            max-width: 95%;
+        }
+        .color-grid {
+            max-width: 340px;
+            gap: 10px;
+        }
+        .color-card {
+            font-size: 1em;
+            height: 75px;
+        }
+        .color-game-header h1 {
+            font-size: 2em;
+        }
+        .game-stats {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+
+<script>
+// Game state
+let gameState = {
+    score: 0,
+    selectedCards: [],
+    matchedPairs: 0,
+    totalPairs: 6, // 6 pairs for moderate
+    attempts: 0,
+    startTime: null,
+    colors: []
+};
+
+// Color pairs for the game (6 pairs with Orange added)
+const colorPairs = [
+    { name: 'Red', color: '#e74c3c' },
+    { name: 'Blue', color: '#3498db' },
+    { name: 'Green', color: '#27ae60' },
+    { name: 'Yellow', color: '#f1c40f' },
+    { name: 'Purple', color: '#9b59b6' },
+    { name: 'Orange', color: '#f39c12' }
+];
+
+function initializeGame() {
+    gameState.colors = [];
+    
+    // Create pairs
+    colorPairs.forEach(pair => {
+        gameState.colors.push(pair, pair);
+    });
+    
+    // Shuffle the cards
+    for (let i = gameState.colors.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [gameState.colors[i], gameState.colors[j]] = [gameState.colors[j], gameState.colors[i]];
+    }
+}
+
+function createGameBoard() {
+    const grid = document.getElementById('color-grid');
+    grid.innerHTML = '';
+    
+    gameState.colors.forEach((colorData, index) => {
+        const card = document.createElement('div');
+        card.className = 'color-card';
+        card.dataset.index = index;
+        card.dataset.color = colorData.name;
+        card.style.backgroundColor = colorData.color;
+        card.textContent = colorData.name;
+        card.onclick = () => selectCard(index);
+        grid.appendChild(card);
+    });
+}
+
+function showCardsTemporarily() {
+    // Show all cards for 4 seconds (longer time for moderate impairment)
+    const cards = document.querySelectorAll('.color-card');
+    
+    setTimeout(() => {
+        cards.forEach(card => {
+            if (!card.classList.contains('matched')) {
+                card.classList.add('hidden');
+                card.textContent = ''; // Clear the text content
+            }
+        });
+    }, 4000);
+    
+    // Show countdown
+    let countdown = 4;
+    const timerElement = document.getElementById('show-timer');
+    timerElement.style.display = 'block';
+    timerElement.textContent = `Study the colors: ${countdown}s`;
+    
+    const countdownInterval = setInterval(() => {
+        countdown -= 1;
+        if (countdown <= 0) {
+            timerElement.style.display = 'none';
+            clearInterval(countdownInterval);
+        } else {
+            timerElement.textContent = `Study the colors: ${countdown}s`;
+        }
+    }, 1000);
+}
+
+function selectCard(index) {
+    const card = document.querySelector(`[data-index="${index}"]`);
+    
+    if (card.classList.contains('matched') || 
+        card.classList.contains('selected') || 
+        gameState.selectedCards.length >= 2) {
+        return;
+    }
+    
+    // Reveal the card
+    card.classList.remove('hidden');
+    card.classList.add('selected');
+    card.textContent = card.dataset.color; // Restore the text content
+    gameState.selectedCards.push({index, element: card});
+    
+    if (gameState.selectedCards.length === 2) {
+        setTimeout(() => checkMatch(), 1000); // Slower feedback for moderate impairment
+    }
+}
+
+function checkMatch() {
+    const [card1, card2] = gameState.selectedCards;
+    const color1 = card1.element.dataset.color;
+    const color2 = card2.element.dataset.color;
+    
+    gameState.attempts++;
+    
+    if (color1 === color2) {
+        // Match found
+        card1.element.classList.add('matched');
+        card2.element.classList.add('matched');
+        card1.element.classList.remove('selected');
+        card2.element.classList.remove('selected');
+        
+        gameState.matchedPairs++;
+        gameState.score += 15; // Moderate scoring
+        
+        document.getElementById('score').textContent = gameState.score;
+        document.getElementById('pairs').textContent = gameState.matchedPairs;
+        
+        showFeedback('Great match!', 'success');
+        
+        if (gameState.matchedPairs === gameState.totalPairs) {
+            setTimeout(() => gameCompleted(), 1000);
+        }
+    } else {
+        // No match
+        setTimeout(() => {
+            card1.element.classList.add('hidden');
+            card2.element.classList.add('hidden');
+            card1.element.classList.remove('selected');
+            card2.element.classList.remove('selected');
+            card1.element.textContent = ''; // Clear text content
+            card2.element.textContent = ''; // Clear text content
+        }, 1500); // Slower hiding for moderate impairment
+        
+        showFeedback('Try again!', 'error');
+    }
+    
+    gameState.selectedCards = [];
+}
+
+function showFeedback(message, type) {
+    const feedback = document.getElementById('feedback');
+    feedback.textContent = message;
+    feedback.className = `feedback ${type}`;
+    feedback.style.display = 'block';
+    
+    setTimeout(() => {
+        feedback.style.display = 'none';
+    }, 2500); // Longer feedback display
+}
+
+function gameCompleted() {
+    const totalTime = gameState.startTime ? Math.floor((Date.now() - gameState.startTime) / 1000) : 0;
+    const accuracy = Math.round((gameState.totalPairs / gameState.attempts) * 100);
+    
+    showFeedback('Congratulations! All pairs found!', 'success');
+    
+    // Submit results
+    setTimeout(() => {
+        submitResults({
+            score: gameState.score,
+            attempts: gameState.attempts,
+            accuracy: accuracy,
+            totalTime: totalTime, // Now sending actual time
+            difficulty: 'moderate'
+        });
+    }, 3000);
+}
+
+function startNewGame() {
+    // Reset game state
+    gameState.score = 0;
+    gameState.selectedCards = [];
+    gameState.matchedPairs = 0;
+    gameState.attempts = 0;
+    gameState.startTime = Date.now(); // Start tracking time
+    
+    // Update display
+    document.getElementById('score').textContent = '0';
+    document.getElementById('pairs').textContent = '0';
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('show-timer').style.display = 'none';
+    
+    // Initialize and start game
+    initializeGame();
+    createGameBoard();
+    showCardsTemporarily();
+}
+
+function submitResults(results) {
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(results)
+    }).then(response => {
+        if (response.ok) {
+            // Redirect to patient tasks page
+            window.location.href = '/tasks/patient/tasks/';
+        } else {
+            console.error('Failed to submit results');
+            // Fallback: try redirecting anyway
+            window.location.href = '/tasks/patient/tasks/';
+        }
+    }).catch(error => {
+        console.error('Error submitting results:', error);
+        // Fallback: redirect to patient tasks page
+        window.location.href = '/tasks/patient/tasks/';
+    });
+}
+
+// Start the game when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    startNewGame();
+});
+</script>
+
+{% csrf_token %}
+{% endblock %} 

@@ -1,13 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
 from users.models import UserProfile
-from .constants import TASK_TYPES, TASK_STATUS
+from .constants import TASK_TYPES, TASK_STATUS, DIFFICULTY_LEVELS
 import json
 
 class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     task_type = models.CharField(max_length=50, choices=TASK_TYPES)
+    
+    # Difficulty level (only for games)
+    difficulty = models.CharField(
+        max_length=20, 
+        choices=DIFFICULTY_LEVELS, 
+        default='mild',
+        help_text="Cognitive difficulty level for games"
+    )
+    
     assigned_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='assigned_tasks')
     assigned_to = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='received_tasks')
     status = models.CharField(max_length=20, choices=TASK_STATUS, default='assigned')
@@ -23,6 +32,13 @@ class Task(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.assigned_to.user.username}"
+    
+    def get_difficulty_display_for_games(self):
+        """Only show difficulty for games, not assessments"""
+        from .constants import GAME_TYPES
+        if self.task_type in GAME_TYPES:
+            return self.get_difficulty_display()
+        return None
     
     class Meta:
         ordering = ['-created_at']
