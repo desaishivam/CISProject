@@ -1,18 +1,19 @@
 {% extends 'layouts/base.html' %}
 {% block title %}Mild Matching Game - CogniCare{% endblock %}
+{% csrf_token %}
 
 {% block content %}
 <div class="container">
     <div class="task-header">
         <h1>🧠 Mild Matching Game</h1>
-        <p>Match pairs of identical emojis — cards flip back if not matched.</p>
+        <p>Match the related items.</p>
     </div>
 
     <div class="stats-container">
         <div>Moves: <span id="moves">0</span></div>
         <div>Matches: <span id="matches">0</span></div>
         <div>Time: <span id="time">00:00</span></div>
-    </div>
+        </div>
 
     <div id="previewBadge" class="preview-badge" style="display:none;">
         Memorize the layout! <span id="previewCountdown">3</span>
@@ -25,8 +26,8 @@
     <div class="victory-modal" id="victory">
         <div class="victory-content">
             <h2>🎉 You did it!</h2>
-            <p>Moves: <span id="finalMoves"></span></p>
-            <p>Time: <span id="finalTime"></span></p>
+                <p>Moves: <span id="finalMoves"></span></p>
+                <p>Time: <span id="finalTime"></span></p>
             <button onclick="initializeGame()">Play Again</button>
         </div>
     </div>
@@ -151,9 +152,18 @@
 
 <script>
     const emojiPairs = [
-        '🐶', '🐱', '🍎', '🍌', '🌞', '🌙', '🔥', '💧',
-        '⚡', '☁️', '🏠', '🏢', '📚', '✏️', '🎵', '🎤',
-        '🚗', '🚌', '🍕', '🍔', '🦋', '🐸', '🌸', '🌲'
+        { id: 1, emoji: '🐶' }, { id: 1, emoji: '🐱' },
+        { id: 2, emoji: '🍎' }, { id: 2, emoji: '🍌' },
+        { id: 3, emoji: '🌞' }, { id: 3, emoji: '🌙' },
+        { id: 4, emoji: '🔥' }, { id: 4, emoji: '💧' },
+        { id: 5, emoji: '⚡' }, { id: 5, emoji: '☁️' },
+        { id: 6, emoji: '🏠' }, { id: 6, emoji: '🏢' },
+        { id: 7, emoji: '📚' }, { id: 7, emoji: '✏️' },
+        { id: 8, emoji: '🎵' }, { id: 8, emoji: '🎤' },
+        { id: 9, emoji: '🚗' }, { id: 9, emoji: '🚌' },
+        { id: 10, emoji: '🍕' }, { id: 10, emoji: '🍔' },
+        { id: 11, emoji: '🦋' }, { id: 11, emoji: '🐸' },
+        { id: 12, emoji: '🌸' }, { id: 12, emoji: '🌲' }
     ];
 
     let state;
@@ -162,11 +172,10 @@
 
     function initializeGame() {
         const pairCount = 12;
-        let selected = emojiPairs.slice(0, pairCount);
+        let selected = emojiPairs.slice(0, pairCount * 2); // Get all pairs
         let cards = [];
-        selected.forEach(emoji => {
-            cards.push({ emoji: emoji, matched: false });
-            cards.push({ emoji: emoji, matched: false });
+        selected.forEach(pair => {
+            cards.push({ id: pair.id, emoji: pair.emoji, matched: false });
         });
         cards = cards.sort(() => Math.random() - 0.5);
         state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, preview: true };
@@ -215,12 +224,12 @@
         if (state.flipped.length === 2) {
             state.moves++;
             const [i1, i2] = state.flipped;
-            if (state.cards[i1].emoji === state.cards[i2].emoji) {
+            if (state.cards[i1].id === state.cards[i2].id) {
                 state.cards[i1].matched = state.cards[i2].matched = true;
                 state.matched++;
                 state.flipped = [];
-                if (state.matched === state.cards.length / 2) endGame();
                 renderGame();
+                if (state.matched === state.cards.length / 2) gameCompleted();
             } else {
                 setTimeout(() => {
                     state.flipped = [];
@@ -243,11 +252,27 @@
         document.getElementById('time').textContent = `${min}:${sec}`;
     }
 
-    function endGame() {
+    function gameCompleted() {
         clearInterval(state.timer);
-        document.getElementById('finalMoves').textContent = state.moves;
-        document.getElementById('finalTime').textContent = document.getElementById('time').textContent;
-        document.getElementById('victory').style.display = 'block';
+        const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
+        const results = {
+            score: state.matched * 10,
+            moves: state.moves,
+            totalTime: totalTime,
+            difficulty: 'mild'
+        };
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(results)
+        }).then(() => {
+            window.location.href = '/tasks/patient/tasks/';
+        }).catch(() => {
+            window.location.href = '/tasks/patient/tasks/';
+        });
     }
 
     initializeGame();

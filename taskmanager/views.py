@@ -8,6 +8,7 @@ from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
 from .constants import TASK_TYPES, TASK_TEMPLATES
 from users.models import UserProfile
 import json
+from django.urls import reverse
 
 @login_required
 def assign_task(request, patient_id):
@@ -156,6 +157,14 @@ def take_task(request, task_id):
                         'difficulty': data.get('difficulty', task.difficulty or 'mild')
                     }
                     handled = True
+                elif task.task_type == 'pairs':
+                    task_response.responses = {
+                        'score': data.get('score', 0),
+                        'moves': data.get('moves', 0),
+                        'totalTime': data.get('totalTime', 0),
+                        'difficulty': data.get('difficulty', task.difficulty or 'major')
+                    }
+                    handled = True
             except (json.JSONDecodeError, ValueError):
                 pass
         
@@ -229,6 +238,9 @@ def take_task(request, task_id):
                 message=f"Task completed: {task.title} by {request.user.first_name} {request.user.last_name}",
                 notification_type='completed'
             )
+            # For JSON POSTs, return a JSON response with redirect_url
+            if request.content_type == 'application/json':
+                return JsonResponse({'redirect_url': reverse('taskmanager:patient_tasks')})
             # Only show success message to the user who completed the task if they are a patient
             if user_profile.user_type == 'patient':
                 messages.success(request, f'Task "{task.title}" has been completed successfully.')
