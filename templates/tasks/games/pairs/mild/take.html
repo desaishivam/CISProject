@@ -14,15 +14,12 @@
         <div>Time: <span id="time">00:00</span></div>
     </div>
 
-    <div class="game-container">
-        <div class="game-board" id="gameBoard"></div>
+    <div id="previewBadge" class="preview-badge" style="display:none;">
+        Memorize the layout! <span id="previewCountdown">3</span>
     </div>
 
-    <div class="preview-overlay" id="previewOverlay">
-        <div class="preview-content">
-            Memorize the layout!<br>
-            <span id="previewCountdown">3</span>
-        </div>
+    <div class="game-container">
+        <div class="game-board" id="gameBoard"></div>
     </div>
 
     <div class="victory-modal" id="victory">
@@ -74,6 +71,19 @@
         margin-bottom: 1.5rem;
     }
 
+    .preview-badge {
+        display: inline-block;
+        background: #fffbe6;
+        color: #b8860b;
+        border: 1px solid #ffe58f;
+        border-radius: 8px;
+        padding: 0.5em 1em;
+        font-size: 1.1em;
+        margin: 0 auto 1em auto;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
     .game-container {
         display: flex;
         justify-content: center;
@@ -114,25 +124,6 @@
         padding: 1rem;
         width: 100%;
         text-align: center;
-    }
-
-    .preview-overlay {
-        position: fixed;
-        top: 0; left: 0; width: 100vw; height: 100vh;
-        background: rgba(0,0,0,0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .preview-content {
-        background: white;
-        padding: 2rem 3rem;
-        border-radius: 12px;
-        text-align: center;
-        font-size: 2em;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
 
     .victory-modal {
@@ -181,7 +172,7 @@
         state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, preview: true };
         renderGame(true); // Show all cards face up for preview
         updateStats();
-        document.getElementById('previewOverlay').style.display = 'flex';
+        document.getElementById('previewBadge').style.display = 'block';
         previewCountdown = 3;
         document.getElementById('previewCountdown').textContent = previewCountdown;
         clearInterval(state.timer);
@@ -191,7 +182,7 @@
             document.getElementById('previewCountdown').textContent = previewCountdown;
             if (previewCountdown === 0) {
                 clearInterval(previewTimer);
-                document.getElementById('previewOverlay').style.display = 'none';
+                document.getElementById('previewBadge').style.display = 'none';
                 state.preview = false;
                 state.startTime = Date.now();
                 renderGame();
@@ -218,7 +209,7 @@
     }
 
     function flipCard(index) {
-        if (state.preview || state.flipped.length >= 2 || state.flipped.includes(index) || state.cards[index].matched) return;
+        if (state.flipped.length >= 2 || state.flipped.includes(index) || state.cards[index].matched) return;
         state.flipped.push(index);
         renderGame();
         if (state.flipped.length === 2) {
