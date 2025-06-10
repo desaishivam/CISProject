@@ -145,27 +145,6 @@
         color: white;
         box-shadow: 0 4px 12px rgba(231,76,60,0.3);
     }
-    .game-controls {
-        text-align: center;
-        margin: 18px 0 0 0;
-    }
-    .color-game-btn {
-        padding: 14px 36px;
-        font-size: 1.1em;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: bold;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-        transition: all 0.3s ease;
-    }
-    .color-game-btn:hover {
-        background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
     @media (max-width: 700px) {
         .game-board { grid-template-columns: repeat(3, 1fr); }
     }
@@ -289,10 +268,6 @@ function gameCompleted() {
             difficulty: 'mild'
         });
     }, 1500);
-}
-
-function startNewGame() {
-    initializeGame();
 }
 
 function submitResults(results) {
