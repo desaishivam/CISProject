@@ -75,6 +75,16 @@ TASK_TEMPLATES = {
         'has_difficulty': True,
         'default_difficulty': 'mild',
         'description': 'Memory pairs matching game',
+        'difficulty_templates': {
+            'mild': 'tasks/games/pairs/mild/take.html',
+            'moderate': 'tasks/games/pairs/moderate/take.html',
+            'major': 'tasks/games/pairs/major/take.html',
+        },
+        'difficulty_results': {
+            'mild': 'tasks/games/pairs/mild/results.html',
+            'moderate': 'tasks/games/pairs/moderate/results.html',
+            'major': 'tasks/games/pairs/major/results.html',
+        }
     },
 }
 

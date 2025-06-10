@@ -15,6 +15,7 @@
     <!-- Design System -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    {% block extra_css %}{% endblock %}
     <style>
         :root {
             /* Patient Theme */
@@ -1422,5 +1423,6 @@
             });
         });
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html> 

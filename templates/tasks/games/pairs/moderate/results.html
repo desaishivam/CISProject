@@ -1,0 +1,148 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Pairs Game Results - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="task-header">
+        <h1>Pairs Game Results</h1>
+        <p>Task completed by {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
+    </div>
+
+    <div class="results-grid">
+        <div class="result-card">
+            <div class="result-icon">🎯</div>
+            <div class="result-value">{{ pairs_results.score }}</div>
+            <div class="result-label">Score</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">🔄</div>
+            <div class="result-value">{{ pairs_results.moves }}</div>
+            <div class="result-label">Moves</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">⏱️</div>
+            <div class="result-value">{{ pairs_results.time }}</div>
+            <div class="result-label">Time</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">📊</div>
+            <div class="result-value">{{ pairs_results.efficiency }}%</div>
+            <div class="result-label">Efficiency</div>
+        </div>
+    </div>
+
+    <div class="analysis-section">
+        <h2>Performance Analysis</h2>
+        <div class="analysis-content">
+            <p>{{ pairs_results.analysis }}</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .task-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .task-header h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 0.5rem;
+    }
+
+    .task-header p {
+        color: #7f8c8d;
+        font-size: 1.2em;
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .result-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .result-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .result-icon {
+        font-size: 2em;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-label {
+        color: #7f8c8d;
+        font-size: 1.1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .analysis-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .analysis-section h2 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1.8em;
+        text-align: center;
+    }
+
+    .analysis-content {
+        color: #34495e;
+        font-size: 1.1em;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .results-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .result-value {
+            font-size: 2em;
+        }
+
+        .task-header h1 {
+            font-size: 2em;
+        }
+
+        .analysis-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}

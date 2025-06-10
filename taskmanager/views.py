@@ -216,6 +216,7 @@ def take_task(request, task_id):
         # Handle other task types
         elif 'complete_task' in request.POST:
             handled = True
+        
         if handled:
             task_response.completed_at = timezone.now()
             task.status = 'completed'
