@@ -168,16 +168,15 @@ function renderGame(preview = false) {
     state.cards.forEach((card, index) => {
         const el = document.createElement('div');
         el.className = 'card';
-        if (card.matched || state.flipped.includes(index) || preview || state.preview) {
-            el.innerHTML = `<div>${card.emoji}</div><div style="font-size: 0.5em;">${card.word}</div>`;
-            if (card.matched) el.classList.add('matched');
-            } else {
-            el.innerHTML = '<div class="card-back">?</div>';
+        // Always show the emoji and word, never hide
+        el.innerHTML = `<div>${card.emoji}</div><div style="font-size: 0.5em;">${card.word}</div>`;
+        if (card.matched) el.classList.add('matched');
+        if (!card.matched && !state.flipped.includes(index)) {
             el.onclick = () => flipCard(index);
         }
         board.appendChild(el);
-        });
-    }
+    });
+}
 
 function flipCard(index) {
     if (state.flipped.length >= 2 || state.flipped.includes(index) || state.cards[index].matched) return;

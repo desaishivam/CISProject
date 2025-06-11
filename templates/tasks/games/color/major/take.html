@@ -275,29 +275,17 @@ function createGameBoard() {
 }
 
 function showCardsTemporarily() {
-    // Show all cards for 8 seconds (very long time for major impairment)
-    const cards = document.querySelectorAll('.color-card');
-    
-    setTimeout(() => {
-        cards.forEach(card => {
-            if (!card.classList.contains('matched')) {
-                card.classList.add('hidden');
-                card.textContent = ''; // Clear the text content
-            }
-        });
-    }, 8000);
-    
-    // Show countdown
+    // For major version, do NOT hide the cards after preview. Just start the timer after 8 seconds.
     let countdown = 8;
     const timerElement = document.getElementById('show-timer');
     timerElement.style.display = 'block';
     timerElement.textContent = `Look at the colors: ${countdown} seconds`;
-    
     const countdownInterval = setInterval(() => {
         countdown -= 1;
         if (countdown <= 0) {
             timerElement.style.display = 'none';
             clearInterval(countdownInterval);
+            // No hiding of cards here!
         } else {
             timerElement.textContent = `Look at the colors: ${countdown} seconds`;
         }
@@ -306,21 +294,15 @@ function showCardsTemporarily() {
 
 function selectCard(index) {
     const card = document.querySelector(`[data-index="${index}"]`);
-    
-    if (card.classList.contains('matched') || 
-        card.classList.contains('selected') || 
-        gameState.selectedCards.length >= 2) {
+    if (card.classList.contains('matched') || card.classList.contains('selected') || gameState.selectedCards.length >= 2) {
         return;
     }
-    
     // Reveal the card
-    card.classList.remove('hidden');
     card.classList.add('selected');
     card.textContent = card.dataset.color; // Restore the text content
     gameState.selectedCards.push({index, element: card});
-    
     if (gameState.selectedCards.length === 2) {
-        setTimeout(() => checkMatch(), 2000); // Very slow feedback for major impairment
+        setTimeout(() => checkMatch(), 400); // Faster feedback
     }
 }
 
@@ -328,40 +310,26 @@ function checkMatch() {
     const [card1, card2] = gameState.selectedCards;
     const color1 = card1.element.dataset.color;
     const color2 = card2.element.dataset.color;
-    
     gameState.attempts++;
-    
     if (color1 === color2) {
-        // Match found
         card1.element.classList.add('matched');
         card2.element.classList.add('matched');
         card1.element.classList.remove('selected');
         card2.element.classList.remove('selected');
-        
         gameState.matchedPairs++;
-        gameState.score += 10; // Simple scoring
-        
+        gameState.score += 10;
         document.getElementById('pairs').textContent = gameState.matchedPairs;
-        
         showFeedback('Excellent! You found a match!', 'success');
-        
         if (gameState.matchedPairs === gameState.totalPairs) {
-            setTimeout(() => gameCompleted(), 2000);
+            setTimeout(() => gameCompleted(), 400);
         }
     } else {
-        // No match
         setTimeout(() => {
-            card1.element.classList.add('hidden');
-            card2.element.classList.add('hidden');
             card1.element.classList.remove('selected');
             card2.element.classList.remove('selected');
-            card1.element.textContent = ''; // Clear text content
-            card2.element.textContent = ''; // Clear text content
-        }, 3000); // Very slow hiding for major impairment
-        
+        }, 400); // Faster hiding
         showFeedback('Not quite - try again!', 'error');
     }
-    
     gameState.selectedCards = [];
 }
 
@@ -370,10 +338,9 @@ function showFeedback(message, type) {
     feedback.textContent = message;
     feedback.className = `feedback ${type}`;
     feedback.style.display = 'block';
-    
     setTimeout(() => {
         feedback.style.display = 'none';
-    }, 4000); // Very long feedback display
+    }, 600); // Short feedback
 }
 
 function gameCompleted() {
