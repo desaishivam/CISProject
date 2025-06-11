@@ -13,7 +13,7 @@
         <div>Moves: <span id="moves">0</span></div>
         <div>Matches: <span id="matches">0</span></div>
         <div>Time: <span id="time">00:00</span></div>
-    </div>
+        </div>
 
     <div id="previewBadge" class="preview-badge" style="display:none;">
         Memorize the layout! <span id="previewCountdown">7</span>
@@ -39,15 +39,6 @@
     .task-header {
         text-align: center;
         margin-bottom: 1.5rem;
-    }
-    .task-header h1 {
-        color: #2c3e50;
-        font-size: 2.5em;
-        margin-bottom: 0.5rem;
-    }
-    .task-header p {
-        color: #7f8c8d;
-        font-size: 1.2em;
     }
     .stats-container {
         display: flex;
@@ -83,6 +74,7 @@
         background: white;
         border-radius: 10px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         cursor: pointer;
@@ -106,8 +98,21 @@
         width: 100%;
         text-align: center;
     }
-    @media (max-width: 700px) {
-        .game-board { grid-template-columns: repeat(4, 1fr); }
+    .victory-modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+    .victory-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 300px;
+        margin: 10% auto;
     }
 </style>
 
@@ -121,13 +126,13 @@ const allPairs = [
     { id: 6, emoji: '🏠', word: 'House' }, { id: 6, emoji: '🏢', word: 'Building' },
     { id: 7, emoji: '📚', word: 'Book' }, { id: 7, emoji: '✏️', word: 'Pencil' },
     { id: 8, emoji: '🎵', word: 'Music' }, { id: 8, emoji: '🎤', word: 'Microphone' }
-];
+    ];
 
 let state;
 let previewTimer;
 let previewCountdown = 7;
 
-function initializeGame() {
+    function initializeGame() {
     const pairCount = 8;
     let selected = allPairs.slice(0, pairCount * 2); // Get all pairs
     let cards = [];
@@ -155,7 +160,7 @@ function initializeGame() {
             state.timer = setInterval(updateTimer, 1000);
         }
     }, 1000);
-}
+    }
 
 function renderGame(preview = false) {
     const board = document.getElementById('gameBoard');
@@ -166,13 +171,13 @@ function renderGame(preview = false) {
         if (card.matched || state.flipped.includes(index) || preview || state.preview) {
             el.innerHTML = `<div>${card.emoji}</div><div style="font-size: 0.5em;">${card.word}</div>`;
             if (card.matched) el.classList.add('matched');
-        } else {
+            } else {
             el.innerHTML = '<div class="card-back">?</div>';
             el.onclick = () => flipCard(index);
         }
         board.appendChild(el);
-    });
-}
+        });
+    }
 
 function flipCard(index) {
     if (state.flipped.length >= 2 || state.flipped.includes(index) || state.cards[index].matched) return;
@@ -185,7 +190,7 @@ function flipCard(index) {
             state.cards[i1].matched = state.cards[i2].matched = true;
             state.matched++;
             state.flipped = [];
-            renderGame();
+        renderGame();
             if (state.matched === state.cards.length / 2) gameCompleted();
         } else {
             setTimeout(() => {
@@ -195,19 +200,19 @@ function flipCard(index) {
         }
     }
     updateStats();
-}
+    }
 
-function updateStats() {
+    function updateStats() {
     document.getElementById('moves').textContent = state.moves;
     document.getElementById('matches').textContent = state.matched;
-}
+    }
 
-function updateTimer() {
+    function updateTimer() {
     const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
     const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
     const sec = String(elapsed % 60).padStart(2, '0');
     document.getElementById('time').textContent = `${min}:${sec}`;
-}
+    }
 
 function gameCompleted() {
     clearInterval(state.timer);
@@ -232,6 +237,6 @@ function gameCompleted() {
     });
 }
 
-initializeGame();
+    initializeGame();
 </script>
 {% endblock %}
