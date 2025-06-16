@@ -89,7 +89,7 @@
                             </div>
                         </div>
                     </form>
-                    <div id="assign-all-status" style="margin-top:1rem;display:none;"></div>
+                    <div id="assign-all-status" class="mt-2 d-none"></div>
                 </div>
 
                 <!-- Task Cleanup Options -->
@@ -144,7 +144,7 @@
                                                 </td>
                                                 <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
                                                 <td>
-                                                    <form method="post" action="{% url 'taskmanager:delete_task' task.id %}" style="display:inline;">
+                                                    <form method="post" action="{% url 'taskmanager:delete_task' task.id %}" class="d-inline">
                                                         {% csrf_token %}
                                                         <button type="submit" class="action-btn danger-btn" onclick="return confirm('Delete this task?');">🗑️ Delete</button>
                                                     </form>

@@ -173,6 +173,10 @@
 .d-inline { display: inline; }
 .d-inline-block { display: inline-block; }
 .d-none { display: none; }
+.d-flex { display: flex; }
+.justify-center { justify-content: center; }
+.flex-center { display: flex; justify-content: center; }
+.mt-5 { margin-top: 2.5rem; }
 
 .w-full { width: 100%; }
 .w-auto { width: auto; }

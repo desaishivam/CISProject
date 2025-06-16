@@ -1,4 +1,8 @@
 {# Unified structure: .container, .section, .card, .mdc-button #}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 {% extends 'layouts/base.html' %}
 
 {% block title %}Checklist Results - CogniCare{% endblock %}
@@ -112,116 +116,11 @@
             {% endif %}
         </div>
     </div>
-    <div class="results-actions" style="display: flex; justify-content: center; margin-top: 2rem;">
+    <div class="results-actions flex-center mt-4">
         <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
             <span class="mdc-button__label">Back to Dashboard</span>
         </a>
     </div>
 </div>
 
-<style>
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .section {
-        margin-bottom: 2rem;
-    }
-    .card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    .subtitle {
-        color: #666;
-        margin-bottom: 2rem;
-    }
-    .results-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-        gap: 2rem;
-    }
-    .result-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .result-header h3 {
-        margin: 0;
-        color: #003366;
-    }
-    .completion-date {
-        color: #666;
-        font-size: 0.875rem;
-    }
-    .completion-stats {
-        display: flex;
-        gap: 2rem;
-        margin-bottom: 1.5rem;
-    }
-    .stat {
-        flex: 1;
-    }
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #003366;
-    }
-    .checklist-items {
-        margin-bottom: 1.5rem;
-    }
-    .checklist-items h4 {
-        color: #003366;
-        margin-bottom: 1rem;
-    }
-    .checklist-items ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .checklist-items li {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .checklist-items li:last-child {
-        border-bottom: none;
-    }
-    .item-status {
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        border-radius: 50%;
-        font-size: 1rem;
-    }
-    .completed .item-status {
-        background: #4CAF50;
-        color: white;
-    }
-    .item-text {
-        color: #333;
-    }
-    .no-results {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 3rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .no-results p {
-        color: #666;
-        margin: 0;
-    }
-</style>
 {% endblock %} 

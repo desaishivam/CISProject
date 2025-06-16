@@ -1,4 +1,8 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 {% block title %}Puzzle Game{% endblock %}
 {% block content %}
 {% csrf_token %}
@@ -31,69 +35,6 @@
   <button class="btn" onclick="submitPuzzle()">✅ Submit</button>
   <div class="results" id="result"></div>
 
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f0f2f5;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      margin-bottom: 10px;
-    }
-    .timer {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
-    .word-bank, .categories {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 20px 0;
-      gap: 10px;
-    }
-    .draggable {
-      padding: 10px 15px;
-      background: #fff;
-      border: 2px solid #333;
-      border-radius: 5px;
-      cursor: grab;
-    }
-    .fruit {
-      background-color: #ffe5e5;
-    }
-    .animal {
-      background-color: #e0f7fa;
-    }
-    .drop-zone {
-      border: 2px dashed #888;
-      padding: 20px;
-      min-width: 150px;
-      height: 200px;
-      margin: 10px;
-      background: #fff;
-      border-radius: 8px;
-    }
-    .drop-zone h3 {
-      margin-top: 0;
-    }
-    .drop-zone.dragover {
-      background-color: #d8f3dc;
-    }
-    .results {
-      margin-top: 30px;
-      font-weight: bold;
-    }
-    .btn {
-      padding: 10px 20px;
-      background: #4caf50;
-      color: white;
-      border: none;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
   <script>
     let startTime = null;
     let timerInterval = null;

@@ -1,4 +1,8 @@
 {# Unified structure: .container, .section, .card, .mdc-button, .table #}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 {% extends 'layouts/base.html' %}
 
 {% block title %}Task Management - CogniCare{% endblock %}
@@ -98,65 +102,4 @@
     {% endif %}
 </div>
 
-<style>
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .section {
-        margin-bottom: 2rem;
-    }
-    .card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        overflow: hidden;
-        padding: 2rem;
-    }
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .table th,
-    .table td {
-        padding: 1rem;
-        text-align: left;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .table th {
-        background-color: #f9fafb;
-        font-weight: 600;
-    }
-    .status-badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-    .status-assigned { background-color: #e0f2fe; color: #0369a1; }
-    .status-in_progress { background-color: #fef3c7; color: #92400e; }
-    .status-completed { background-color: #d1fae5; color: #065f46; }
-    .status-overdue { background-color: #fee2e2; color: #b91c1c; }
-    .no-tasks {
-        text-align: center;
-        padding: 3rem;
-    }
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-    }
-    .message.success {
-        background-color: #d1fae5;
-        color: #065f46;
-    }
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
-    }
-</style>
 {% endblock %} 

@@ -1,4 +1,8 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 {% block title %}Matching Game{% endblock %}
 {% csrf_token %}
 
@@ -20,132 +24,6 @@
     </div>
 </div>
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f2f6f9;
-        margin: 0;
-        padding: 0;
-    }
-
-    .container {
-        max-width: 900px;
-        margin: auto;
-        padding: 2rem;
-    }
-
-    .task-header {
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .task-header h1 {
-        color: #2c3e50;
-        font-size: 2.5em;
-        margin-bottom: 0.5rem;
-    }
-
-    .task-header p {
-        color: #7f8c8d;
-        font-size: 1.2em;
-    }
-
-    .stats-container {
-        display: flex;
-        justify-content: space-around;
-        background: #e9ecef;
-        padding: 1rem;
-        border-radius: 10px;
-        margin-bottom: 1.5rem;
-    }
-
-    .preview-badge {
-        display: inline-block;
-        background: #fffbe6;
-        color: #b8860b;
-        border: 1px solid #ffe58f;
-        border-radius: 8px;
-        padding: 0.5em 1em;
-        font-size: 1.1em;
-        margin: 0 auto 1em auto;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    }
-
-    .game-container {
-        display: flex;
-        justify-content: center;
-    }
-
-    .game-board {
-        display: grid;
-        gap: 12px;
-        width: 100%;
-        grid-template-columns: repeat(6, 1fr);
-    }
-
-    .card {
-        background: white;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        padding: 1rem;
-        text-align: center;
-        user-select: none;
-        font-size: 2em;
-        transition: background 0.3s;
-    }
-
-    .card.matched {
-        background: #28a745;
-        color: white;
-        cursor: default;
-    }
-
-    .card-back {
-        background: #dee2e6;
-        color: #6c757d;
-        border-radius: 10px;
-        padding: 1rem;
-        width: 100%;
-        text-align: center;
-    }
-
-    .victory-modal {
-        display: none;
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-    }
-
-    .victory-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        text-align: center;
-        max-width: 300px;
-        margin: 10% auto;
-    }
-
-    .card.wrong {
-        border: 2px solid #e74c3c;
-        background: #fdecea;
-    }
-
-    .card.selected {
-        border: 2px solid #3498db;
-        background: #eaf6fb;
-    }
-
-    @media (max-width: 700px) {
-        .game-board { grid-template-columns: repeat(4, 1fr); }
-    }
-</style>
 
 <script>
     const emojiPairs = [

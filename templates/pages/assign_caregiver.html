@@ -1,4 +1,8 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 
 {% block title %}Assign Caregivers - CogniCare{% endblock %}
 
@@ -70,100 +74,4 @@
     </form>
 </div>
 
-<style>
-    .form-container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    
-    .subtitle {
-        color: #666;
-        margin-bottom: 1.5rem;
-    }
-    
-    .edit-form {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 1.5rem;
-    }
-    
-    .patient-info {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .patient-info h3, .caregiver-list h3 {
-        color: #003366;
-        margin-top: 0;
-        margin-bottom: 1rem;
-    }
-    
-    .patient-info p {
-        margin: 0.5rem 0;
-    }
-    
-    .caregiver-list {
-        margin-bottom: 1.5rem;
-    }
-    
-    .caregivers {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem 1rem;
-    }
-    
-    .caregiver-item {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem;
-        border-radius: 4px;
-    }
-    
-    .caregiver-item:hover {
-        background-color: #f5f7fa;
-    }
-    
-    .caregiver-item input[type="checkbox"] {
-        margin-right: 0.5rem;
-    }
-    
-    .no-caregivers {
-        color: #6b7280;
-        font-style: italic;
-    }
-    
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-    }
-    
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-    
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .message.success {
-        background-color: #d1fae5;
-        color: #065f46;
-    }
-    
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
-    }
-    
-    @media (max-width: 600px) {
-        .caregivers {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
 {% endblock %} 
