@@ -5,14 +5,14 @@ Constants and configuration for the task management system.
 # Task Types Configuration
 TASK_TYPES = (
     ('memory_questionnaire', 'Memory Questionnaire'),
-    ('checklist', 'Checklist'),
+    ('checklist', 'Daily Checklist'),
     ('puzzle', 'Memory Puzzle'),
-    ('color', 'Color Matching'),
+    ('color', 'Color Game'),
     ('pairs', 'Pairs Game'),
 )
 
 # Task Categories
-GAME_TYPES = ('puzzle', 'color', 'pairs')
+GAME_TYPES = ('puzzle', 'pairs')
 ASSESSMENT_TYPES = ('memory_questionnaire', 'checklist')
 
 # Difficulty Levels for Games
@@ -27,124 +27,111 @@ TASK_STATUS = (
     ('assigned', 'Assigned'),
     ('in_progress', 'In Progress'),
     ('completed', 'Completed'),
-    ('overdue', 'Overdue'),
 )
 
 # Task Templates Configuration - Updated for games/non-games structure
 TASK_TEMPLATES = {
-    # Non-game assessments (no difficulty levels)
-    'memory_questionnaire': {
-        'template_name': 'tasks/non-games/questionnaires/take.html',
-        'results_template': 'tasks/non-games/questionnaires/results.html',
-        'has_difficulty': False,
-    },
     'checklist': {
-        'template_name': 'tasks/non-games/checklists/take.html',
-        'results_template': 'tasks/non-games/checklists/results.html',
-        'has_difficulty': False,
-    },
-    
-    # Cognitive training games (with difficulty levels)
-    'puzzle': {
-        'template_name': 'tasks/games/puzzle/take.html',
-        'results_template': 'tasks/games/puzzle/results.html',
-        'has_difficulty': True,
-        'default_difficulty': 'mild',
-        'description': 'Memory categorization puzzle game',
-    },
-    'color': {
-        'template_name': 'tasks/games/color/{difficulty}/take.html',
-        'results_template': 'tasks/games/color/{difficulty}/results.html',
-        'has_difficulty': True,
-        'default_difficulty': 'mild',
-        'description': 'Color sequence matching game',
-        'difficulty_templates': {
-            'mild': 'tasks/games/color/mild/take.html',
-            'moderate': 'tasks/games/color/moderate/take.html',
-            'major': 'tasks/games/color/major/take.html',
+        'template_name': 'tasks/checklist/take.html',
+        'results_template': 'tasks/checklist/results.html',
+        'icon': '📋',
+        'description': 'Daily tasks and activities checklist',
+        'templates': {
+            'mild': 'tasks/checklist/mild/take.html',
+            'moderate': 'tasks/checklist/moderate/take.html',
+            'major': 'tasks/checklist/major/take.html',
         },
-        'difficulty_results': {
-            'mild': 'tasks/games/color/mild/results.html',
-            'moderate': 'tasks/games/color/moderate/results.html',
-            'major': 'tasks/games/color/major/results.html',
+        'results_templates': {
+            'mild': 'tasks/checklist/mild/results.html',
+            'moderate': 'tasks/checklist/moderate/results.html',
+            'major': 'tasks/checklist/major/results.html',
+        }
+    },
+    'puzzle': {
+        'template_name': 'tasks/games/puzzle/{difficulty}/take.html',
+        'results_template': 'tasks/games/puzzle/{difficulty}/results.html',
+        'icon': '🧩',
+        'description': 'Memory puzzle game',
+        'templates': {
+            'mild': 'tasks/games/puzzle/mild/take.html',
+            'moderate': 'tasks/games/puzzle/moderate/take.html',
+            'major': 'tasks/games/puzzle/major/take.html',
+        },
+        'results_templates': {
+            'mild': 'tasks/games/puzzle/mild/results.html',
+            'moderate': 'tasks/games/puzzle/moderate/results.html',
+            'major': 'tasks/games/puzzle/major/results.html',
         }
     },
     'pairs': {
-        'template_name': 'tasks/games/pairs/take.html',
-        'results_template': 'tasks/games/pairs/results.html',
-        'has_difficulty': True,
-        'default_difficulty': 'mild',
+        'template_name': 'tasks/games/pairs/{difficulty}/take.html',
+        'results_template': 'tasks/games/pairs/{difficulty}/results.html',
+        'icon': '🎮',
         'description': 'Memory pairs matching game',
-        'difficulty_templates': {
+        'templates': {
             'mild': 'tasks/games/pairs/mild/take.html',
             'moderate': 'tasks/games/pairs/moderate/take.html',
             'major': 'tasks/games/pairs/major/take.html',
         },
-        'difficulty_results': {
+        'results_templates': {
             'mild': 'tasks/games/pairs/mild/results.html',
             'moderate': 'tasks/games/pairs/moderate/results.html',
             'major': 'tasks/games/pairs/major/results.html',
         }
-    },
+    }
 }
 
 # Difficulty Configurations for Future Development
 DIFFICULTY_CONFIGS = {
-    'puzzle': {
+    'checklist': {
         'mild': {
-            'word_count': 10,
-            'categories': 3,
+            'tasks': 5,
             'time_limit': None,
-            'description': 'Basic categorization with familiar words'
+            'description': 'Basic daily tasks'
         },
         'moderate': {
-            'word_count': 15,
-            'categories': 4,
-            'time_limit': 300,  # 5 minutes
-            'description': 'More words and categories with time pressure'
+            'tasks': 7,
+            'time_limit': None,
+            'description': 'Extended daily tasks'
         },
         'major': {
-            'word_count': 20,
-            'categories': 5,
-            'time_limit': 180,  # 3 minutes
-            'description': 'Advanced categorization with complex words'
+            'tasks': 10,
+            'time_limit': None,
+            'description': 'Comprehensive daily tasks'
         }
     },
-    'color': {
+    'puzzle': {
         'mild': {
-            'sequence_length': 3,
-            'colors': 4,
-            'speed': 'slow',
-            'description': 'Short sequences with basic colors'
+            'grid': '3x3',
+            'time_limit': 300,
+            'description': 'Simple 3x3 grid puzzle'
         },
         'moderate': {
-            'sequence_length': 5,
-            'colors': 6,
-            'speed': 'medium',
-            'description': 'Longer sequences with more colors'
+            'grid': '4x4',
+            'time_limit': 600,
+            'description': 'Medium 4x4 grid puzzle'
         },
         'major': {
-            'sequence_length': 8,
-            'colors': 8,
-            'speed': 'fast',
-            'description': 'Complex sequences requiring sustained attention'
+            'grid': '5x5',
+            'time_limit': 900,
+            'description': 'Complex 5x5 grid puzzle'
         }
     },
     'pairs': {
         'mild': {
-            'pairs_count': 6,
-            'flip_time': 2000,  # 2 seconds
-            'description': 'Basic memory matching with longer view time'
+            'pairs': 6,
+            'time_limit': None,
+            'description': 'Basic pairs matching'
         },
         'moderate': {
-            'pairs_count': 8,
-            'flip_time': 1500,  # 1.5 seconds
-            'description': 'More pairs with moderate timing'
+            'pairs': 8,
+            'time_limit': None,
+            'description': 'Extended pairs matching'
         },
         'major': {
-            'pairs_count': 12,
-            'flip_time': 1000,  # 1 second
-            'description': 'Challenging memory test with quick timing'
+            'pairs': 10,
+            'time_limit': None,
+            'description': 'Complex pairs matching'
         }
     }
 } 

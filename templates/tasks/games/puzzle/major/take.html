@@ -1,11 +1,203 @@
 {% extends 'layouts/base.html' %}
 {% block title %}Puzzle Game{% endblock %}
-{% csrf_token %}
 {% block content %}
+{% csrf_token %}
 <div class="container">
-    <div class="task-header">
-        <h1>🧩 Puzzle Game</h1>
-        <p>Puzzle game (major) will go here.</p>
+  <h1>🧠 Match the Words - Major Version</h1>
+  <div class="timer">⏱ Time: <span id="timer">00:00</span></div>
+
+  <div class="word-bank" id="wordBank">
+    <!-- Fruit -->
+    <div class="draggable fruit" draggable="true" id="Apple" data-category="fruit">🍎 Apple</div>
+    <div class="draggable fruit" draggable="true" id="Banana" data-category="fruit">🍌 Banana</div>
+    <div class="draggable fruit" draggable="true" id="Orange" data-category="fruit">🍊 Orange</div>
+    <div class="draggable fruit" draggable="true" id="Grapes" data-category="fruit">🍇 Grapes</div>
+    <!-- Animal -->
+    <div class="draggable animal" draggable="true" id="Elephant" data-category="animal">🐘 Elephant</div>
+    <div class="draggable animal" draggable="true" id="Tiger" data-category="animal">🐯 Tiger</div>
+    <div class="draggable animal" draggable="true" id="Lion" data-category="animal">🦁 Lion</div>
+    <div class="draggable animal" draggable="true" id="Dog" data-category="animal">🐶 Dog</div>
+  </div>
+
+  <div class="categories">
+    <div class="drop-zone" id="fruit" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🍎 Fruit</h3>
     </div>
+    <div class="drop-zone" id="animal" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🐘 Animal</h3>
+    </div>
+  </div>
+
+  <button class="btn" onclick="submitPuzzle()">✅ Submit</button>
+  <div class="results" id="result"></div>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .timer {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .word-bank, .categories {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      gap: 10px;
+    }
+    .draggable {
+      padding: 10px 15px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 5px;
+      cursor: grab;
+    }
+    .fruit {
+      background-color: #ffe5e5;
+    }
+    .animal {
+      background-color: #e0f7fa;
+    }
+    .drop-zone {
+      border: 2px dashed #888;
+      padding: 20px;
+      min-width: 150px;
+      height: 200px;
+      margin: 10px;
+      background: #fff;
+      border-radius: 8px;
+    }
+    .drop-zone h3 {
+      margin-top: 0;
+    }
+    .drop-zone.dragover {
+      background-color: #d8f3dc;
+    }
+    .results {
+      margin-top: 30px;
+      font-weight: bold;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    let startTime = null;
+    let timerInterval = null;
+    const wordBank = document.getElementById('wordBank');
+    function startTimer() {
+      if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+          const seconds = (elapsed % 60).toString().padStart(2, '0');
+          document.getElementById("timer").textContent = `${minutes}:${seconds}`;
+        }, 1000);
+      }
+    }
+    function allowDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add("dragover");
+    }
+    function drop(e) {
+      e.preventDefault();
+      const id = e.dataTransfer.getData("text");
+      const dragged = document.getElementById(id);
+      const expected = dragged.dataset.category;
+      const dropZoneId = e.currentTarget.id;
+      // Snap-back if incorrect
+      if (dropZoneId !== expected) {
+        wordBank.appendChild(dragged); // move it back
+        alert("Oops! That's not the right category.");
+        return;
+      }
+      e.currentTarget.appendChild(dragged);
+      e.currentTarget.classList.remove("dragover");
+    }
+    document.querySelectorAll('.draggable').forEach(elem => {
+      elem.addEventListener('dragstart', e => {
+        e.dataTransfer.setData("text", e.target.id);
+        startTimer();
+      });
+    });
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    function submitPuzzle() {
+      let score = 0;
+      const total = document.querySelectorAll('.draggable').length;
+      document.querySelectorAll('.draggable').forEach(elem => {
+        if (elem.parentElement.classList.contains("drop-zone")) {
+          if (elem.parentElement.id === elem.dataset.category) {
+            score++;
+          }
+        }
+      });
+      clearInterval(timerInterval);
+      const time = document.getElementById("timer").textContent;
+      // Prepare results
+      const results = {
+        score: score,
+        total: total,
+        time: time,
+        difficulty: 'major'
+      };
+      console.log('Submitting results:', results);
+      fetch('/tasks/take-task/{{ task.id }}/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(results)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          window.location.href = '/tasks/patient/tasks/';
+        }
+      })
+      .catch(error => {
+        window.location.href = '/tasks/patient/tasks/';
+      });
+    }
+    function shuffleWordBank() {
+      const wordBank = document.getElementById('wordBank');
+      const items = Array.from(wordBank.children);
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        wordBank.appendChild(items[j]);
+        items.splice(j, 1);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', shuffleWordBank);
+  </script>
 </div>
 {% endblock %} 

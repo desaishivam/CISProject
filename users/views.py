@@ -4,10 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import UserProfile
-from taskmanager.views import get_task_statistics, get_provider_task_statistics
+from taskmanager.views import get_task_statistics
 from taskmanager.models import Task
 from taskmanager.constants import TASK_TYPES
 import logging
+from .utils import UserProfileUtils
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -58,39 +59,12 @@ def admin_dashboard(request):
         messages.error(request, 'You do not have permission to access the admin dashboard.')
         return redirect('home')
     
-    # Fetch all user accounts by type
-    providers = UserProfile.objects.filter(user_type='provider')
-    caregivers = UserProfile.objects.filter(user_type='caregiver')
-    patients = UserProfile.objects.filter(user_type='patient')
+    # Get all the peeps by role using our utils (so much cleaner)
+    providers_with_patients = UserProfileUtils.providers_w_patients()
+    caregivers_with_patients = UserProfileUtils.caregivers_w_patients()
+    patients_with_relationships = UserProfileUtils.patients_w_relationships()
     
-    # Add relationship data
-    providers_with_patients = []
-    for provider in providers:
-        managed_patients = UserProfile.objects.filter(user_type='patient', provider=provider)
-        providers_with_patients.append({
-            'profile': provider,
-            'managed_patients': managed_patients
-        })
-    
-    caregivers_with_patients = []
-    for caregiver in caregivers:
-        assigned_patient = caregiver.patient.user if caregiver.patient else None
-        caregivers_with_patients.append({
-            'profile': caregiver,
-            'assigned_patient': assigned_patient
-        })
-    
-    patients_with_relationships = []
-    for patient in patients:
-        patient_caregivers = UserProfile.objects.filter(user_type='caregiver', patient=patient)
-        provider_user = patient.provider.user if patient.provider else None
-        patients_with_relationships.append({
-            'profile': patient,
-            'provider': provider_user,
-            'caregivers': patient_caregivers
-        })
-    
-    # Get task statistics
+    # Get task stats (still the same)
     task_statistics = get_task_statistics()
     
     context = {
@@ -108,39 +82,24 @@ def create_provider(request):
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'admin':
         messages.error(request, 'You do not have permission to create provider accounts.')
         return redirect('home')
-    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
-        
         # Check if username already exists
         if User.objects.filter(username=username).exists():
             messages.error(request, f'Username "{username}" is already taken.')
             return redirect('admin_dashboard')
-        
         try:
-            # Create the user
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                email=email,
-                first_name=first_name,
-                last_name=last_name
+            # Use our utils to make a provider (so easy now)
+            user, profile = UserProfileUtils.create_user_w_profile(
+                username, password, first_name, last_name, email, 'provider'
             )
-            
-            # Create the provider profile
-            UserProfile.objects.create(
-                user=user,
-                user_type='provider'
-            )
-            
             messages.success(request, f'Provider account for {first_name} {last_name} has been created successfully.')
         except Exception as e:
             messages.error(request, f'Error creating provider account: {str(e)}')
-    
     return redirect('admin_dashboard')
 
 @login_required
@@ -156,7 +115,7 @@ def provider_dashboard(request):
         user_type='caregiver',
         patient__in=provider_patient_ids
     )
-    task_statistics = get_provider_task_statistics(provider_profile)
+    task_statistics = get_task_statistics(provider_profile)
     recent_tasks = Task.objects.filter(
         assigned_by=provider_profile
     ).select_related('assigned_to__user').order_by('-created_at')[:10]
@@ -195,40 +154,24 @@ def create_patient(request):
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to create patient accounts.')
         return redirect('home')
-    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
-        
         # Check if username already exists
         if User.objects.filter(username=username).exists():
             messages.error(request, f'Username "{username}" is already taken.')
             return redirect('provider_dashboard')
-        
         try:
-            # Create the user
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                email=email,
-                first_name=first_name,
-                last_name=last_name
+            # Use our utils to make a patient, link to current provider
+            user, profile = UserProfileUtils.create_user_w_profile(
+                username, password, first_name, last_name, email, 'patient', provider=request.user.profile
             )
-            
-            # Create the patient profile and assign the current provider
-            UserProfile.objects.create(
-                user=user,
-                user_type='patient',
-                provider=request.user.profile
-            )
-            
             messages.success(request, f'Patient account for {first_name} {last_name} has been created successfully.')
         except Exception as e:
             messages.error(request, f'Error creating patient account: {str(e)}')
-    
     return redirect('provider_dashboard')
 
 @login_required
@@ -236,39 +179,24 @@ def create_caregiver(request):
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to create caregiver accounts.')
         return redirect('home')
-    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
-        
         # Check if username already exists
         if User.objects.filter(username=username).exists():
             messages.error(request, f'Username "{username}" is already taken.')
             return redirect('provider_dashboard')
-        
         try:
-            # Create the user
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                email=email,
-                first_name=first_name,
-                last_name=last_name
+            # Use our utils to make a caregiver
+            user, profile = UserProfileUtils.create_user_w_profile(
+                username, password, first_name, last_name, email, 'caregiver'
             )
-            
-            # Create the caregiver profile
-            UserProfile.objects.create(
-                user=user,
-                user_type='caregiver'
-            )
-            
             messages.success(request, f'Caregiver account for {first_name} {last_name} has been created successfully.')
         except Exception as e:
             messages.error(request, f'Error creating caregiver account: {str(e)}')
-    
     return redirect('provider_dashboard')
 
 @login_required

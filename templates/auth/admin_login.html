@@ -49,24 +49,6 @@
         </button>
     </form>
     
-    <div class="login-help">
-                    <div class="help-header">
-                        <span class="help-icon">🛡️</span>
-                        <h3>System Test Account</h3>
-                    </div>
-                    <div class="credentials">
-                        <div class="credential-item">
-                            <span class="cred-label">Username:</span>
-                            <span class="cred-value">admin</span>
-                        </div>
-                        <div class="credential-item">
-                            <span class="cred-label">Password:</span>
-                            <span class="cred-value">admin</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <div class="login-footer">
                 <p>Comprehensive administrative control for healthcare system management.</p>
             </div>
@@ -80,7 +62,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #1a202c 0%, #2d3748 30%, #4a5568 70%, #2c5530 100%);
+        background: #f8f9fa;
         padding: 2rem;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         position: relative;
@@ -122,13 +104,13 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+        background: #1a202c;
     }
     
     .login-header {
         text-align: center;
         padding: 2.5rem 2rem 1.5rem;
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(217, 119, 6, 0.05));
+        background: #f8f9fa;
         position: relative;
     }
     
@@ -223,7 +205,7 @@
     .login-btn {
         width: 100%;
         padding: 1rem 1.5rem;
-        background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+        background: #1a202c;
         color: white;
         border: none;
         border-radius: 12px;
@@ -237,29 +219,12 @@
         gap: 0.5rem;
         box-shadow: 0 4px 15px rgba(26, 32, 44, 0.4);
         margin-top: 1rem;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .login-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        transition: left 0.3s ease;
-        z-index: 0;
-    }
-    
-    .login-btn:hover::before {
-        left: 0;
     }
     
     .login-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(26, 32, 44, 0.5);
+        background: #2d3748;
     }
     
     .login-btn:active {
@@ -278,63 +243,6 @@
     
     .btn-text {
         font-weight: 600;
-    }
-    
-    .login-help {
-        background: linear-gradient(135deg, #f7fafc, #edf2f7);
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .help-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    
-    .help-icon {
-        margin-right: 0.5rem;
-        font-size: 1.2rem;
-    }
-    
-    .help-header h3 {
-        margin: 0;
-        color: #2d3748;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-    
-    .credentials {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    
-    .credential-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 1rem;
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .cred-label {
-        font-weight: 600;
-        color: #4a5568;
-    }
-    
-    .cred-value {
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        background: linear-gradient(135deg, #1a202c, #2d3748);
-        color: #fbbf24;
-        padding: 0.3rem 0.8rem;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        border: 1px solid rgba(251, 191, 36, 0.3);
     }
     
     .login-footer {
@@ -366,9 +274,9 @@
     }
     
     .message.error {
-        background: linear-gradient(135deg, #fed7d7, #feb2b2);
-        color: #c53030;
-        border: 1px solid #feb2b2;
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
     }
     
     .message.error::before {
@@ -377,9 +285,9 @@
     }
     
     .message.success {
-        background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
-        color: #2f855a;
-        border: 1px solid #9ae6b4;
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
     }
     
     .message.success::before {
@@ -433,12 +341,6 @@
             font-size: 1rem;
         }
         
-        .credential-item {
-            flex-direction: column;
-            gap: 0.5rem;
-            text-align: center;
-        }
-        
         .messages {
             margin: 0 1.5rem 1rem;
         }
@@ -475,10 +377,6 @@
     
     .login-btn {
         animation: fadeInUp 0.6s ease-out 0.3s both;
-    }
-    
-    .login-help {
-        animation: fadeInUp 0.6s ease-out 0.4s both;
     }
 </style>
 {% endblock %} 

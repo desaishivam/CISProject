@@ -22,7 +22,7 @@ from users import views as users_views
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name='pages/main_landing_page.html'), name='home'),
-    path('about/', TemplateView.as_view(template_name='pages/about.html'), name='about'),
+    # path('about/', TemplateView.as_view(template_name='pages/about.html'), name='about'),
     path('carecenter/', TemplateView.as_view(template_name='pages/carecenter.html'), name='carecenter'),
     path('cognicon/', TemplateView.as_view(template_name='pages/cognicon.html'), name='cognicon'),
     

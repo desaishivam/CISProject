@@ -48,23 +48,6 @@
                         <span class="btn-text">Access Dashboard</span>
         </button>
     </form>
-    
-    <div class="login-help">
-                    <div class="help-header">
-                        <span class="help-icon">💡</span>
-                        <h3>Test Account</h3>
-                    </div>
-                    <div class="credentials">
-                        <div class="credential-item">
-                            <span class="cred-label">Username:</span>
-                            <span class="cred-value">caregiver</span>
-                        </div>
-                        <div class="credential-item">
-                            <span class="cred-label">Password:</span>
-                            <span class="cred-value">caregiver</span>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <div class="login-footer">
@@ -80,7 +63,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 50%, #16a085 100%);
+        background: #f8f9fa;
         padding: 2rem;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
@@ -108,13 +91,13 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        background: #2ecc71;
     }
     
     .login-header {
         text-align: center;
         padding: 2.5rem 2rem 1.5rem;
-        background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), rgba(39, 174, 96, 0.05));
+        background: #f8f9fa;
     }
     
     .login-icon {
@@ -195,7 +178,7 @@
     .login-btn {
         width: 100%;
         padding: 1rem 1.5rem;
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        background: #2ecc71;
         color: white;
         border: none;
         border-radius: 12px;
@@ -214,7 +197,7 @@
     .login-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(46, 204, 113, 0.5);
-        background: linear-gradient(135deg, #27ae60, #229954);
+        background: #27ae60;
     }
     
     .login-btn:active {
@@ -226,62 +209,6 @@
     }
     
     .btn-text {
-        font-weight: 600;
-    }
-    
-    .login-help {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid #dee2e6;
-    }
-    
-    .help-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    
-    .help-icon {
-        margin-right: 0.5rem;
-        font-size: 1.2rem;
-    }
-    
-    .help-header h3 {
-        margin: 0;
-        color: #495057;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-    
-    .credentials {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    
-    .credential-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 1rem;
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-    }
-    
-    .cred-label {
-        font-weight: 600;
-        color: #6c757d;
-    }
-    
-    .cred-value {
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 6px;
-        font-size: 0.9rem;
         font-weight: 600;
     }
     
@@ -313,7 +240,7 @@
     }
     
     .message.error {
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        background: #f8d7da;
         color: #721c24;
         border: 1px solid #f5c6cb;
     }
@@ -324,7 +251,7 @@
     }
     
     .message.success {
-        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        background: #d4edda;
         color: #155724;
         border: 1px solid #c3e6cb;
     }
@@ -422,10 +349,6 @@
     
     .login-btn {
         animation: fadeInUp 0.6s ease-out 0.3s both;
-    }
-    
-    .login-help {
-        animation: fadeInUp 0.6s ease-out 0.4s both;
     }
 </style>
 {% endblock %} 

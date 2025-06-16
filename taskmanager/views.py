@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
-from .constants import TASK_TYPES, TASK_TEMPLATES
+from .constants import TASK_TYPES, TASK_TEMPLATES, DIFFICULTY_LEVELS, DIFFICULTY_CONFIGS
 from users.models import UserProfile
 import json
 from django.urls import reverse
@@ -73,8 +73,6 @@ def assign_task(request, patient_id):
             
             messages.success(request, f'Task "{title}" has been assigned to {patient_profile.user.first_name} {patient_profile.user.last_name}.')
             return redirect('provider_dashboard')
-        
-        from .constants import DIFFICULTY_LEVELS, TASK_TEMPLATES
         
         context = {
             'patient': patient_profile,
@@ -179,6 +177,19 @@ def take_task(request, task_id):
                 'answers': answers
             }
             handled = True
+        # Handle JSON submissions for puzzle tasks
+        elif task.task_type == 'puzzle' and request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+                task_response.responses = {
+                    'score': data.get('score', 0),
+                    'total': data.get('total', 0),
+                    'time': data.get('time', '00:00'),
+                    'difficulty': data.get('difficulty', task.difficulty or 'mild')
+                }
+                handled = True
+            except (json.JSONDecodeError, ValueError):
+                pass
         # Handle color task responses (form-based fallback)
         elif task.task_type == 'color' and 'complete_task' in request.POST:
             score = request.POST.get('score', 0)
@@ -228,69 +239,25 @@ def take_task(request, task_id):
         
         if handled:
             task_response.completed_at = timezone.now()
+            task_response.save()
             task.status = 'completed'
-            task.completed_at = timezone.now()
             task.save()
-            task_response.save()
-            TaskNotification.objects.create(
-                task=task,
-                recipient=task.assigned_by,
-                message=f"Task completed: {task.title} by {request.user.first_name} {request.user.last_name}",
-                notification_type='completed'
-            )
-            # For JSON POSTs, return a JSON response with redirect_url
-            if request.content_type == 'application/json':
-                return JsonResponse({'redirect_url': reverse('taskmanager:patient_tasks')})
-            # Only show success message to the user who completed the task if they are a patient
-            if user_profile.user_type == 'patient':
-                messages.success(request, f'Task "{task.title}" has been completed successfully.')
-            # Redirect based on user type
-            if user_profile.user_type == 'caregiver':
-                return redirect('caregiver_dashboard')
-            else:
-                return redirect('taskmanager:patient_tasks')
-        # FINAL CATCH-ALL: If POST and 'complete_task', always redirect after saving
-        if 'complete_task' in request.POST:
-            task_response.save()
-            if user_profile.user_type == 'caregiver':
-                return redirect('caregiver_dashboard')
-            else:
-                messages.success(request, 'Task submitted (catch-all redirect).')
-                return redirect('taskmanager:patient_tasks')
+            return JsonResponse({'status': 'success', 'redirect': reverse('taskmanager:patient_tasks')})
         else:
             task_response.save()
             messages.success(request, 'Your progress has been saved.')
     
-    questions = task.task_config.get('questions', [])
+    # Get template based on task type and difficulty
+    template = TASK_TEMPLATES[task.task_type]['template_name']
+    if task.difficulty:
+        template = template.format(difficulty=task.difficulty)
+    
     context = {
         'task': task,
-        'questions': questions,
-        'responses': task_response.responses
+        'config': DIFFICULTY_CONFIGS[task.task_type][task.difficulty] if task.difficulty else None
     }
-    # Add puzzle_words for puzzle tasks
-    if task.task_type == 'puzzle':
-        context['puzzle_words'] = [
-            {'id': 'q1', 'word': 'Apple', 'category': 'Fruit'},
-            {'id': 'q2', 'word': 'Paris', 'category': 'City'},
-            {'id': 'q3', 'word': 'Elephant', 'category': 'Animal'},
-            {'id': 'q4', 'word': 'Tokyo', 'category': 'City'},
-            {'id': 'q5', 'word': 'Banana', 'category': 'Fruit'},
-            {'id': 'q6', 'word': 'Lion', 'category': 'Animal'},
-            {'id': 'q7', 'word': 'London', 'category': 'City'},
-            {'id': 'q8', 'word': 'Orange', 'category': 'Fruit'},
-            {'id': 'q9', 'word': 'Tiger', 'category': 'Animal'},
-            {'id': 'q10', 'word': 'Berlin', 'category': 'City'},
-        ]
-    template_config = TASK_TEMPLATES.get(task.task_type, {})
-    template_name = template_config.get('template_name', 'tasks/questionnaires/take.html')
     
-    # Use difficulty-specific template for games if available
-    if hasattr(task, 'difficulty') and task.difficulty and template_config.get('has_difficulty', False):
-        difficulty_templates = template_config.get('difficulty_templates', {})
-        if task.difficulty in difficulty_templates:
-            template_name = difficulty_templates[task.difficulty]
-    
-    return render(request, template_name, context)
+    return render(request, template, context)
 
 @login_required
 def task_results(request, task_id):
@@ -320,156 +287,28 @@ def task_results(request, task_id):
     except TaskResponse.DoesNotExist:
         task_response = None
     
+    if task_response:
+        if task.task_type == 'puzzle':
+            # Handle puzzle results
+            pass
+        elif task.task_type == 'pairs':
+            # Handle pairs results
+            pass
+        elif task.task_type == 'checklist':
+            # Handle checklist results
+            pass
+    
+    template = TASK_TEMPLATES[task.task_type]['results_template']
+    if task.difficulty:
+        template = template.format(difficulty=task.difficulty)
+    
     context = {
         'task': task,
         'task_response': task_response,
         'patient': task.assigned_to
     }
     
-    # Process results based on task type
-    if task.task_type == 'memory_questionnaire' and task_response:
-        context['memory_results'] = process_memory_questionnaire_results(task_response.responses)
-    elif task.task_type == 'puzzle':
-        context['puzzle_words'] = [
-            {'id': 'q1', 'word': 'Apple', 'category': 'Fruit'},
-            {'id': 'q2', 'word': 'Paris', 'category': 'City'},
-            {'id': 'q3', 'word': 'Elephant', 'category': 'Animal'},
-            {'id': 'q4', 'word': 'Tokyo', 'category': 'City'},
-            {'id': 'q5', 'word': 'Banana', 'category': 'Fruit'},
-            {'id': 'q6', 'word': 'Lion', 'category': 'Animal'},
-            {'id': 'q7', 'word': 'London', 'category': 'City'},
-            {'id': 'q8', 'word': 'Orange', 'category': 'Fruit'},
-            {'id': 'q9', 'word': 'Tiger', 'category': 'Animal'},
-            {'id': 'q10', 'word': 'Berlin', 'category': 'City'},
-        ]
-        items = []
-        answers = task_response.responses.get('answers', {}) if task_response else {}
-        for item in context['puzzle_words']:
-            id = item['id']
-            word = item['word']
-            correct_category = item['category']
-            user_answer = answers.get(id, '')
-            items.append({
-                'word': word,
-                'correct_category': correct_category,
-                'user_category': user_answer,
-                'correct': user_answer.strip().lower() == correct_category.strip().lower() if user_answer else False
-            })
-        context['puzzle_results'] = {
-            'score': task_response.responses.get('score', 0) if task_response else 0,
-            'time': task_response.responses.get('time', '00:00') if task_response else '00:00',
-            'items': items
-        }
-    elif task.task_type == 'color' and task_response:
-        responses = task_response.responses
-        
-        # Handle both old and new data formats
-        score = int(responses.get('score', 0))
-        attempts = int(responses.get('attempts', responses.get('tries', 0)))
-        time_sec = int(responses.get('totalTime', responses.get('time', 0)))
-        accuracy = int(responses.get('accuracy', 0))
-        difficulty = responses.get('difficulty', task.difficulty or 'mild')
-        
-        # Determine max score and pairs based on difficulty
-        if difficulty == 'mild':
-            pairs = 8
-            max_score = pairs * 20  # 160 points max
-        elif difficulty == 'moderate':
-            pairs = 6
-            max_score = pairs * 15  # 90 points max
-        else:  # major
-            pairs = 6
-            max_score = pairs * 10  # 60 points max
-        
-        # Format time as mm:ss
-        minutes = time_sec // 60
-        seconds = time_sec % 60
-        formatted_time = f"{minutes:02d}:{seconds:02d}"
-        
-        # Calculate efficiency
-        efficiency = (pairs / attempts) * 100 if attempts > 0 else 0
-        
-        # Generate analysis based on difficulty and performance
-        score_percentage = (score / max_score) * 100 if max_score > 0 else 0
-        
-        if difficulty == 'mild':
-            if score_percentage >= 80:
-                analysis = "Performance indicates strong cognitive engagement. Results suggest intact memory and processing abilities within this assessment context."
-            elif score_percentage >= 60:
-                analysis = "Performance demonstrates adequate cognitive function. Results show solid task completion abilities within normal variation."
-            elif score_percentage >= 40:
-                analysis = "Performance suggests some cognitive challenges. Results may indicate need for additional support or assessment."
-            else:
-                analysis = "Performance indicates significant cognitive challenges. Clinical follow-up recommended for comprehensive evaluation."
-        elif difficulty == 'moderate':
-            if score_percentage >= 70:
-                analysis = "Performance shows good task adaptation. Results indicate positive response to structured cognitive activities."
-            elif score_percentage >= 50:
-                analysis = "Performance demonstrates consistent engagement. Results show adequate participation in simplified cognitive tasks."
-            elif score_percentage >= 30:
-                analysis = "Performance indicates ongoing cognitive engagement. Results suggest benefit from continued supportive activities."
-            else:
-                analysis = "Performance shows cognitive challenges. Results indicate need for enhanced support and simplified interventions."
-        else:  # major
-            if score_percentage >= 60:
-                analysis = "Performance demonstrates strong engagement with supportive environment. Results indicate positive response to maximally simplified tasks."
-            elif score_percentage >= 40:
-                analysis = "Performance shows meaningful participation. Results indicate retained cognitive abilities with appropriate support."
-            elif score_percentage >= 20:
-                analysis = "Performance demonstrates cognitive engagement. Results suggest maintained capacity for simple memory tasks."
-            else:
-                analysis = "Performance indicates significant cognitive challenges. Results suggest need for comprehensive care planning and support."
-        
-        context['color_results'] = {
-            'score': score,
-            'max_score': max_score,
-            'attempts': attempts,
-            'tries': attempts,  # For backward compatibility
-            'time': formatted_time,
-            'accuracy': accuracy,
-            'efficiency': f"{efficiency:.1f}",
-            'difficulty': difficulty.title(),
-            'pairs': pairs,
-            'analysis': analysis,
-            'score_percentage': f"{score_percentage:.1f}"
-        }
-    elif task.task_type == 'pairs' and task_response:
-        score = int(task_response.responses.get('score', 0))
-        moves = int(task_response.responses.get('moves', 0))
-        time_sec = int(task_response.responses.get('time', 0))
-        # Format time as mm:ss
-        minutes = time_sec // 60
-        seconds = time_sec % 60
-        formatted_time = f"{minutes:02d}:{seconds:02d}"
-        total_pairs = 8  # 8 pairs in the game
-        efficiency = (total_pairs / moves) * 100 if moves > 0 else 0
-        if score >= 80:
-            analysis = "Outstanding performance! Excellent memory and quick matching."
-        elif score >= 60:
-            analysis = "Good performance! Shows good memory and matching skills."
-        elif score >= 40:
-            analysis = "Fair performance. Room for improvement in speed and accuracy."
-        else:
-            analysis = "Needs improvement. Consider more practice to enhance memory skills."
-        context['pairs_results'] = {
-            'score': score,
-            'moves': moves,
-            'time': formatted_time,
-            'efficiency': f"{efficiency:.1f}",
-            'analysis': analysis
-        }
-    
-    # Get the appropriate template
-    template_config = TASK_TEMPLATES.get(task.task_type, {})
-    template_name = template_config.get('results_template', 'tasks/questionnaires/results.html')
-    
-    # Use difficulty-specific results template for games if available
-    if hasattr(task, 'difficulty') and task.difficulty and template_config.get('has_difficulty', False):
-        difficulty_results = template_config.get('difficulty_results', {})
-        if task.difficulty in difficulty_results:
-            template_name = difficulty_results[task.difficulty]
-    
-    return render(request, template_name, context)
+    return render(request, template, context)
 
 def process_memory_questionnaire_results(responses):
     """Process memory questionnaire responses for analysis"""
@@ -608,7 +447,6 @@ def provider_task_management(request):
         'assigned_tasks': assigned_tasks,
         'pending_tasks': assigned_tasks.filter(status__in=['assigned', 'in_progress']),
         'completed_tasks': assigned_tasks.filter(status='completed'),
-        'overdue_tasks': assigned_tasks.filter(status='overdue')
     }
     return render(request, 'tasks/assign/provider_task_management.html', context)
 
@@ -689,7 +527,6 @@ def get_task_statistics():
         'total_tasks': Task.objects.count(),
         'pending_tasks_count': Task.objects.filter(status__in=['assigned', 'in_progress']).count(),
         'completed_tasks_count': Task.objects.filter(status='completed').count(),
-        'overdue_tasks_count': Task.objects.filter(status='overdue').count(),
     }
 
 @login_required
@@ -767,16 +604,6 @@ def clear_provider_task_responses(request):
         })
     except Exception:
         return JsonResponse({'success': False, 'message': 'An error occurred while resetting your task responses'})
-
-def get_provider_task_statistics(provider_profile):
-    """Helper function to get task statistics for a specific provider"""
-    provider_tasks = Task.objects.filter(assigned_by=provider_profile)
-    return {
-        'my_total_tasks': provider_tasks.count(),
-        'my_pending_tasks': provider_tasks.filter(status__in=['assigned', 'in_progress']).count(),
-        'my_completed_tasks': provider_tasks.filter(status='completed').count(),
-        'my_overdue_tasks': provider_tasks.filter(status='overdue').count(),
-    }
 
 @login_required
 @require_POST

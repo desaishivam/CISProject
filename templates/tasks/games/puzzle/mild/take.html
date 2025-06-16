@@ -1,11 +1,232 @@
 {% extends 'layouts/base.html' %}
 {% block title %}Puzzle Game{% endblock %}
-{% csrf_token %}
 {% block content %}
+{% csrf_token %}
 <div class="container">
-    <div class="task-header">
-        <h1>🧩 Puzzle Game</h1>
-        <p>Puzzle game (mild) will go here.</p>
+  <h1>🧠 Drag & Drop Puzzle</h1>
+  <div class="timer">⏱ Time: <span id="timer">00:00</span></div>
+
+  <div class="word-bank" id="wordBank">
+    <!-- Fruit -->
+    <div class="draggable" draggable="true" id="Apple">Apple</div>
+    <div class="draggable" draggable="true" id="Banana">Banana</div>
+    <div class="draggable" draggable="true" id="Orange">Orange</div>
+    <!-- City -->
+    <div class="draggable" draggable="true" id="Paris">Paris</div>
+    <div class="draggable" draggable="true" id="Tokyo">Tokyo</div>
+    <div class="draggable" draggable="true" id="Berlin">Berlin</div>
+    <!-- Animal -->
+    <div class="draggable" draggable="true" id="Elephant">Elephant</div>
+    <div class="draggable" draggable="true" id="Lion">Lion</div>
+    <div class="draggable" draggable="true" id="Tiger">Tiger</div>
+    <!-- Food -->
+    <div class="draggable" draggable="true" id="Pizza">Pizza</div>
+    <div class="draggable" draggable="true" id="Rice">Rice</div>
+    <div class="draggable" draggable="true" id="Cheese">Cheese</div>
+    <!-- Plant -->
+    <div class="draggable" draggable="true" id="Rose">Rose</div>
+    <div class="draggable" draggable="true" id="Bamboo">Bamboo</div>
+    <div class="draggable" draggable="true" id="Cactus">Cactus</div>
+    <!-- Vehicle -->
+    <div class="draggable" draggable="true" id="Car">Car</div>
+    <div class="draggable" draggable="true" id="Bike">Bike</div>
+    <div class="draggable" draggable="true" id="Bus">Bus</div>
+  </div>
+
+  <div class="categories">
+    <div class="drop-zone" id="fruit" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🍎 Fruit</h3>
     </div>
+    <div class="drop-zone" id="city" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🏙️ City</h3>
+    </div>
+    <div class="drop-zone" id="animal" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🐘 Animal</h3>
+    </div>
+    <div class="drop-zone" id="food" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🍽️ Food</h3>
+    </div>
+    <div class="drop-zone" id="plant" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🌳 Plant</h3>
+    </div>
+    <div class="drop-zone" id="vehicle" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>🚗 Vehicle</h3>
+    </div>
+  </div>
+
+  <button class="btn" onclick="submitPuzzle()">✅ Submit</button>
+  <div class="results" id="result"></div>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .timer {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .word-bank, .categories {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      gap: 10px;
+    }
+    .draggable {
+      padding: 10px 15px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 5px;
+      cursor: grab;
+    }
+    .drop-zone {
+      border: 2px dashed #888;
+      padding: 20px;
+      min-width: 150px;
+      height: 200px;
+      margin: 10px;
+      background: #fff;
+      border-radius: 8px;
+    }
+    .drop-zone h3 {
+      margin-top: 0;
+    }
+    .drop-zone.dragover {
+      background-color: #d8f3dc;
+    }
+    .results {
+      margin-top: 30px;
+      font-weight: bold;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    const correctCategories = {
+      Apple: "fruit",
+      Banana: "fruit",
+      Orange: "fruit",
+      Paris: "city",
+      Tokyo: "city",
+      Berlin: "city",
+      Elephant: "animal",
+      Lion: "animal",
+      Tiger: "animal",
+      Pizza: "food",
+      Rice: "food",
+      Cheese: "food",
+      Rose: "plant",
+      Bamboo: "plant",
+      Cactus: "plant",
+      Car: "vehicle",
+      Bike: "vehicle",
+      Bus: "vehicle"
+    };
+    let startTime = null;
+    let timerInterval = null;
+    function startTimer() {
+      if (!startTime) {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+          const seconds = (elapsed % 60).toString().padStart(2, '0');
+          document.getElementById("timer").textContent = `${minutes}:${seconds}`;
+        }, 1000);
+      }
+    }
+    function allowDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add("dragover");
+    }
+    function drop(e) {
+      e.preventDefault();
+      const id = e.dataTransfer.getData("text");
+      const dragged = document.getElementById(id);
+      e.currentTarget.appendChild(dragged);
+      e.currentTarget.classList.remove("dragover");
+    }
+    document.querySelectorAll('.draggable').forEach(elem => {
+      elem.addEventListener('dragstart', e => {
+        e.dataTransfer.setData("text", e.target.id);
+        startTimer();
+      });
+    });
+    function submitPuzzle() {
+      let score = 0;
+      for (const [word, correct] of Object.entries(correctCategories)) {
+        const elem = document.getElementById(word);
+        const parentId = elem.parentElement.id;
+        if (parentId === correct) score++;
+      }
+      clearInterval(timerInterval);
+      const time = document.getElementById("timer").textContent;
+      // Prepare results
+      const results = {
+        score: score,
+        total: 18,
+        time: time,
+        difficulty: 'mild'
+      };
+      console.log('Submitting results:', results);
+      // Get CSRF token from cookie
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      fetch('/tasks/take-task/{{ task.id }}/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(results)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          window.location.href = '/tasks/patient/tasks/';
+        }
+      })
+      .catch(error => {
+        window.location.href = '/tasks/patient/tasks/';
+      });
+    }
+    function shuffleWordBank() {
+      const wordBank = document.getElementById('wordBank');
+      const items = Array.from(wordBank.children);
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        wordBank.appendChild(items[j]);
+        items.splice(j, 1);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', shuffleWordBank);
+  </script>
 </div>
 {% endblock %} 

@@ -19,7 +19,11 @@ class Task(models.Model):
     
     assigned_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='assigned_tasks')
     assigned_to = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='received_tasks')
-    status = models.CharField(max_length=20, choices=TASK_STATUS, default='assigned')
+    status = models.CharField(max_length=20, choices=[
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ], default='assigned')
     
     # Dates
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,7 +87,6 @@ class TaskNotification(models.Model):
         ('assigned', 'Task Assigned'),
         ('reminder', 'Task Reminder'),
         ('completed', 'Task Completed'),
-        ('overdue', 'Task Overdue'),
     ])
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)

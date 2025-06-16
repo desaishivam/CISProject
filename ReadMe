@@ -1,0 +1,23 @@
+## Starting the Website
+
+1. Open Terminal on your Mac:
+   - Click on Spotlight (magnifying glass icon in top right)
+   - Type "Terminal"
+   - Click on Terminal app
+
+2. Navigate to your website folder:
+   ```
+   cd /Users/shivam/Code/CISProject
+   ```
+
+3. Start the website:
+
+python3 manage.py runserver
+   ```
+   
+   ```
+
+4. View your website:
+   - Open any web browser (Safari, Chrome, etc.)
+   - Go to: http://127.0.0.1:8000
+   - You should see your website!

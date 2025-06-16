@@ -5,18 +5,14 @@
 {% block content %}
 <div class="container">
     <div class="task-header">
-        <h1>🧠 Matching Game</h1>
-        <p>Match the related items.</p>
+        <h1>Pairing Game</h1>
+        <p>Pair together the related items.</p>
     </div>
 
     <div class="stats-container">
         <div>Moves: <span id="moves">0</span></div>
         <div>Matches: <span id="matches">0</span></div>
         <div>Time: <span id="time">00:00</span></div>
-        </div>
-
-    <div id="previewBadge" class="preview-badge" style="display:none;">
-        Memorize the layout! <span id="previewCountdown">7</span>
     </div>
 
     <div class="game-container">
@@ -114,6 +110,14 @@
         max-width: 300px;
         margin: 10% auto;
     }
+    .card.wrong {
+        border: 2px solid #e74c3c;
+        background: #fdecea;
+    }
+    .card.selected {
+        border: 2px solid #3498db;
+        background: #eaf6fb;
+    }
 </style>
 
 <script>
@@ -129,59 +133,52 @@ const allPairs = [
     ];
 
 let state;
-let previewTimer;
-let previewCountdown = 7;
 
     function initializeGame() {
     const pairCount = 8;
-    let selected = allPairs.slice(0, pairCount * 2); // Get all pairs
+    let selected = allPairs.slice(0, pairCount * 2);
     let cards = [];
     selected.forEach(pair => {
         cards.push({ id: pair.id, emoji: pair.emoji, word: pair.word, matched: false });
-    });
+            });
     cards = cards.sort(() => Math.random() - 0.5);
-    state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, preview: true };
-    renderGame(true); // Show all cards face up for preview
+    state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, wrong: [], completed: false };
+        renderGame();
     updateStats();
-    document.getElementById('previewBadge').style.display = 'block';
-    previewCountdown = 7;
-    document.getElementById('previewCountdown').textContent = previewCountdown;
     clearInterval(state.timer);
-    clearInterval(previewTimer);
-    previewTimer = setInterval(() => {
-        previewCountdown--;
-        document.getElementById('previewCountdown').textContent = previewCountdown;
-        if (previewCountdown === 0) {
-            clearInterval(previewTimer);
-            document.getElementById('previewBadge').style.display = 'none';
-            state.preview = false;
-            state.startTime = Date.now();
-            renderGame();
-            state.timer = setInterval(updateTimer, 1000);
-        }
-    }, 1000);
+    state.startTime = Date.now();
+    state.timer = setInterval(updateTimer, 1000);
     }
 
-function renderGame(preview = false) {
+    function renderGame() {
     const board = document.getElementById('gameBoard');
     board.innerHTML = '';
     state.cards.forEach((card, index) => {
         const el = document.createElement('div');
         el.className = 'card';
-        // Always show the emoji and word, never hide
-        el.innerHTML = `<div>${card.emoji}</div><div style="font-size: 0.5em;">${card.word}</div>`;
-        if (card.matched) el.classList.add('matched');
-        if (!card.matched && !state.flipped.includes(index)) {
+        el.innerHTML = `<div>${card.emoji}</div><div style=\"font-size: 0.5em;\">${card.word}</div>`;
+        if (card.matched) {
+            el.classList.add('matched');
+        } else if (state.wrong && state.wrong.includes(index)) {
+            el.classList.add('wrong');
+        } else if (state.flipped.includes(index)) {
+            el.classList.add('selected');
+            } else {
             el.onclick = () => flipCard(index);
-        }
+            }
         board.appendChild(el);
-    });
-}
+        });
+    // Check for completion after rendering
+    if (!state.completed && state.matched === state.cards.length / 2) {
+        state.completed = true;
+        gameCompleted();
+        }
+    }
 
 function flipCard(index) {
-    if (state.flipped.length >= 2 || state.flipped.includes(index) || state.cards[index].matched) return;
+    if (state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) return;
     state.flipped.push(index);
-    renderGame();
+        renderGame();
     if (state.flipped.length === 2) {
         state.moves++;
         const [i1, i2] = state.flipped;
@@ -189,14 +186,17 @@ function flipCard(index) {
             state.cards[i1].matched = state.cards[i2].matched = true;
             state.matched++;
             state.flipped = [];
-        renderGame();
+            renderGame();
             if (state.matched === state.cards.length / 2) gameCompleted();
         } else {
+            state.wrong = [i1, i2];
+            renderGame();
             setTimeout(() => {
                 state.flipped = [];
+                state.wrong = [];
                 renderGame();
-            }, 900);
-        }
+            }, 1000);
+    }
     }
     updateStats();
     }
@@ -219,9 +219,10 @@ function gameCompleted() {
     const results = {
         score: state.matched * 10,
         moves: state.moves,
-        totalTime: totalTime,
+        time: totalTime,
         difficulty: 'major'
     };
+    console.log('Submitting results:', results);
     fetch(window.location.href, {
         method: 'POST',
         headers: {
@@ -229,9 +230,11 @@ function gameCompleted() {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
         body: JSON.stringify(results)
-    }).then(() => {
+    }).then((res) => {
+        console.log('Fetch response:', res);
         window.location.href = '/tasks/patient/tasks/';
-    }).catch(() => {
+    }).catch((err) => {
+        console.error('Fetch error:', err);
         window.location.href = '/tasks/patient/tasks/';
     });
 }
