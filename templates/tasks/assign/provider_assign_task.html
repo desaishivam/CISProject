@@ -1,4 +1,8 @@
 {# Unified structure: .container, .section, .card, .mdc-button #}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 {% extends 'layouts/base.html' %}
 
 {% block title %}Assign Task - CogniCare{% endblock %}
@@ -43,7 +47,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="form-group" id="difficulty-group" style="display: none;">
+                <div class="form-group" id="difficulty-group" class="d-none">
                     <label for="difficulty">Difficulty Level</label>
                     <select id="difficulty" name="difficulty">
                         {% for value, label in difficulty_levels %}
@@ -84,80 +88,6 @@
     </div>
 </div>
 
-<style>
-    .container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    .section {
-        margin-bottom: 1.5rem;
-    }
-    .card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 2rem;
-    }
-    .subtitle {
-        color: #666;
-        margin-bottom: 1.5rem;
-    }
-    .task-form {
-        width: 100%;
-    }
-    .form-row {
-        display: flex;
-        gap: 1rem;
-    }
-    .form-row .form-group {
-        flex: 1;
-    }
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-    }
-    .form-group input, .form-group select, .form-group textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 1rem;
-    }
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-    }
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-    }
-    .message.success {
-        background-color: #d1fae5;
-        color: #065f46;
-    }
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
-    }
-    .help-text {
-        display: block;
-        margin-top: 0.25rem;
-        font-size: 0.875rem;
-        color: #666;
-    }
-    #difficulty-group {
-        transition: all 0.3s ease;
-    }
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

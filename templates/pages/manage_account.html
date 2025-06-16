@@ -44,7 +44,7 @@
     </form>
 
     <!-- Change Password Form -->
-    <form method="post" action="" class="edit-form" style="margin-top:2.5rem;">
+    <form method="post" action="" class="edit-form mt-5">
         {% csrf_token %}
         <input type="hidden" name="change_password" value="1">
         <div class="form-group">
@@ -64,7 +64,7 @@
     </form>
 
     <!-- Delete Account Section -->
-    <form method="post" action="" class="edit-form" style="margin-top:2.5rem;">
+    <form method="post" action="" class="edit-form mt-5">
         {% csrf_token %}
         <input type="hidden" name="delete_account" value="1">
         <div class="form-actions">

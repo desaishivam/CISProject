@@ -1,4 +1,8 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel='stylesheet' href='{% static 'css/games.css' %}'>
+{% endblock %}
 
 {% block title %}Caregiver Dashboard - CogniCare{% endblock %}
 
@@ -119,84 +123,5 @@
     {% endif %}
 </div>
 
-<style>
-    /* Caregiver Dashboard Specific Styles */
-    
-    .patient-header {
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 2px solid #f0f0f0;
-    }
-    
-    .patient-header h2 {
-        color: #2c3e50;
-        margin: 0 0 1rem 0;
-        font-size: 1.8rem;
-        font-weight: 600;
-    }
-    
-    .patient-details {
-        display: flex;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-    
-    .patient-details span {
-        color: #666;
-        font-size: 0.95rem;
-    }
-    
 
-    
-    /* Caregiver-specific table header styling */
-    .enhanced-table th {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-    }
-    
-    .enhanced-table tr:hover td {
-        background-color: #f0fdf4;
-    }
-    
-    .task-title {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-    
-    /* Caregiver-specific button styles */
-    .complete-btn {
-        background: linear-gradient(135deg, #2ecc71, #27ae60);
-        color: white;
-        box-shadow: 0 2px 10px rgba(46, 204, 113, 0.3);
-    }
-    
-    .complete-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
-    }
-    
-    .view-btn {
-        background: linear-gradient(135deg, #16a085, #138d75);
-        color: white;
-        box-shadow: 0 2px 10px rgba(22, 160, 133, 0.3);
-    }
-    
-    .view-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(22, 160, 133, 0.4);
-    }
-    
-    /* Caregiver-specific responsive styles */
-    @media (max-width: 768px) {
-        .patient-details {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-    }
-</style>
-
-<style>
-    body {
-        background: #f8f9fa;
-    }
-</style>
 {% endblock %} 
