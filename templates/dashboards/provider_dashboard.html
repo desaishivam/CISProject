@@ -211,7 +211,7 @@
                             <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
                                 🔗 Assign Caregivers
                             </a>
-                            <a href="{% url 'edit_account' patient.user.id %}" class="action-btn outline-btn">
+                            <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
                                 ✏️ Edit
                             </a>
                         </div>
@@ -249,7 +249,7 @@
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'edit_account' caregiver.user.id %}" class="action-btn outline-btn">
+                            <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
                                 ✏️ Edit
                             </a>
                         </div>

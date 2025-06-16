@@ -10,8 +10,7 @@ class Command(BaseCommand):
             {'username': 'admin', 'password': 'admin', 'user_type': 'admin', 'first_name': 'Admin', 'last_name': 'User'},
             {'username': 'provider', 'password': 'provider', 'user_type': 'provider', 'first_name': 'Provider', 'last_name': 'User'},
             {'username': 'caregiver', 'password': 'caregiver', 'user_type': 'caregiver', 'first_name': 'Care', 'last_name': 'Giver'},
-            {'username': 'patient', 'password': 'patient', 'user_type': 'patient', 'first_name': 'Pat', 'last_name': 'Ient'},
-            {'username': 'user', 'password': 'user', 'user_type': 'patient', 'first_name': 'User', 'last_name': 'User'},
+            {'username': 'patient', 'password': 'patient', 'user_type': 'patient', 'first_name': 'Patient', 'last_name': 'User'},
         ]
         profiles = {}
         for role in roles:
@@ -29,7 +28,7 @@ class Command(BaseCommand):
         # Assign provider to patient/caregiver if needed
         provider_profile = profiles.get('provider')
         if provider_profile:
-            for key in ['patient', 'user']:
+            for key in ['patient']:
                 if key in profiles:
                     profiles[key].provider = provider_profile
                     profiles[key].save()

@@ -1,0 +1,78 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Manage Account - CogniCare{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Manage Account</h1>
+    <p class="subtitle">Update details, change password, or delete the account for {{ user_to_manage.first_name }} {{ user_to_manage.last_name }}</p>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Edit Account Form -->
+    <form method="post" action="" class="edit-form">
+        {% csrf_token %}
+        <input type="hidden" name="edit_account" value="1">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="{{ user_to_manage.username }}" required>
+        </div>
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first_name" value="{{ user_to_manage.first_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last_name" value="{{ user_to_manage.last_name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ user_to_manage.email }}" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="mdc-button mdc-button--raised">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Save Changes</span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Change Password Form -->
+    <form method="post" action="" class="edit-form" style="margin-top:2.5rem;">
+        {% csrf_token %}
+        <input type="hidden" name="change_password" value="1">
+        <div class="form-group">
+            <label for="new_password">New Password</label>
+            <input type="password" id="new_password" name="new_password" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="mdc-button mdc-button--raised">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Change Password</span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Delete Account Section -->
+    <form method="post" action="" class="edit-form" style="margin-top:2.5rem;">
+        {% csrf_token %}
+        <input type="hidden" name="delete_account" value="1">
+        <div class="form-actions">
+            <button type="submit" class="mdc-button mdc-button--raised delete-btn" onclick="return confirm('Are you sure you want to delete this account? This action cannot be undone.');">
+                <span class="mdc-button__ripple"></span>
+                <span class="mdc-button__label">Delete Account</span>
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

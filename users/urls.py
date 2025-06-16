@@ -25,9 +25,7 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     
     # Account editing
-    path('edit-account/<int:user_id>/', views.edit_account, name='edit_account'),
-    path('change-password/<int:user_id>/', views.change_password, name='change_password'),
-    path('delete-account/<int:user_id>/', views.delete_account, name='delete_account'),
+    path('manage-account/<int:user_id>/', views.manage_account, name='manage_account'),
     
     # Assign caregivers a patient here
     path('assign-caregiver/<int:patient_id>/', views.assign_caregiver, name='assign_caregiver'),

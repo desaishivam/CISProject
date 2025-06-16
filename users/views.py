@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -115,7 +115,7 @@ def provider_dashboard(request):
         user_type='caregiver',
         patient__in=provider_patient_ids
     )
-    task_statistics = get_task_statistics(provider_profile)
+    task_statistics = get_task_statistics()
     recent_tasks = Task.objects.filter(
         assigned_by=provider_profile
     ).select_related('assigned_to__user').order_by('-created_at')[:10]
@@ -240,151 +240,60 @@ def patient_dashboard(request):
     return render(request, 'dashboards/patient_dashboard.html', context)
 
 @login_required
-def edit_account(request, user_id):
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type not in ['admin', 'provider']:
-        messages.error(request, 'You do not have permission to edit accounts.')
+def manage_account(request, user_id):
+    # Only allow admin/provider to manage others, or user to manage self
+    if not hasattr(request.user, 'profile') or (request.user.id != user_id and request.user.profile.user_type not in ['admin', 'provider']):
+        messages.error(request, 'You do not have permission to manage this account.')
         return redirect('home')
-    
     try:
-        user_to_edit = User.objects.get(id=user_id)
-        
-        # For providers, only allow editing patients they manage
-        if request.user.profile.user_type == 'provider':
-            if not hasattr(user_to_edit, 'profile') or user_to_edit.profile.user_type != 'patient' or user_to_edit.profile.provider != request.user.profile:
-                messages.error(request, 'You do not have permission to edit this account.')
-                return redirect('provider_dashboard')
-        
-        if request.method == 'POST':
-            # Update account details
+        user_to_manage = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('home')
+    # Handle edit, password, or delete
+    if request.method == 'POST':
+        if 'edit_account' in request.POST:
+            # Edit account info
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
             email = request.POST.get('email')
             username = request.POST.get('username')
-            
-            # Check if username already exists and is not the current user
-            if username != user_to_edit.username and User.objects.filter(username=username).exists():
+            if username != user_to_manage.username and User.objects.filter(username=username).exists():
                 messages.error(request, f'Username "{username}" is already taken.')
             else:
-                user_to_edit.username = username
-                user_to_edit.first_name = first_name
-                user_to_edit.last_name = last_name
-                user_to_edit.email = email
-                user_to_edit.save()
-                
+                user_to_manage.username = username
+                user_to_manage.first_name = first_name
+                user_to_manage.last_name = last_name
+                user_to_manage.email = email
+                user_to_manage.save()
                 messages.success(request, f'Account details for {first_name} {last_name} have been updated.')
-                
-                # Redirect based on user type
-                if request.user.profile.user_type == 'admin':
-                    return redirect('admin_dashboard')
-                else:
-                    return redirect('provider_dashboard')
-        
-        context = {
-            'user': request.user,
-            'user_to_edit': user_to_edit
-        }
-        return render(request, 'pages/edit_account.html', context)
-    
-    except User.DoesNotExist:
-        messages.error(request, 'User not found.')
-        if request.user.profile.user_type == 'admin':
-            return redirect('admin_dashboard')
-        else:
-            return redirect('provider_dashboard')
-
-@login_required
-def change_password(request, user_id):
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type not in ['admin', 'provider']:
-        messages.error(request, 'You do not have permission to change passwords.')
-        return redirect('home')
-    
-    try:
-        user_to_edit = User.objects.get(id=user_id)
-        
-        # For providers, only allow editing patients they manage
-        if request.user.profile.user_type == 'provider':
-            if not hasattr(user_to_edit, 'profile') or user_to_edit.profile.user_type != 'patient' or user_to_edit.profile.provider != request.user.profile:
-                messages.error(request, 'You do not have permission to change this account password.')
-                return redirect('provider_dashboard')
-        
-        if request.method == 'POST':
+        elif 'change_password' in request.POST:
+            # Change password
             new_password = request.POST.get('new_password')
             confirm_password = request.POST.get('confirm_password')
-            
             if new_password != confirm_password:
                 messages.error(request, 'Passwords do not match.')
             else:
-                user_to_edit.set_password(new_password)
-                user_to_edit.save()
-                messages.success(request, f'Password for {user_to_edit.first_name} {user_to_edit.last_name} has been updated.')
-                
-                # Redirect based on user type
-                if request.user.profile.user_type == 'admin':
-                    return redirect('admin_dashboard')
-                else:
-                    return redirect('provider_dashboard')
-        
-        context = {
-            'user': request.user,
-            'user_to_edit': user_to_edit
-        }
-        return render(request, 'pages/change_password.html', context)
-    
-    except User.DoesNotExist:
-        messages.error(request, 'User not found.')
-        if request.user.profile.user_type == 'admin':
-            return redirect('admin_dashboard')
-        else:
-            return redirect('provider_dashboard')
-
-@login_required
-def delete_account(request, user_id):
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type not in ['admin', 'provider']:
-        messages.error(request, 'You do not have permission to delete accounts.')
-        return redirect('home')
-    
-    try:
-        user_to_delete = User.objects.get(id=user_id)
-        
-        # For providers, only allow deleting patients they manage
-        if request.user.profile.user_type == 'provider':
-            if not hasattr(user_to_delete, 'profile') or user_to_delete.profile.user_type != 'patient' or user_to_delete.profile.provider != request.user.profile:
-                messages.error(request, 'You do not have permission to delete this account.')
-                return redirect('provider_dashboard')
-        
-        # Don't allow admins to delete themselves
-        if user_to_delete == request.user:
-            messages.error(request, 'You cannot delete your own account.')
-            if request.user.profile.user_type == 'admin':
-                return redirect('admin_dashboard')
-            else:
-                return redirect('provider_dashboard')
-        
-        if request.method == 'POST':
-            # Get the user's full name before deletion for the message
-            full_name = f"{user_to_delete.first_name} {user_to_delete.last_name}"
-            user_to_delete.delete()
-            
+                user_to_manage.set_password(new_password)
+                user_to_manage.save()
+                update_session_auth_hash(request, user_to_manage)
+                messages.success(request, f'Password for {user_to_manage.first_name} {user_to_manage.last_name} has been updated.')
+        elif 'delete_account' in request.POST:
+            # Delete account
+            full_name = f"{user_to_manage.first_name} {user_to_manage.last_name}"
+            user_to_manage.delete()
             messages.success(request, f'Account for {full_name} has been deleted.')
-            
-            # Redirect based on user type
             if request.user.profile.user_type == 'admin':
                 return redirect('admin_dashboard')
-            else:
+            elif request.user.profile.user_type == 'provider':
                 return redirect('provider_dashboard')
-        
-        context = {
-            'user': request.user,
-            'user_to_delete': user_to_delete
-        }
-        return render(request, 'pages/delete_account.html', context)
-    
-    except User.DoesNotExist:
-        messages.error(request, 'User not found.')
-        if request.user.profile.user_type == 'admin':
-            return redirect('admin_dashboard')
-        else:
-            return redirect('provider_dashboard')
+            else:
+                return redirect('home')
+    context = {
+        'user': request.user,
+        'user_to_manage': user_to_manage
+    }
+    return render(request, 'pages/manage_account.html', context)
 
 @login_required
 def assign_caregiver(request, patient_id):

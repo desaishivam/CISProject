@@ -93,7 +93,7 @@
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'edit_account' provider_data.profile.user.id %}" class="action-btn outline-btn">
+                            <a href="{% url 'manage_account' provider_data.profile.user.id %}" class="action-btn outline-btn">
                                 ✏️ Edit
                             </a>
                         </div>
@@ -131,7 +131,7 @@
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'edit_account' caregiver_data.profile.user.id %}" class="action-btn outline-btn">
+                            <a href="{% url 'manage_account' caregiver_data.profile.user.id %}" class="action-btn outline-btn">
                                 ✏️ Edit
                             </a>
                         </div>
@@ -183,7 +183,7 @@
                             <a href="{% url 'assign_caregiver' patient_data.profile.user.id %}" class="action-btn primary-btn">
                                 🔗 Assign Caregivers
                             </a>
-                            <a href="{% url 'edit_account' patient_data.profile.user.id %}" class="action-btn outline-btn">
+                            <a href="{% url 'manage_account' patient_data.profile.user.id %}" class="action-btn outline-btn">
                                 ✏️ Edit
                             </a>
                         </div>

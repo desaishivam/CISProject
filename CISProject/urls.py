@@ -38,7 +38,5 @@ urlpatterns = [
     path('create-caregiver/', users_views.create_caregiver, name='create_caregiver'),
     
     # Account editing
-    path('edit-account/<int:user_id>/', users_views.edit_account, name='edit_account'),
-    path('change-password/<int:user_id>/', users_views.change_password, name='change_password'),
-    path('delete-account/<int:user_id>/', users_views.delete_account, name='delete_account'),
+    path('manage-account/<int:user_id>/', users_views.manage_account, name='manage_account'),
 ]

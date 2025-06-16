@@ -13,16 +13,6 @@
             </div>
             <h1>Transform Memory Care with CogniCare</h1>
             <p class="hero-tagline">Empowering patients, caregivers, and healthcare professionals through innovative technology and compassionate care solutions.</p>
-        <div class="hero-buttons">
-                <a href="/about" class="hero-button primary">
-                    <span class="button-icon">🚀</span>
-                    <span class="button-text">Discover Our Mission</span>
-                </a>
-                <a href="/carecenter" class="hero-button secondary">
-                    <span class="button-icon">🏥</span>
-                    <span class="button-text">Explore CareCenter</span>
-                </a>
-            </div>
             <div class="hero-stats">
                 <!-- Removed stat-item/stat-number/stat-label blocks -->
             </div>
@@ -35,7 +25,7 @@
             <h2>Why Choose CogniCare?</h2>
             <p class="section-subtitle">Comprehensive solutions designed for every aspect of memory care</p>
         </div>
-        <div class="features-grid">
+        <div class="features-grid" style="grid-template-columns: repeat(3, 1fr);">
             <div class="feature-card patient-theme">
                 <div class="feature-icon">
                     <i class="fas fa-user-friends"></i>
@@ -46,16 +36,6 @@
                     <span class="highlight-tag">For Patients</span>
                 </div>
             </div>
-            <div class="feature-card caregiver-theme">
-                <div class="feature-icon">
-                    <i class="fas fa-heart"></i>
-                </div>
-                <h3>Caregiver Support</h3>
-                <p>Comprehensive resources and real-time communication tools to support caregivers in their vital role.</p>
-                <div class="feature-highlight">
-                    <span class="highlight-tag">For Caregivers</span>
-    </div>
-</div>
             <div class="feature-card provider-theme">
                 <div class="feature-icon">
         <i class="fas fa-user-md"></i>
@@ -76,58 +56,10 @@
                     <span class="highlight-tag">Enterprise Ready</span>
                 </div>
             </div>
-            <div class="feature-card cognicon-theme">
-                <div class="feature-icon">
-                    <i class="fas fa-tv"></i>
-                </div>
-                <h3>CogniCon Smart Display</h3>
-                <p>Interactive at-home smart screen technology for daily routines and cognitive exercises.</p>
-                <div class="feature-highlight">
-                    <span class="highlight-tag">Smart Technology</span>
-                </div>
-            </div>
-            <div class="feature-card universal-theme">
-                <div class="feature-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <h3>24/7 Availability</h3>
-                <p>Round-the-clock support and monitoring to ensure continuous care and peace of mind.</p>
-                <div class="feature-highlight">
-                    <span class="highlight-tag">Always There</span>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Solutions Overview Section -->
-    <div class="solutions-section">
-        <div class="section-header">
-            <h2>Complete Care Ecosystem</h2>
-            <p class="section-subtitle">Integrated solutions for comprehensive memory care management</p>
-        </div>
-        <div class="solutions-grid">
-            <div class="solution-card">
-                <div class="solution-header">
-                    <div class="solution-icon">🏥</div>
-                    <h3>CareCenter Platform</h3>
-                </div>
-                <p>Comprehensive task management and coordination tools for healthcare facilities.</p>
-                <a href="/carecenter" class="solution-link">
-                    Explore CareCenter <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="solution-card">
-                <div class="solution-header">
-                    <div class="solution-icon">📺</div>
-                    <h3>CogniCon Smart Display</h3>
-                </div>
-                <p>Interactive home-based technology for daily routines and cognitive engagement.</p>
-                <a href="/cognicon" class="solution-link">
-                    Discover CogniCon <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-    </div>
+    <!-- Solutions Overview Section removed as requested -->
 
     <!-- Quick Access Section -->
     <div class="quick-access-section">
@@ -135,7 +67,7 @@
             <h2>Access Your Portal</h2>
             <p class="section-subtitle">Choose your role to access the appropriate dashboard</p>
         </div>
-        <div class="access-grid">
+        <div class="access-grid" style="grid-template-columns: repeat(5, 1fr);">
             <a href="/patient-login" class="access-card patient-access">
                 <div class="access-icon">👤</div>
                 <h3>Patient Portal</h3>
@@ -158,6 +90,12 @@
                 <div class="access-icon">🔒</div>
                 <h3>Admin Portal</h3>
                 <p>System administration and user management</p>
+                <div class="access-arrow">→</div>
+            </a>
+            <a href="/cognicon" class="access-card cognicon-access">
+                <div class="access-icon">📺</div>
+                <h3>CogniCon Smart Display</h3>
+                <p>Interactive home-based technology for daily routines and cognitive engagement.</p>
                 <div class="access-arrow">→</div>
             </a>
         </div>
@@ -236,55 +174,6 @@
         line-height: 1.6;
     }
 
-    .hero-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: 3rem;
-    }
-
-    .hero-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1.2rem 2rem;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .hero-button.primary {
-        background: linear-gradient(135deg, var(--provider-primary), var(--provider-secondary));
-        color: white;
-        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-    }
-
-    .hero-button.secondary {
-        background: white;
-        color: var(--provider-primary);
-        border: 2px solid var(--provider-primary);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .hero-button:hover {
-        transform: translateY(-3px);
-    }
-
-    .hero-button.primary:hover {
-        box-shadow: 0 12px 35px rgba(30, 58, 138, 0.4);
-    }
-
-    .hero-button.secondary:hover {
-        background: var(--provider-primary);
-        color: white;
-        box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
-    }
-
     .hero-stats {
         display: flex;
         justify-content: center;
@@ -314,7 +203,6 @@
 
     /* Enhanced Sections */
     .features-section,
-    .solutions-section,
     .quick-access-section {
         margin-bottom: 5rem;
     }
@@ -646,6 +534,16 @@
         color: var(--admin-primary);
     }
 
+    .cognicon-access:hover {
+        border-color: var(--provider-primary);
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(30, 64, 175, 0.05));
+    }
+
+    .cognicon-access h3,
+    .cognicon-access .access-arrow {
+        color: var(--provider-primary);
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .hero-content h1 {
@@ -654,11 +552,6 @@
 
         .hero-tagline {
             font-size: 1.1rem;
-        }
-
-        .hero-buttons {
-            flex-direction: column;
-            align-items: center;
         }
 
         .hero-stats {
