@@ -242,7 +242,7 @@ def take_task(request, task_id):
             task_response.save()
             task.status = 'completed'
             task.save()
-            return JsonResponse({'status': 'success', 'redirect': reverse('taskmanager:patient_tasks')})
+            return JsonResponse({'status': 'success', 'redirect': reverse('patient_dashboard')})
         else:
             task_response.save()
             messages.success(request, 'Your progress has been saved.')
