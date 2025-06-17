@@ -28,7 +28,6 @@
                     <tr>
                         <th>Title</th>
                         <th>Patient</th>
-                        <th>Type</th>
                         <th>Status</th>
                         <th>Due Date</th>
                         <th>Actions</th>
@@ -39,7 +38,6 @@
                     <tr>
                         <td>{{ task.title }}</td>
                         <td>{{ task.assigned_to.user.get_full_name }}</td>
-                        <td>{{ task.get_task_type_display }}</td>
                         <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
                         <td>{% if task.due_date %}{{ task.due_date|date:"M d, Y g:i A" }}{% else %}-{% endif %}</td>
                         <td>

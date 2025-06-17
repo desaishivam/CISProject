@@ -9,6 +9,7 @@ from .constants import TASK_TYPES, TASK_TEMPLATES, DIFFICULTY_LEVELS, DIFFICULTY
 from users.models import UserProfile
 import json
 from django.urls import reverse
+from collections import OrderedDict
 
 @login_required
 def assign_task(request, patient_id):
@@ -30,16 +31,15 @@ def assign_task(request, patient_id):
         
         if request.method == 'POST':
             task_type = request.POST.get('task_type')
-            title = request.POST.get('title')
             description = request.POST.get('description')
             due_date = request.POST.get('due_date')
             template_id = request.POST.get('template_id')
             difficulty = request.POST.get('difficulty', 'mild')  # Default to mild
-            
-            # Generate default title if none provided
-            if not title:
-                title = "Memory Questionnaire" if task_type == 'memory_questionnaire' else task_type.replace('_', ' ').title()
-            
+
+            # Always set title to the display name for the selected task_type
+            type_dict = dict(TASK_TYPES)
+            title = type_dict.get(task_type, task_type.replace('_', ' ').title())
+
             # Create the task
             task = Task.objects.create(
                 title=title,
@@ -248,13 +248,22 @@ def take_task(request, task_id):
             messages.success(request, 'Your progress has been saved.')
     
     # Get template based on task type and difficulty
+    print("TASK_TEMPLATES keys:", TASK_TEMPLATES.keys())
+    print("task.task_type:", task.task_type)
     template = TASK_TEMPLATES[task.task_type]['template_name']
     if task.difficulty:
         template = template.format(difficulty=task.difficulty)
-    
+
+    # Use 'default' config for non-game tasks
+    config_dict = DIFFICULTY_CONFIGS[task.task_type]
+    if task.difficulty in config_dict:
+        config = config_dict[task.difficulty]
+    else:
+        config = config_dict.get('default')
+
     context = {
         'task': task,
-        'config': DIFFICULTY_CONFIGS[task.task_type][task.difficulty] if task.difficulty else None
+        'config': config
     }
     
     return render(request, template, context)

@@ -119,7 +119,6 @@
                                         <thead>
                                             <tr>
                                                 <th>Title</th>
-                                                <th>Type</th>
                                                 <th>Difficulty</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
@@ -129,7 +128,6 @@
                                             {% for task in patient_tasks %}
                                             <tr>
                                                 <td class="task-title">{{ task.title }}</td>
-                                                <td><span class="task-type-badge">{{ task.get_task_type_display }}</span></td>
                                                 <td>
                                                     {% if task.task_type in game_types %}
                                                         <span class="difficulty-badge difficulty-{{ task.difficulty }}">

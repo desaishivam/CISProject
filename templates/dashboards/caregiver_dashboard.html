@@ -74,7 +74,6 @@
                                 <thead>
                                     <tr>
                                         <th>Title</th>
-                                        <th>Completed At</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -82,7 +81,6 @@
                                     {% for task in entry.completed_tasks %}
                                     <tr>
                                         <td class="task-title">{{ task.title }}</td>
-                                        <td>{{ task.completed_at|date:"M d, Y g:i A" }}</td>
                                         <td>
                                             <a href="{% url 'taskmanager:task_results' task.id %}" class="action-btn view-btn">
                                                 👁️ View Results
