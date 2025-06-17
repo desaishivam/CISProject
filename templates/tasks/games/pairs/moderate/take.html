@@ -226,9 +226,13 @@ function gameCompleted() {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
         body: JSON.stringify(results)
-    }).then((res) => {
-        console.log('Fetch response:', res);
-        window.location.href = '/tasks/patient/tasks/';
+    }).then((res) => res.json())
+    .then((data) => {
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        } else {
+            window.location.href = '/tasks/patient/tasks/';
+        }
     }).catch((err) => {
         console.error('Fetch error:', err);
         window.location.href = '/tasks/patient/tasks/';

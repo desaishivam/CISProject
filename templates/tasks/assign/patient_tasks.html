@@ -55,7 +55,7 @@
     {% endif %}
 
     <!-- Completed Tasks -->
-    {% if completed_tasks %}
+    {% if not request.user.profile.user_type == 'patient' and completed_tasks %}
     <div class="table-section">
         <h2 class="section-title">✅ Completed Tasks</h2>
         <div class="table-container">
