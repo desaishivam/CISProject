@@ -29,51 +29,14 @@
             <table class="enhanced-table">
                 <thead>
                     <tr>
-                        <th>Task</th>
-                        <th>Type</th>
-                        <th>Difficulty</th>
-                        <th>Status</th>
-                        <th>Assigned By</th>
-                        <th>Due Date</th>
+                        <th>Title</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
             {% for task in pending_tasks %}
                     <tr>
-                        <td class="task-title">
-                <div class="task-info">
-                                <h4>{{ task.title }}</h4>
-                                {% if task.description %}
-                                    <p class="task-description">{{ task.description }}</p>
-                    {% endif %}
-                </div>
-                        </td>
-                        <td>
-                            <span class="task-type">{{ task.get_task_type_display }}</span>
-                        </td>
-                        <td>
-                            {% if task.get_difficulty_display_for_games %}
-                                <span class="difficulty-badge difficulty-{{ task.difficulty }}">
-                                    {{ task.get_difficulty_display_for_games }}
-                                </span>
-                            {% else %}
-                                <span class="no-difficulty">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="status-badge status-{{ task.status }}">
-                                {{ task.get_status_display }}
-                            </span>
-                        </td>
-                        <td>{{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</td>
-                        <td>
-                            {% if task.due_date %}
-                                {{ task.due_date|date:"M d, Y g:i A" }}
-                            {% else %}
-                                <span class="no-date">No due date</span>
-                            {% endif %}
-                        </td>
+                        <td>{{ task.title }}</td>
                         <td>
                             <a href="{% url 'taskmanager:take_task' task.id %}" class="action-btn start-btn">
                                 {% if task.status == 'assigned' %}
@@ -99,44 +62,13 @@
             <table class="enhanced-table">
                 <thead>
                     <tr>
-                        <th>Task</th>
-                        <th>Type</th>
-                        <th>Difficulty</th>
-                        <th>Assigned By</th>
-                        <th>Completed At</th>
-                        <th>Status</th>
+                        <th>Title</th>
                     </tr>
                 </thead>
                 <tbody>
             {% for task in completed_tasks %}
                     <tr>
-                        <td class="task-title">
-                <div class="task-info">
-                                <h4>{{ task.title }}</h4>
-                                {% if task.description %}
-                                    <p class="task-description">{{ task.description }}</p>
-                                {% endif %}
-                </div>
-                        </td>
-                        <td>
-                            <span class="task-type">{{ task.get_task_type_display }}</span>
-                        </td>
-                        <td>
-                            {% if task.get_difficulty_display_for_games %}
-                                <span class="difficulty-badge difficulty-{{ task.difficulty }}">
-                                    {{ task.get_difficulty_display_for_games }}
-                                </span>
-                            {% else %}
-                                <span class="no-difficulty">-</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</td>
-                        <td>{{ task.completed_at|date:"M d, Y g:i A" }}</td>
-                        <td>
-                            <span class="status-badge status-{{ task.status }}">
-                                ✓ {{ task.get_status_display }}
-                            </span>
-                        </td>
+                        <td>{{ task.title }}</td>
                     </tr>
             {% endfor %}
                 </tbody>

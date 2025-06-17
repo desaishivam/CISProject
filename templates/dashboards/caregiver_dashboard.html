@@ -41,8 +41,6 @@
                                 <thead>
                                     <tr>
                                         <th>Title</th>
-                                        <th>Status</th>
-                                        <th>Due Date</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -50,12 +48,6 @@
                                     {% for task in entry.pending_tasks %}
                                     <tr>
                                         <td class="task-title">{{ task.title }}</td>
-                                        <td>
-                                            <span class="status-badge status-{{ task.status }}">
-                                                {{ task.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td>{% if task.due_date %}{{ task.due_date|date:"M d, Y g:i A" }}{% else %}<span class="no-date">-</span>{% endif %}</td>
                                         <td>
                                             <a href="{% url 'taskmanager:take_task' task.id %}" class="action-btn complete-btn">
                                                 ✓ Complete Task
