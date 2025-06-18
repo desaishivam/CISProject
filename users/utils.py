@@ -4,20 +4,21 @@ from .models import UserProfile
 # Utility class for all the user stuff (creation, queries, etc.)
 class UserProfileUtils:
     @staticmethod
-    def create_user_w_profile(username, password, first_name, last_name, email, user_type, provider=None):
-        # Make a user + their profile in one go, b/c who wants to repeat code?
+    def create_user_w_profile(username, password, first_name, last_name, user_type, provider=None):
+        """Create a user and their associated profile"""
         user = User.objects.create_user(
             username=username,
             password=password,
-            email=email,
             first_name=first_name,
             last_name=last_name
         )
+        
         profile = UserProfile.objects.create(
             user=user,
             user_type=user_type,
             provider=provider
         )
+        
         return user, profile
 
     @staticmethod

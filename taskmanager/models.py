@@ -96,3 +96,17 @@ class TaskNotification(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+class Appointment(models.Model):
+    """Appointments between providers and patients"""
+    provider = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='provided_appointments')
+    patient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='appointments')
+    datetime = models.DateTimeField()
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Appointment: {self.patient.user.get_full_name()} with {self.provider.user.get_full_name()} on {self.datetime}"
+    
+    class Meta:
+        ordering = ['datetime']

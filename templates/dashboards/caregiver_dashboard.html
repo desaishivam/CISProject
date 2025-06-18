@@ -28,8 +28,41 @@
                     <h2>Patient: {{ entry.patient.user.first_name }} {{ entry.patient.user.last_name }}</h2>
                     <div class="patient-details">
                         <span><strong>Username:</strong> {{ entry.patient.user.username }}</span>
-                        <span><strong>Email:</strong> {{ entry.patient.user.email }}</span>
                     </div>
+                </div>
+                
+                <!-- Appointments Section -->
+                <div class="table-section">
+                    <h3 class="section-title caregiver">📅 Upcoming Appointments</h3>
+                    {% if entry.appointments %}
+                        <div class="table-container">
+                            <table class="enhanced-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Provider</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in entry.appointments %}
+                                    <tr>
+                                        <td class="appointment-datetime">
+                                            {{ appointment.datetime|date:"l, F j, Y" }}<br>
+                                            <span class="time">{{ appointment.datetime|date:"g:i A" }}</span>
+                                        </td>
+                                        <td>Dr. {{ appointment.provider.user.get_full_name }}</td>
+                                        <td>{{ appointment.notes|default:"No notes" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <p>📅 No upcoming appointments scheduled.</p>
+                        </div>
+                    {% endif %}
                 </div>
                 
                 <!-- Pending Tasks Section -->
@@ -181,6 +214,31 @@
             flex-direction: column;
             gap: 0.5rem;
         }
+    }
+    
+    /* Add these styles to the existing <style> section */
+    .appointment-datetime {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .appointment-datetime .time {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: normal;
+    }
+    
+    /* Update the existing enhanced-table styles */
+    .enhanced-table th {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    .enhanced-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
     }
 </style>
 

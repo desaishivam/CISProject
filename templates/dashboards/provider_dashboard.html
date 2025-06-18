@@ -28,46 +28,82 @@
                 <!-- Quick Task Assignment -->
                 <div class="quick-assign-section">
                     <h4 class="subsection-title">⚡ Quick Task Assignment</h4>
-                    <form id="quick-assign-form" class="quick-assign-form">
-                        {% csrf_token %}
-                        <!-- Top Row: Patient, Task Type, Difficulty -->
-                        <div class="assign-row compact-top-row">
-                            <div class="form-group patient-select">
-                                <label for="patient_select">Assign Task To:</label>
-                                <select id="patient_select" name="patient_select" class="form-input" required>
-                                    <option value="">Select a patient...</option>
-                                    {% for patient in patients %}
-                                        <option value="{{ patient.id }}">{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                    {% endfor %}
-                                </select>
+                    <form id="quick-assign-form" class="task-form">
+                        <div class="quick-assign-row">
+                            <div class="form-group flex-1">
+                                <div class="label-input-row">
+                                    <label for="quick_assign_patient">Assign Task To:</label>
+                                    <select id="quick_assign_patient" name="patient" class="form-input" required>
+                                        <option value="">Select a patient...</option>
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.id }}">{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group task-type">
-                                <label for="quick_task_type">Task Type:</label>
-                                <select id="quick_task_type" name="task_type" class="form-input" required>
-                                    <option value="">Select type...</option>
-                                    {% for value, label in task_types %}
-                                        <option value="{{ value }}" data-has-difficulty="{% if value == 'puzzle' or value == 'color' or value == 'pairs' %}true{% else %}false{% endif %}">
-                                            {% if value == 'puzzle' or value == 'color' or value == 'pairs' %}🎮 {% endif %}{{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
+                            <div class="form-group flex-1">
+                                <div class="label-input-row">
+                                    <label for="quick_assign_task">Task Type:</label>
+                                    <select id="quick_assign_task" name="task" class="form-input" required>
+                                        <option value="">Select type...</option>
+                                        {% for value, label in task_types %}
+                                            <option value="{{ value }}" data-has-difficulty="{% if value == 'puzzle' or value == 'color' or value == 'pairs' %}true{% else %}false{% endif %}">
+                                                {% if value == 'puzzle' or value == 'color' or value == 'pairs' %}🎮 {% endif %}{{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group" id="difficulty-group">
-                                <label for="quick_difficulty">🎯 Difficulty:</label>
-                                <select id="quick_difficulty" name="difficulty" class="form-input">
-                                    {% for value, label in difficulty_levels %}
-                                        <option value="{{ value }}" {% if value == 'mild' %}selected{% endif %}>
-                                            {% if value == 'mild' %}🟢 Mild
-                                            {% elif value == 'moderate' %}🟡 Moderate  
-                                            {% elif value == 'major' %}🔴 Major
-                                            {% else %}{{ label }}{% endif %}
-                                        </option>
-                                    {% endfor %}
-                                </select>
+                            <div class="form-group flex-1">
+                                <div class="label-input-row">
+                                    <label for="quick_assign_difficulty">
+                                        <span class="target-icon">🎯</span> Difficulty:
+                                    </label>
+                                    <select id="quick_assign_difficulty" name="difficulty" class="form-input" required>
+                                        <option value="mild">🟢 Mild</option>
+                                        <option value="moderate">🟡 Moderate</option>
+                                        <option value="challenging">🔴 Challenging</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Bottom Row: Action Buttons -->
+                        <style>
+                            .quick-assign-row {
+                                display: flex;
+                                gap: 1rem;
+                                margin-bottom: 1.5rem;
+                                flex-wrap: nowrap;
+                                width: 100%;
+                            }
+                            .flex-1 {
+                                flex: 1;
+                                min-width: 0;
+                            }
+                            .label-input-row {
+                                display: flex;
+                                align-items: center;
+                                gap: 0.5rem;
+                                width: 100%;
+                            }
+                            .label-input-row label {
+                                white-space: nowrap;
+                                font-weight: 500;
+                            }
+                            .label-input-row select {
+                                flex: 1;
+                                min-width: 0;
+                                width: 100%;
+                            }
+                            @media (max-width: 768px) {
+                                .quick-assign-row {
+                                    flex-direction: column;
+                                    gap: 1rem;
+                                }
+                                .label-input-row {
+                                    width: 100%;
+                                }
+                            }
+                        </style>
                         <div class="assign-row compact-button-row">
                             <div class="form-group assign-button">
                                 <button type="button" onclick="quickAssignTask()" class="action-btn primary-btn">
@@ -84,9 +120,6 @@
                                     🎮 Assign All Difficulties
                                 </button>
                             </div>
-                            <div class="form-group help-text-group">
-                                <small class="help-text">🎮 Difficulty sets game levels • "All Difficulties" assigns selected game at all 3 levels</small>
-                            </div>
                         </div>
                     </form>
                     <div id="assign-all-status" style="margin-top:1rem;display:none;"></div>
@@ -100,14 +133,23 @@
                             {% csrf_token %}
                         <div class="patient-selection-row">
                             <div class="form-group">
+                                <div class="label-input-row">
                                     <label for="selected_patient">Select Patient:</label>
                                     <select id="selected_patient" name="selected_patient" class="form-input" required>
-                                    <option value="">Choose a patient...</option>
-                                    {% for patient in patients %}
+                                        <option value="">Choose a patient...</option>
+                                        {% for patient in patients %}
                                             <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                    {% endfor %}
-                                </select>
-                                    <button type="submit" class="action-btn primary-btn">🔍 View Tasks</button>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="action-buttons-row">
+                                    <button type="submit" class="action-btn primary-btn">
+                                        🔍 View Tasks
+                                    </button>
+                                    <button type="button" onclick="managePatientTasks('delete')" class="action-btn danger-btn">
+                                        🗑️ Delete All Tasks
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         </form>
@@ -158,12 +200,6 @@
                                 </div>
                             {% endif %}
                         {% endif %}
-                        <div class="action-buttons">
-                            <button onclick="managePatientTasks('delete')" class="action-btn danger-btn">
-                                🗑️ Delete All Tasks
-                            </button>
-                        </div>
-                        <p class="info-text">💡 Manage tasks for a specific patient. Deleted tasks are permanently removed.</p>
                     </div>
                 </div>
             </div>
@@ -171,167 +207,682 @@
         
         <div class="dashboard-section">
             <h2 class="section-title">👥 Account Management</h2>
-            <div class="tabs">
-                <button class="tab-button active" onclick="openTab(event, 'patients-tab')">👤 Patients</button>
-                <button class="tab-button" onclick="openTab(event, 'caregivers-tab')">🤝 Caregivers</button>
-            </div>
-            
-            <div id="patients-tab" class="tab-content active">
-                <h3 class="tab-title">Patient Accounts</h3>
-                {% if patients %}
-                <div class="user-accounts">
-                    {% for patient in patients %}
-                    <div class="user-card">
-                        <div class="user-details">
-                            <h4 class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
-                            <div class="user-info">
-                            <p><strong>Username:</strong> {{ patient.user.username }}</p>
-                            <p><strong>Email:</strong> {{ patient.user.email }}</p>
+            <div class="account-management-container">
+                <!-- Patient Accounts Section -->
+                <div class="account-section">
+                    <h3 class="section-subtitle">👤 Patient Accounts</h3>
+                    {% if patients %}
+                    <div class="user-accounts">
+                        {% for patient in patients %}
+                        <div class="user-card">
+                            <div class="user-details">
+                                <h4 class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
+                                <div class="user-info">
+                                    <p><strong>Username:</strong> {{ patient.user.username }}</p>
+                                </div>
+                                
+                                <!-- Show caregivers assigned to this patient -->
+                                <div class="relationship-data">
+                                    <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
+                                    {% with caregivers=patient.caregivers.all %}
+                                        {% if caregivers %}
+                                            <div class="relationship-list">
+                                            {% for caregiver in caregivers %}
+                                                <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
+                                            {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <p class="no-relationships">❌ No caregivers assigned</p>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
+                                    🔗 Assign Caregivers
+                                </a>
+                                <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
+                                    ✏️ Edit
+                                </a>
                             </div>
                             
-                            <!-- Show caregivers assigned to this patient -->
-                            <div class="relationship-data">
-                                <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
-                                {% with caregivers=patient.caregivers.all %}
-                                    {% if caregivers %}
-                                        <ul class="relationship-list">
-                                        {% for caregiver in caregivers %}
-                                            <li class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</li>
-                                        {% endfor %}
-                                        </ul>
+                            <!-- Appointment Management -->
+                            <div class="appointment-section">
+                                <p class="relationship-title"><strong>📅 Appointments</strong></p>
+                                <button class="action-btn outline-btn schedule-btn" 
+                                        onclick="openScheduleModal('{{ patient.user.first_name }} {{ patient.user.last_name }}', '{{ patient.user.id }}')">
+                                    Schedule Appointment
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <p>👤 No patient accounts found.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Caregiver Accounts Section -->
+                <div class="account-section">
+                    <h3 class="section-subtitle">🤝 Caregiver Accounts</h3>
+                    {% if caregivers %}
+                    <div class="user-accounts">
+                        {% for caregiver in caregivers %}
+                        <div class="user-card">
+                            <div class="user-details">
+                                <h4 class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
+                                <div class="user-info">
+                                    <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
+                                </div>
+                                
+                                <!-- Show assigned patient -->
+                                <div class="relationship-data">
+                                    <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
+                                    {% if caregiver.patient %}
+                                        <div class="relationship-list">
+                                            <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
+                                        </div>
                                     {% else %}
-                                        <p class="no-relationships">❌ No caregivers assigned</p>
+                                        <p class="no-relationships">❌ No patient assigned</p>
                                     {% endif %}
-                                {% endwith %}
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
+                                    ✏️ Edit
+                                </a>
                             </div>
                         </div>
-                        <div class="user-actions">
-                            <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
-                                🔗 Assign Caregivers
-                            </a>
-                            <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
-                                ✏️ Edit
-                            </a>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <p>👤 No patient accounts found.</p>
-                </div>
-                {% endif %}
-            </div>
-            
-            <div id="caregivers-tab" class="tab-content">
-                <h3 class="tab-title">Caregiver Accounts</h3>
-                {% if caregivers %}
-                <div class="user-accounts">
-                    {% for caregiver in caregivers %}
-                    <div class="user-card">
-                        <div class="user-details">
-                            <h4 class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
-                            <div class="user-info">
-                            <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
-                            <p><strong>Email:</strong> {{ caregiver.user.email }}</p>
-                            </div>
-                            
-                            <!-- Show assigned patient -->
-                            <div class="relationship-data">
-                                <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
-                                {% if caregiver.patient %}
-                                    <p class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</p>
-                                {% else %}
-                                    <p class="no-relationships">❌ No patient assigned</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="user-actions">
-                            <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
-                                ✏️ Edit
-                            </a>
-                        </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <p>🤝 No caregiver accounts found.</p>
                     </div>
-                    {% endfor %}
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="empty-state">
-                    <p>🤝 No caregiver accounts found.</p>
-                </div>
-                {% endif %}
             </div>
         </div>
     
-        <!-- Create New Accounts at the very bottom -->
+        <!-- Create New Accounts Section -->
         <div class="dashboard-section">
-            <h2 class="section-title">➕ Create New Patient Account</h2>
-            <form method="post" action="{% url 'create_patient' %}" class="account-form">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="patient_username">Username</label>
-                        <input type="text" id="patient_username" name="username" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="patient_password">Password</label>
-                        <input type="password" id="patient_password" name="password" class="form-input" required>
-                    </div>
+            <h2 class="section-title">➕ Create New Accounts</h2>
+            <div class="create-accounts-container">
+                <!-- Create Patient Account -->
+                <div class="create-account-section">
+                    <h3 class="section-subtitle">👤 New Patient Account</h3>
+                    <form method="post" action="{% url 'create_patient' %}" class="account-form">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="patient_username">Username</label>
+                                    <input type="text" id="patient_username" name="username" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="patient_password">Password</label>
+                                    <input type="password" id="patient_password" name="password" class="form-input" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="patient_first_name">First Name</label>
+                                    <input type="text" id="patient_first_name" name="first_name" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="patient_last_name">Last Name</label>
+                                    <input type="text" id="patient_last_name" name="last_name" class="form-input" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="action-btn primary-btn large-btn">
+                            ➕ Create Patient Account
+                        </button>
+                    </form>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="patient_first_name">First Name</label>
-                        <input type="text" id="patient_first_name" name="first_name" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="patient_last_name">Last Name</label>
-                        <input type="text" id="patient_last_name" name="last_name" class="form-input" required>
-                    </div>
+
+                <!-- Create Caregiver Account -->
+                <div class="create-account-section">
+                    <h3 class="section-subtitle">🤝 New Caregiver Account</h3>
+                    <form method="post" action="{% url 'create_caregiver' %}" class="account-form">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="caregiver_username">Username</label>
+                                    <input type="text" id="caregiver_username" name="username" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="caregiver_password">Password</label>
+                                    <input type="password" id="caregiver_password" name="password" class="form-input" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="caregiver_first_name">First Name</label>
+                                    <input type="text" id="caregiver_first_name" name="first_name" class="form-input" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="caregiver_last_name">Last Name</label>
+                                    <input type="text" id="caregiver_last_name" name="last_name" class="form-input" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="action-btn primary-btn large-btn">
+                            ➕ Create Caregiver Account
+                        </button>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="patient_email">Email</label>
-                    <input type="email" id="patient_email" name="email" class="form-input" required>
-                </div>
-                <button type="submit" class="action-btn primary-btn large-btn">
-                    ➕ Create Patient Account
-                </button>
-            </form>
+            </div>
+        </div>
     </div>
-    
-        <div class="dashboard-section">
-            <h2 class="section-title">➕ Create New Caregiver Account</h2>
-            <form method="post" action="{% url 'create_caregiver' %}" class="account-form">
+</div>
+
+<!-- Appointment Modal -->
+<div id="appointmentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Schedule Appointment</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="appointmentForm">
                 {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="caregiver_username">Username</label>
-                        <input type="text" id="caregiver_username" name="username" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="caregiver_password">Password</label>
-                        <input type="password" id="caregiver_password" name="password" class="form-input" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="caregiver_first_name">First Name</label>
-                        <input type="text" id="caregiver_first_name" name="first_name" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="caregiver_last_name">Last Name</label>
-                        <input type="text" id="caregiver_last_name" name="last_name" class="form-input" required>
-                    </div>
+                <input type="hidden" id="patient_id" name="patient_id">
+                <div class="form-group">
+                    <label for="appointment_datetime">Date and Time</label>
+                    <input type="datetime-local" id="appointment_datetime" name="datetime" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label for="caregiver_email">Email</label>
-                    <input type="email" id="caregiver_email" name="email" class="form-input" required>
+                    <label for="appointment_notes">Notes (Optional)</label>
+                    <textarea id="appointment_notes" name="notes" class="form-input" rows="3"></textarea>
                 </div>
-                <button type="submit" class="action-btn primary-btn large-btn">
-                    ➕ Create Caregiver Account
+                <button type="submit" class="action-btn primary-btn">
+                    📅 Schedule Appointment
                 </button>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    /* Add these styles to your existing styles */
+    .account-management-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .account-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .section-subtitle {
+        color: #2d3748;
+        margin: 0 0 1rem 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+    .appointment-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        width: 100%;
+    }
+    
+    .schedule-btn {
+        margin-top: 0.75rem;
+        width: 100%;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    
+    .schedule-btn:hover {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+    
+    .user-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .account-management-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .create-accounts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .create-account-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .create-account-section .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .create-account-section label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2d3748;
+        font-weight: 500;
+    }
+    
+    .create-account-section .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .create-account-section .form-input:focus {
+        border-color: #4299e1;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    
+    .create-account-section .large-btn {
+        width: 100%;
+        margin-top: 1rem;
+        padding: 0.75rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .create-accounts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .assign-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        align-items: center;
+    }
+
+    .compact-button-row {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1rem;
+        flex-wrap: nowrap;
+    }
+
+    .compact-button-row .form-group {
+        flex: 0 1 auto;
+        margin: 0;
+    }
+
+    .compact-button-row button {
+        white-space: nowrap;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .compact-button-row {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        
+        .compact-button-row .form-group {
+            flex: 1 1 auto;
+        }
+    }
+
+    .patient-selection-row {
+        margin-bottom: 1.5rem;
+    }
+
+    .action-buttons-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        justify-content: flex-start;
+    }
+
+    .action-buttons-row button {
+        flex: 0 1 auto;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons-row {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons-row button {
+            flex: 1 1 auto;
+        }
+    }
+
+    .label-input-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .label-input-row label {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-weight: 500;
+        min-width: 120px;
+    }
+
+    .label-input-row select {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    @media (max-width: 768px) {
+        .label-input-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .label-input-row label {
+            margin-bottom: 0.25rem;
+        }
+
+        .label-input-row select {
+            width: 100%;
+        }
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    .label-input-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .label-input-row label {
+        min-width: 100px;
+        white-space: nowrap;
+    }
+
+    .label-input-row input {
+        flex: 1;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+        }
+        .label-input-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .label-input-row label {
+            margin-bottom: 0.5rem;
+        }
+        .label-input-row input {
+            width: 100%;
+        }
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        position: relative;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #2d3748;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: #2d3748;
+    }
+
+    /* Appointments Section Styles */
+    .appointments-container {
+        margin-top: 1.5rem;
+    }
+
+    .appointment-selection {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-end;
+    }
+
+    .appointment-selection .form-group {
+        flex: 1;
+        margin: 0;
+    }
+
+    .appointment-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .appointment-selection {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .appointment-actions {
+            justify-content: flex-end;
+        }
+    }
+
+    .relationship-data {
+        margin: 1rem 0;
+    }
+    
+    .relationship-title {
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .relationship-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .relationship-item {
+        color: #2d3748;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+    
+    .no-relationships {
+        color: #718096;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .header-info h1 {
+        margin: 0;
+        color: #1a202c;
+        font-size: 1.8rem;
+    }
+    
+    .user-type {
+        color: #4a5568;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .logout-btn {
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        color: #2d3748;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    
+    .logout-btn:hover {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+
+    .section-title {
+        color: #1a202c;
+        margin: 0 0 1.5rem 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .subsection-title {
+        color: #2d3748;
+        margin: 0 0 1rem 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+    .user-name {
+        color: #1a202c;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .user-info {
+        color: #4a5568;
+        margin-bottom: 1rem;
+    }
+    
+    .user-info p {
+        margin: 0;
+    }
+    
+    .user-info strong {
+        color: #2d3748;
+    }
+    
+    .patient-tasks-title {
+        color: #2d3748;
+        margin: 1.5rem 0 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    
+    .empty-state {
+        color: #718096;
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    
+    .empty-state p {
+        margin: 0;
+        font-size: 1rem;
+    }
+</style>
 
 <script>
     function openTab(evt, tabName) {
@@ -412,9 +963,9 @@
     }
     
     function quickAssignTask() {
-        const patientId = document.getElementById('patient_select').value;
-        const taskType = document.getElementById('quick_task_type').value;
-        const difficulty = document.getElementById('quick_difficulty').value;
+        const patientId = document.getElementById('quick_assign_patient').value;
+        const taskType = document.getElementById('quick_assign_task').value;
+        const difficulty = document.getElementById('quick_assign_difficulty').value;
         
         if (!patientId || !taskType) {
             alert('Please fill in all required fields.');
@@ -457,10 +1008,10 @@
     }
 
     function assignAllTasksToPatient() {
-        const patientId = document.getElementById('patient_select').value;
+        const patientId = document.getElementById('quick_assign_patient').value;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const currentDifficulty = document.getElementById('quick_difficulty').value || 'mild';
-        const taskTypes = Array.from(document.querySelectorAll('#quick_task_type option'))
+        const currentDifficulty = document.getElementById('quick_assign_difficulty').value || 'mild';
+        const taskTypes = Array.from(document.querySelectorAll('#quick_assign_task option'))
             .filter(opt => opt.value)
             .map(opt => ({ 
                 value: opt.value, 
@@ -523,8 +1074,8 @@
     }
 
     function assignAllDifficulties() {
-        const patientId = document.getElementById('patient_select').value;
-        const taskType = document.getElementById('quick_task_type').value;
+        const patientId = document.getElementById('quick_assign_patient').value;
+        const taskType = document.getElementById('quick_assign_task').value;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const statusDiv = document.getElementById('assign-all-status');
         
@@ -534,7 +1085,7 @@
         }
         
         // Check if selected task type is a game
-        const selectedOption = document.querySelector(`#quick_task_type option[value="${taskType}"]`);
+        const selectedOption = document.querySelector(`#quick_assign_task option[value="${taskType}"]`);
         const hasdifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
         
         if (!hasdifficulty) {
@@ -588,7 +1139,7 @@
 
     // Handle dynamic difficulty field visibility
     document.addEventListener('DOMContentLoaded', function() {
-        const taskTypeSelect = document.getElementById('quick_task_type');
+        const taskTypeSelect = document.getElementById('quick_assign_task');
         const difficultyGroup = document.getElementById('difficulty-group');
         
         // Always keep difficulty field visible for "Assign All Tasks" functionality
@@ -616,6 +1167,169 @@
         
         // Listen for changes
         taskTypeSelect.addEventListener('change', highlightDifficultyField);
+        
+        // Appointment Modal
+        const modal = document.getElementById("appointmentModal");
+        const span = document.getElementsByClassName("close")[0];
+        
+        // Close modal when clicking (x)
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        // Handle appointment form submission
+        const appointmentForm = document.getElementById("appointmentForm");
+        appointmentForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    modal.style.display = "none";
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error scheduling appointment. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error scheduling appointment. Please try again.');
+            });
+        });
     });
+
+    // Function to open the appointment modal
+    function openScheduleModal(patientName, patientId) {
+        const modal = document.getElementById('appointmentModal');
+        document.getElementById('patient_id').value = patientId;
+        modal.style.display = 'block';
+        
+        // Set minimum date to today
+        const today = new Date();
+        const dateInput = document.getElementById('appointment_datetime');
+        dateInput.min = today.toISOString().slice(0, 16);
+    }
+    
+    // Close modal when clicking the close button or outside the modal
+    document.querySelector('.close').onclick = function() {
+        document.getElementById('appointmentModal').style.display = 'none';
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('appointmentModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    // Handle appointment form submission
+    document.getElementById('appointmentForm').onsubmit = function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        fetch('/schedule-appointment/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Appointment scheduled successfully!');
+                document.getElementById('appointmentModal').style.display = 'none';
+                location.reload();
+            } else {
+                alert('Error scheduling appointment: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error scheduling appointment. Please try again.');
+            console.error('Error:', error);
+        });
+    };
+    
+    // Add styles for the modal
+    const styles = `
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #666;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2d3748;
+        }
+        
+        .appointment-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .schedule-btn {
+            margin-top: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+    `;
+    
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = styles;
+    document.head.appendChild(styleSheet);
 </script>
 {% endblock %} 

@@ -9,6 +9,7 @@ from taskmanager.models import Task
 from taskmanager.constants import TASK_TYPES
 import logging
 from .utils import UserProfileUtils
+from django.db.utils import IntegrityError
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -82,24 +83,27 @@ def create_provider(request):
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'admin':
         messages.error(request, 'You do not have permission to create provider accounts.')
         return redirect('home')
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            messages.error(request, f'Username "{username}" is already taken.')
+        
+        if not all([username, password, first_name, last_name]):
+            messages.error(request, 'Please fill in all required fields.')
             return redirect('admin_dashboard')
+        
         try:
-            # Use our utils to make a provider (so easy now)
             user, profile = UserProfileUtils.create_user_w_profile(
-                username, password, first_name, last_name, email, 'provider'
+                username, password, first_name, last_name, 'provider'
             )
             messages.success(request, f'Provider account for {first_name} {last_name} has been created successfully.')
         except Exception as e:
             messages.error(request, f'Error creating provider account: {str(e)}')
+        
+        return redirect('admin_dashboard')
+    
     return redirect('admin_dashboard')
 
 @login_required
@@ -154,24 +158,43 @@ def create_patient(request):
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to create patient accounts.')
         return redirect('home')
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            messages.error(request, f'Username "{username}" is already taken.')
+        
+        if not all([username, password, first_name, last_name]):
+            messages.error(request, 'Please fill in all required fields.')
             return redirect('provider_dashboard')
+        
         try:
-            # Use our utils to make a patient, link to current provider
-            user, profile = UserProfileUtils.create_user_w_profile(
-                username, password, first_name, last_name, email, 'patient', provider=request.user.profile
+            # Create user without email
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
             )
-            messages.success(request, f'Patient account for {first_name} {last_name} has been created successfully.')
+            
+            # Create patient profile
+            UserProfile.objects.create(
+                user=user,
+                user_type='patient',
+                provider=request.user.profile
+            )
+            
+            messages.success(request, f'Patient account created successfully for {first_name} {last_name}.')
+            return redirect('provider_dashboard')
+            
+        except IntegrityError:
+            messages.error(request, 'Username already exists. Please choose a different username.')
+            return redirect('provider_dashboard')
         except Exception as e:
             messages.error(request, f'Error creating patient account: {str(e)}')
+            return redirect('provider_dashboard')
+    
     return redirect('provider_dashboard')
 
 @login_required
@@ -179,24 +202,27 @@ def create_caregiver(request):
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to create caregiver accounts.')
         return redirect('home')
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            messages.error(request, f'Username "{username}" is already taken.')
+        
+        if not all([username, password, first_name, last_name]):
+            messages.error(request, 'Please fill in all required fields.')
             return redirect('provider_dashboard')
+        
         try:
-            # Use our utils to make a caregiver
             user, profile = UserProfileUtils.create_user_w_profile(
-                username, password, first_name, last_name, email, 'caregiver'
+                username, password, first_name, last_name, 'caregiver'
             )
             messages.success(request, f'Caregiver account for {first_name} {last_name} has been created successfully.')
         except Exception as e:
             messages.error(request, f'Error creating caregiver account: {str(e)}')
+        
+        return redirect('provider_dashboard')
+    
     return redirect('provider_dashboard')
 
 @login_required
@@ -206,20 +232,28 @@ def caregiver_dashboard(request):
         return redirect('home')
     
     caregiver_profile = request.user.profile
-    # Get all linked patients
-    linked_patients = caregiver_profile.linked_patients.all()
     patients_with_tasks = []
-    for patient in linked_patients:
+    
+    # Get the assigned patient
+    if caregiver_profile.patient:
+        patient = caregiver_profile.patient
         completed_tasks = Task.objects.filter(assigned_to=patient, status='completed').order_by('-completed_at')
         pending_tasks = Task.objects.filter(
             assigned_to=patient,
             status__in=['assigned', 'in_progress']
         ).order_by('due_date', 'created_at')
+        
+        # Get patient's appointments
+        from taskmanager.models import Appointment
+        appointments = Appointment.objects.filter(patient=patient).order_by('datetime')
+        
         patients_with_tasks.append({
             'patient': patient,
             'pending_tasks': pending_tasks,
-            'completed_tasks': completed_tasks
+            'completed_tasks': completed_tasks,
+            'appointments': appointments
         })
+    
     context = {
         'user': request.user,
         'user_type': 'Caregiver',
@@ -241,131 +275,163 @@ def patient_dashboard(request):
 
 @login_required
 def manage_account(request, user_id):
-    # Only allow admin/provider to manage others, or user to manage self
-    if not hasattr(request.user, 'profile') or (request.user.id != user_id and request.user.profile.user_type not in ['admin', 'provider']):
-        messages.error(request, 'You do not have permission to manage this account.')
-        return redirect('home')
     try:
         user_to_manage = User.objects.get(id=user_id)
-    except User.DoesNotExist:
-        messages.error(request, 'User not found.')
-        return redirect('home')
-    # Handle edit, password, or delete
-    if request.method == 'POST':
-        if 'edit_account' in request.POST:
-            # Edit account info
+        
+        if request.method == 'POST':
+            username = request.POST.get('username')
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
-            email = request.POST.get('email')
-            username = request.POST.get('username')
-            if username != user_to_manage.username and User.objects.filter(username=username).exists():
-                messages.error(request, f'Username "{username}" is already taken.')
-            else:
-                user_to_manage.username = username
-                user_to_manage.first_name = first_name
-                user_to_manage.last_name = last_name
-                user_to_manage.email = email
+            
+            if not all([username, first_name, last_name]):
+                messages.error(request, 'Please fill in all required fields.')
+                return redirect('manage_account', user_id=user_id)
+            
+            user_to_manage.username = username
+            user_to_manage.first_name = first_name
+            user_to_manage.last_name = last_name
+            
+            try:
                 user_to_manage.save()
-                messages.success(request, f'Account details for {first_name} {last_name} have been updated.')
-        elif 'change_password' in request.POST:
-            # Change password
-            new_password = request.POST.get('new_password')
-            confirm_password = request.POST.get('confirm_password')
-            if new_password != confirm_password:
-                messages.error(request, 'Passwords do not match.')
-            else:
-                user_to_manage.set_password(new_password)
-                user_to_manage.save()
-                update_session_auth_hash(request, user_to_manage)
-                messages.success(request, f'Password for {user_to_manage.first_name} {user_to_manage.last_name} has been updated.')
-        elif 'delete_account' in request.POST:
-            # Delete account
-            full_name = f"{user_to_manage.first_name} {user_to_manage.last_name}"
-            user_to_manage.delete()
-            messages.success(request, f'Account for {full_name} has been deleted.')
-            if request.user.profile.user_type == 'admin':
-                return redirect('admin_dashboard')
-            elif request.user.profile.user_type == 'provider':
-                return redirect('provider_dashboard')
-            else:
-                return redirect('home')
-    context = {
-        'user': request.user,
-        'user_to_manage': user_to_manage
-    }
-    return render(request, 'pages/manage_account.html', context)
+                messages.success(request, 'Account updated successfully.')
+            except Exception as e:
+                messages.error(request, f'Error updating account: {str(e)}')
+            
+            return redirect('provider_dashboard')
+        
+        return render(request, 'pages/manage_account.html', {
+            'user_to_manage': user_to_manage
+        })
+        
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('provider_dashboard')
 
 @login_required
 def assign_caregiver(request, patient_id):
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type not in ['admin', 'provider']:
+    """View for providers to assign caregivers to patients"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to assign caregivers.')
         return redirect('home')
     
     try:
-        patient_user = User.objects.get(id=patient_id)
-        patient_profile = patient_user.profile
+        patient = UserProfile.objects.get(id=patient_id, user_type='patient')
         
-        # Verify patient exists and is a patient
-        if not hasattr(patient_user, 'profile') or patient_user.profile.user_type != 'patient':
-            messages.error(request, 'Invalid patient account.')
-            if request.user.profile.user_type == 'admin':
-                return redirect('admin_dashboard')
-            else:
-                return redirect('provider_dashboard')
-        
-        # For providers, only allow assigning caregivers to patients they manage
-        if request.user.profile.user_type == 'provider' and patient_profile.provider != request.user.profile:
-            messages.error(request, 'You do not have permission to assign caregivers to this patient.')
+        # Verify provider manages this patient
+        if patient.provider != request.user.profile:
+            messages.error(request, 'You do not have permission to manage this patient.')
             return redirect('provider_dashboard')
         
-        # Get all available caregivers
-        if request.user.profile.user_type == 'admin':
-            available_caregivers = UserProfile.objects.filter(user_type='caregiver')
-        else:
-            # Providers can only assign caregivers they've created
-            # This assumes caregivers have a provider field or we're just showing all caregivers
-            available_caregivers = UserProfile.objects.filter(user_type='caregiver')
-        
-        # Get currently assigned caregivers
-        assigned_caregivers = UserProfile.objects.filter(user_type='caregiver', linked_patients=patient_profile)
+        # Get all available caregivers for this provider
+        available_caregivers = UserProfile.objects.filter(
+            user_type='caregiver',
+            provider=request.user.profile
+        )
         
         if request.method == 'POST':
-            # Get selected caregiver IDs from form
-            selected_caregiver_ids = request.POST.getlist('caregivers')
+            caregiver_id = request.POST.get('caregiver')
+            action = request.POST.get('action')
             
-            # Clear all current assignments for this patient
-            for caregiver in UserProfile.objects.filter(user_type='caregiver'):
-                caregiver.linked_patients.remove(patient_profile)
-                caregiver.save()
-            
-            # Assign selected caregivers
-            for caregiver_id in selected_caregiver_ids:
+            if caregiver_id and action:
                 try:
-                    caregiver_profile = UserProfile.objects.get(id=caregiver_id, user_type='caregiver')
-                    caregiver_profile.linked_patients.add(patient_profile)
-                    caregiver_profile.save()
+                    caregiver = UserProfile.objects.get(
+                        id=caregiver_id,
+                        user_type='caregiver',
+                        provider=request.user.profile
+                    )
+                    
+                    if action == 'assign':
+                        caregiver.patient = patient
+                        caregiver.save()
+                        messages.success(request, f'Successfully assigned {caregiver.user.get_full_name()} to {patient.user.get_full_name()}')
+                    elif action == 'unassign':
+                        if caregiver.patient == patient:
+                            caregiver.patient = None
+                            caregiver.save()
+                            messages.success(request, f'Successfully unassigned {caregiver.user.get_full_name()} from {patient.user.get_full_name()}')
+                    
                 except UserProfile.DoesNotExist:
-                    pass
+                    messages.error(request, 'Caregiver not found.')
             
-            messages.success(request, f'Caregiver assignments updated for {patient_user.first_name} {patient_user.last_name}.')
-            
-            # Redirect based on user type
-            if request.user.profile.user_type == 'admin':
-                return redirect('admin_dashboard')
-            else:
-                return redirect('provider_dashboard')
+            return redirect('assign_caregiver', patient_id=patient_id)
         
         context = {
-            'user': request.user,
-            'patient': patient_user,
+            'patient': patient,
             'available_caregivers': available_caregivers,
-            'assigned_caregivers': assigned_caregivers
+            'assigned_caregivers': available_caregivers.filter(patient=patient)
         }
-        return render(request, 'pages/assign_caregiver.html', context)
-    
-    except User.DoesNotExist:
+        
+        return render(request, 'users/assign_caregiver.html', context)
+        
+    except UserProfile.DoesNotExist:
         messages.error(request, 'Patient not found.')
-        if request.user.profile.user_type == 'admin':
-            return redirect('admin_dashboard')
-        else:
+        return redirect('provider_dashboard')
+
+@login_required
+def delete_account(request, user_id):
+    """View to handle account deletion"""
+    try:
+        user_to_delete = User.objects.get(id=user_id)
+        
+        # Check permissions
+        if not request.user.is_superuser:  # Admin can delete any account
+            if request.user.profile.user_type == 'provider':
+                # Provider can only delete their patients/caregivers
+                if not hasattr(user_to_delete, 'profile') or \
+                   user_to_delete.profile.provider != request.user.profile or \
+                   user_to_delete == request.user:
+                    messages.error(request, 'You do not have permission to delete this account.')
+                    return redirect('provider_dashboard')
+            else:
+                # Other users can only delete their own account
+                if user_to_delete != request.user:
+                    messages.error(request, 'You do not have permission to delete this account.')
+                    return redirect('home')
+        
+        if request.method == 'POST':
+            # Delete related tasks first
+            if hasattr(user_to_delete, 'profile'):
+                from taskmanager.models import Task, TaskResponse, TaskNotification
+                
+                # Delete tasks where user is assigned to or assigned by
+                tasks = Task.objects.filter(
+                    assigned_to=user_to_delete.profile
+                ) | Task.objects.filter(
+                    assigned_by=user_to_delete.profile
+                )
+                
+                # Delete related task data
+                TaskResponse.objects.filter(task__in=tasks).delete()
+                TaskNotification.objects.filter(task__in=tasks).delete()
+                tasks.delete()
+                
+                # If provider, reassign their patients/caregivers
+                if user_to_delete.profile.user_type == 'provider':
+                    UserProfile.objects.filter(provider=user_to_delete.profile).update(provider=None)
+                
+                # Delete the profile
+                user_to_delete.profile.delete()
+            
+            # Delete the user
+            username = user_to_delete.username
+            user_to_delete.delete()
+            
+            messages.success(request, f'Account "{username}" has been deleted successfully.')
+            
+            # If user deleted their own account, log them out
+            if user_to_delete == request.user:
+                logout(request)
+                return redirect('home')
+            
+            # Otherwise return to appropriate dashboard
+            if request.user.profile.user_type == 'admin':
+                return redirect('admin_dashboard')
             return redirect('provider_dashboard')
+        
+        return render(request, 'pages/delete_account.html', {
+            'user_to_delete': user_to_delete
+        })
+        
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('home')

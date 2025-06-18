@@ -14,11 +14,12 @@ class Command(BaseCommand):
         ]
         profiles = {}
         for role in roles:
-            user, created = User.objects.get_or_create(username=role['username'])
-            user.set_password(role['password'])
-            user.first_name = role['first_name']
-            user.last_name = role['last_name']
-            user.email = f"{role['username']}@test.com"
+            user = User.objects.create_user(
+                username=role['username'],
+                password=role['password'],
+                first_name=role['first_name'],
+                last_name=role['last_name']
+            )
             user.save()
             profile, _ = UserProfile.objects.get_or_create(user=user)
             profile.user_type = role['user_type']

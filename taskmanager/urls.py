@@ -28,4 +28,8 @@ urlpatterns = [
     # Patient-specific task management
     path('provider/delete-patient-tasks/<int:patient_id>/', views.delete_patient_tasks, name='delete_patient_tasks'),
     path('provider/delete-task/<int:task_id>/', views.delete_task, name='delete_task'),
+    
+    # Appointments
+    path('provider/create-appointment/<int:patient_id>/', views.create_appointment, name='create_appointment'),
+    path('patient/appointments/', views.patient_appointments, name='patient_appointments'),
 ] 

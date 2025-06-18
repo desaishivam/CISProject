@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
+from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, Appointment
 from .constants import TASK_TYPES, TASK_TEMPLATES, DIFFICULTY_LEVELS, DIFFICULTY_CONFIGS
 from users.models import UserProfile
 import json
@@ -686,3 +686,60 @@ def delete_task(request, task_id):
         else:
             messages.error(request, 'An error occurred while deleting the task.')
             return redirect('provider_dashboard')
+
+@login_required
+def create_appointment(request, patient_id):
+    """Provider view to create an appointment with a patient"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        return JsonResponse({'status': 'error', 'message': 'You do not have permission to create appointments.'})
+    
+    try:
+        patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
+        
+        # Verify provider manages this patient
+        if patient_profile.provider != request.user.profile:
+            return JsonResponse({'status': 'error', 'message': 'You do not have permission to create appointments for this patient.'})
+        
+        if request.method == 'POST':
+            datetime_str = request.POST.get('datetime')
+            notes = request.POST.get('notes', '')
+            
+            if not datetime_str:
+                return JsonResponse({'status': 'error', 'message': 'Date and time are required.'})
+            
+            # Create the appointment
+            appointment = Appointment.objects.create(
+                provider=request.user.profile,
+                patient=patient_profile,
+                datetime=datetime_str,
+                notes=notes
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Appointment scheduled with {patient_profile.user.get_full_name()} for {datetime_str}.',
+                'appointment': {
+                    'id': appointment.id,
+                    'datetime': datetime_str,
+                    'notes': appointment.notes
+                }
+            })
+            
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Patient not found.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Error creating appointment: {str(e)}'})
+
+@login_required
+def patient_appointments(request):
+    """View for patients to see their appointments"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'patient':
+        messages.error(request, 'You do not have permission to view appointments.')
+        return redirect('home')
+    
+    appointments = Appointment.objects.filter(patient=request.user.profile).order_by('datetime')
+    
+    return render(request, 'appointments/patient_appointments.html', {
+        'appointments': appointments,
+        'user_type': 'Patient'
+    })

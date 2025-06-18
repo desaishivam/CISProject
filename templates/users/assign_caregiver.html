@@ -1,0 +1,205 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Assign Caregivers - CogniCare{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-info">
+            <h1>Assign Caregivers</h1>
+            <p class="subtitle">Managing caregivers for {{ patient.user.get_full_name }}</p>
+        </div>
+        <a href="{% url 'provider_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="assignment-container">
+        <!-- Currently Assigned Caregivers -->
+        <div class="section">
+            <h2>🤝 Currently Assigned</h2>
+            {% if assigned_caregivers %}
+                <div class="caregiver-list">
+                    {% for caregiver in assigned_caregivers %}
+                        <div class="caregiver-card">
+                            <div class="caregiver-info">
+                                <h3>{{ caregiver.user.get_full_name }}</h3>
+                            </div>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="caregiver" value="{{ caregiver.id }}">
+                                <input type="hidden" name="action" value="unassign">
+                                <button type="submit" class="action-btn danger-btn">
+                                    ❌ Unassign
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">No caregivers currently assigned.</p>
+            {% endif %}
+        </div>
+
+        <!-- Available Caregivers -->
+        <div class="section mt-4">
+            <h2>👥 Available Caregivers</h2>
+            {% if available_caregivers %}
+                {% with has_available=False %}
+                    <div class="caregiver-list">
+                        {% for caregiver in available_caregivers %}
+                            {% if not caregiver.patient %}
+                                {% with has_available=True %}
+                                    <div class="caregiver-card">
+                                        <div class="caregiver-info">
+                                            <h3>{{ caregiver.user.get_full_name }}</h3>
+                                        </div>
+                                        <form method="post" class="inline-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="caregiver" value="{{ caregiver.id }}">
+                                            <input type="hidden" name="action" value="assign">
+                                            <button type="submit" class="action-btn success-btn">
+                                                ✅ Assign
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endwith %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% if not has_available %}
+                        <p class="empty-state">No available caregivers found.</p>
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                <p class="empty-state">No caregivers available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .subtitle {
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .assignment-container {
+        margin-top: 2rem;
+    }
+    
+    .section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+    
+    .section h2 {
+        margin: 0 0 1rem 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+    }
+    
+    .caregiver-list {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .caregiver-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .caregiver-info h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #2c3e50;
+    }
+    
+    .caregiver-info p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .inline-form {
+        margin: 0;
+    }
+    
+    .empty-state {
+        color: #666;
+        text-align: center;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin: 0;
+    }
+    
+    .back-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #2c3e50;
+        transition: all 0.3s ease;
+    }
+    
+    .back-btn:hover {
+        background: #e9ecef;
+        text-decoration: none;
+        color: #2c3e50;
+    }
+
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .success-btn {
+        background: #28a745;
+        color: white;
+    }
+
+    .success-btn:hover {
+        background: #218838;
+    }
+
+    .danger-btn {
+        background: #dc3545;
+        color: white;
+    }
+
+    .danger-btn:hover {
+        background: #c82333;
+    }
+    
+    @media (max-width: 768px) {
+        .caregiver-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %} 

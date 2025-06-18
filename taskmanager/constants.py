@@ -40,7 +40,7 @@ TASK_TEMPLATES = {
             'mild': 'tasks/checklist/mild/take.html',
             'moderate': 'tasks/checklist/moderate/take.html',
             'major': 'tasks/checklist/major/take.html',
-        },
+    },
         'results_templates': {
             'mild': 'tasks/checklist/mild/results.html',
             'moderate': 'tasks/checklist/moderate/results.html',
