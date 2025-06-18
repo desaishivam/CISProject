@@ -35,11 +35,11 @@ def assign_task(request, patient_id):
             due_date = request.POST.get('due_date')
             template_id = request.POST.get('template_id')
             difficulty = request.POST.get('difficulty', 'mild')  # Default to mild
-
+            
             # Always set title to the display name for the selected task_type
             type_dict = dict(TASK_TYPES)
             title = type_dict.get(task_type, task_type.replace('_', ' ').title())
-
+            
             # Create the task
             task = Task.objects.create(
                 title=title,

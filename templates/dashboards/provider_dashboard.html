@@ -91,7 +91,7 @@
                     </form>
                     <div id="assign-all-status" style="margin-top:1rem;display:none;"></div>
                 </div>
-
+                
                 <!-- Task Cleanup Options -->
                 <div class="clear-actions">
                     <h4 class="subsection-title">🗂️ Patient Task Management</h4>
@@ -455,7 +455,7 @@
         document.body.appendChild(form);
         form.submit();
     }
-    
+
     function assignAllTasksToPatient() {
         const patientId = document.getElementById('patient_select').value;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;

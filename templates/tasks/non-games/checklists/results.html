@@ -77,17 +77,17 @@
                 </div>
             <div class="completion-stats">
                 <div class="stat">
-                    {% with completed_count=0 %}
-                    {% if result.responses.item_1 %}{% widthratio 1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.item_2 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.item_3 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.item_5 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.item_6 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.item_7 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.mood %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    {% if result.responses.memory_entry %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
-                    <span class="stat-value">{{ completed_count }}/8</span>
-                    {% endwith %}
+                        {% with completed_count=0 %}
+                        {% if result.responses.item_1 %}{% widthratio 1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_2 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_3 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_5 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_6 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.item_7 %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.mood %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        {% if result.responses.memory_entry %}{% widthratio completed_count|add:1 1 1 as completed_count %}{% endif %}
+                        <span class="stat-value">{{ completed_count }}/8</span>
+                        {% endwith %}
                 </div>
                 </div>
             <div class="checklist-items">
