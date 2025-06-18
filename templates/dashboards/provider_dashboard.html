@@ -67,70 +67,6 @@
                                 </div>
                             </div>
                         </div>
-                        <style>
-                            .quick-assign-row {
-                                display: flex;
-                                gap: 1.5rem;
-                                margin-bottom: 1.5rem;
-                                flex-wrap: nowrap;
-                                width: 100%;
-                            }
-                            .flex-1 {
-                                flex: 1;
-                                min-width: 0;
-                            }
-                            .label-input-row {
-                                display: flex;
-                                align-items: center;
-                                gap: 1rem;
-                                width: 100%;
-                            }
-                            .label-input-row label {
-                                white-space: nowrap;
-                                font-weight: 500;
-                                color: #2d3748;
-                                min-width: max-content;
-                            }
-                            .label-input-row select {
-                                flex: 1;
-                                min-width: 0;
-                                width: 100%;
-                                padding: 0.75rem;
-                                border: 1px solid #e5e7eb;
-                                border-radius: 6px;
-                                background-color: white;
-                                color: #1a202c;
-                            }
-                            .assign-row {
-                                display: flex;
-                                gap: 1.5rem;
-                                margin-top: 1.5rem;
-                            }
-                            .compact-button-row {
-                                display: flex;
-                                gap: 1.5rem;
-                                margin-top: 1.5rem;
-                            }
-                            .compact-button-row button {
-                                padding: 0.75rem 1.5rem;
-                                white-space: nowrap;
-                            }
-                            @media (max-width: 768px) {
-                                .quick-assign-row {
-                                    flex-direction: column;
-                                    gap: 1.5rem;
-                                }
-                                .label-input-row {
-                                    width: 100%;
-                                }
-                                .compact-button-row {
-                                    flex-direction: column;
-                                }
-                                .compact-button-row button {
-                                    width: 100%;
-                                }
-                            }
-                        </style>
                         <div class="assign-row compact-button-row">
                             <div class="form-group assign-button">
                                 <button type="button" onclick="quickAssignTask()" class="action-btn primary-btn">
@@ -154,7 +90,7 @@
                 
                 <!-- Task Cleanup Options -->
                 <div class="clear-actions">
-                    <h4 class="subsection-title">🗂️ Patient Task Management</h4>
+                    <h4 class="subsection-title task-management-title">🗂️ Patient Task Management</h4>
                     <div class="patient-task-management">
                         <form method="post" action="" class="patient-select-form">
                             {% csrf_token %}
@@ -942,6 +878,121 @@
     .empty-state p {
         margin: 0;
         font-size: 1rem;
+    }
+
+    .quick-assign-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+    
+    .compact-button-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .compact-button-row button {
+        padding: 0.75rem 1.5rem;
+        white-space: nowrap;
+        min-width: 180px;
+        justify-content: center;
+    }
+    
+    .task-management-title {
+        margin-bottom: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .quick-assign-row {
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .compact-button-row {
+            flex-direction: column;
+            margin-bottom: 2.5rem;
+        }
+        .compact-button-row button {
+            width: 100%;
+            min-width: unset;
+        }
+    }
+
+    .flex-1 {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .label-input-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+    }
+    
+    .label-input-row label {
+        white-space: nowrap;
+        font-weight: 500;
+        color: #2d3748;
+        min-width: max-content;
+    }
+    
+    .label-input-row select {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        background-color: white;
+        color: #1a202c;
+    }
+    
+    .quick-assign-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+    
+    .compact-button-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .compact-button-row button {
+        padding: 0.75rem 1.5rem;
+        white-space: nowrap;
+        min-width: 180px;
+        justify-content: center;
+    }
+    
+    .task-management-title {
+        margin-bottom: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .quick-assign-row {
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .compact-button-row {
+            flex-direction: column;
+            margin-bottom: 2.5rem;
+        }
+        .compact-button-row button {
+            width: 100%;
+            min-width: unset;
+        }
+        .label-input-row {
+            width: 100%;
+        }
     }
 </style>
 
