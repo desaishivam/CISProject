@@ -70,7 +70,7 @@
                         <style>
                             .quick-assign-row {
                                 display: flex;
-                                gap: 1rem;
+                                gap: 1.5rem;
                                 margin-bottom: 1.5rem;
                                 flex-wrap: nowrap;
                                 width: 100%;
@@ -82,24 +82,51 @@
                             .label-input-row {
                                 display: flex;
                                 align-items: center;
-                                gap: 0.5rem;
+                                gap: 1rem;
                                 width: 100%;
                             }
                             .label-input-row label {
                                 white-space: nowrap;
                                 font-weight: 500;
+                                color: #2d3748;
+                                min-width: max-content;
                             }
                             .label-input-row select {
                                 flex: 1;
                                 min-width: 0;
                                 width: 100%;
+                                padding: 0.75rem;
+                                border: 1px solid #e5e7eb;
+                                border-radius: 6px;
+                                background-color: white;
+                                color: #1a202c;
+                            }
+                            .assign-row {
+                                display: flex;
+                                gap: 1.5rem;
+                                margin-top: 1.5rem;
+                            }
+                            .compact-button-row {
+                                display: flex;
+                                gap: 1.5rem;
+                                margin-top: 1.5rem;
+                            }
+                            .compact-button-row button {
+                                padding: 0.75rem 1.5rem;
+                                white-space: nowrap;
                             }
                             @media (max-width: 768px) {
                                 .quick-assign-row {
                                     flex-direction: column;
-                                    gap: 1rem;
+                                    gap: 1.5rem;
                                 }
                                 .label-input-row {
+                                    width: 100%;
+                                }
+                                .compact-button-row {
+                                    flex-direction: column;
+                                }
+                                .compact-button-row button {
                                     width: 100%;
                                 }
                             }
@@ -131,28 +158,62 @@
                     <div class="patient-task-management">
                         <form method="post" action="" class="patient-select-form">
                             {% csrf_token %}
-                        <div class="patient-selection-row">
-                            <div class="form-group">
-                                <div class="label-input-row">
-                                    <label for="selected_patient">Select Patient:</label>
-                                    <select id="selected_patient" name="selected_patient" class="form-input" required>
-                                        <option value="">Choose a patient...</option>
-                                        {% for patient in patients %}
-                                            <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="action-buttons-row">
-                                    <button type="submit" class="action-btn primary-btn">
-                                        🔍 View Tasks
-                                    </button>
-                                    <button type="button" onclick="managePatientTasks('delete')" class="action-btn danger-btn">
-                                        🗑️ Delete All Tasks
-                                    </button>
+                            <div class="patient-selection-row">
+                                <div class="form-group">
+                                    <div class="label-input-row">
+                                        <label for="selected_patient">Select Patient:</label>
+                                        <select id="selected_patient" name="selected_patient" class="form-input" required>
+                                            <option value="">Choose a patient...</option>
+                                            {% for patient in patients %}
+                                                <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="action-buttons-row">
+                                <button type="submit" class="action-btn primary-btn">
+                                    🔍 View Tasks
+                                </button>
+                                <button type="button" onclick="managePatientTasks('delete')" class="action-btn danger-btn">
+                                    🗑️ Delete All Tasks
+                                </button>
+                            </div>
                         </form>
+                        <style>
+                            .patient-task-management {
+                                margin-top: 1.5rem;
+                            }
+                            
+                            .patient-selection-row {
+                                margin-bottom: 1.5rem;
+                            }
+                            
+                            .patient-selection-row .form-group {
+                                width: 100%;
+                            }
+                            
+                            .action-buttons-row {
+                                display: flex;
+                                gap: 1.5rem;
+                            }
+                            
+                            .action-buttons-row button {
+                                padding: 0.75rem 1.5rem;
+                                white-space: nowrap;
+                            }
+                            
+                            @media (max-width: 768px) {
+                                .action-buttons-row {
+                                    flex-direction: column;
+                                    gap: 1rem;
+                                }
+                                
+                                .action-buttons-row button {
+                                    width: 100%;
+                                }
+                            }
+                        </style>
                         {% if selected_patient %}
                             <h5 class="patient-tasks-title">Tasks for {{ selected_patient.user.get_full_name }}</h5>
                             {% if patient_tasks %}
