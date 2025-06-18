@@ -1,9 +1,149 @@
 <!-- Color Game (Major) - Placeholder -->
 {% extends 'layouts/base.html' %}
-{% block title %}Color Matching (Major){% endblock %}
+
+{% block title %}Color Matching Game – Major{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Color Matching (Major)</h1>
-    <!-- Game implementation will be added here -->
+<div class="game-container">
+  <style>
+    .game-container {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #stats {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    .board {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      margin: 8px;
+      background: #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+      --color: #fff;
+      transition: background-color 0.3s;
+    }
+    .card.revealed {
+      background-color: var(--color);
+    }
+    .card.matched {
+      visibility: hidden;
+    }
+  </style>
+
+  <h1>🎨 Color Matching – Major</h1>
+  <div id="stats">
+    Moves: <span id="moves">0</span> |
+    Time: <span id="timer">00:00</span>
+  </div>
+  <div class="board" id="board"></div>
+
+  <form id="gameForm" method="post" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="moves" id="finalMoves">
+    <input type="hidden" name="time" id="finalTime">
+  </form>
+
+  <script>
+    const colors = ['red','green','blue','yellow'];
+    let deck = [...colors, ...colors];
+    let first = null, second = null, moves = 0, matches = 0, seconds = 0, timer;
+
+    const board = document.getElementById('board');
+    const movesEl = document.getElementById('moves');
+    const timerEl = document.getElementById('timer');
+    const gameForm = document.getElementById('gameForm');
+    const finalMoves = document.getElementById('finalMoves');
+    const finalTime = document.getElementById('finalTime');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function startTimer() {
+      timer = setInterval(() => {
+        seconds++;
+        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const s = String(seconds % 60).padStart(2, '0');
+        timerEl.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function init() {
+      shuffle(deck);
+      board.innerHTML = '';
+      deck.forEach(color => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.color = color;
+        card.style.setProperty('--color', color);
+        card.addEventListener('click', flip);
+        board.appendChild(card);
+      });
+      moves = 0;
+      matches = 0;
+      seconds = 0;
+      movesEl.textContent = moves;
+      timerEl.textContent = '00:00';
+      clearInterval(timer);
+      first = second = null;
+    }
+
+    function flip(e) {
+      const card = e.currentTarget;
+      if (card.classList.contains('revealed') || second) return;
+
+      if (moves === 0 && !timer) startTimer();
+
+      card.classList.add('revealed');
+      if (!first) {
+        first = card;
+      } else {
+        second = card;
+        movesEl.textContent = ++moves;
+
+        if (first.dataset.color === second.dataset.color) {
+          first.classList.add('matched');
+          second.classList.add('matched');
+          resetPicks();
+          if (++matches === colors.length) finish();
+        } else {
+          setTimeout(() => {
+            first.classList.remove('revealed');
+            second.classList.remove('revealed');
+            resetPicks();
+          }, 800);
+        }
+      }
+    }
+
+    function resetPicks() {
+      first = null;
+      second = null;
+    }
+
+    function finish() {
+      clearInterval(timer);
+      setTimeout(() => {
+        finalMoves.value = moves;
+        finalTime.value = timerEl.textContent;
+        gameForm.submit();
+      }, 200);
+    }
+
+    init();
+  </script>
 </div>
 {% endblock %} 

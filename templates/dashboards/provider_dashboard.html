@@ -3,6 +3,7 @@
 {% block title %}Provider Dashboard - CogniCare{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="dashboard-container">
     <div class="dashboard-header">
         <div class="header-info">
@@ -28,64 +29,62 @@
                 <!-- Quick Task Assignment -->
                 <div class="quick-assign-section">
                     <h4 class="subsection-title">⚡ Quick Task Assignment</h4>
-                    <form id="quick-assign-form" class="task-form">
-                        <div class="quick-assign-row">
-                            <div class="form-group flex-1">
-                                <div class="label-input-row">
-                                    <label for="quick_assign_patient">Assign Task To:</label>
-                                    <select id="quick_assign_patient" name="patient" class="form-input" required>
-                                        <option value="">Select a patient...</option>
-                                        {% for patient in patients %}
-                                            <option value="{{ patient.id }}">{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group flex-1">
-                                <div class="label-input-row">
-                                    <label for="quick_assign_task">Task Type:</label>
-                                    <select id="quick_assign_task" name="task" class="form-input" required>
-                                        <option value="">Select type...</option>
-                                        {% for value, label in task_types %}
-                                            <option value="{{ value }}" data-has-difficulty="{% if value == 'puzzle' or value == 'color' or value == 'pairs' %}true{% else %}false{% endif %}">
-                                                {% if value == 'puzzle' or value == 'color' or value == 'pairs' %}🎮 {% endif %}{{ label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group flex-1">
-                                <div class="label-input-row">
-                                    <label for="quick_assign_difficulty">
-                                        <span class="target-icon">🎯</span> Difficulty:
-                                    </label>
-                                    <select id="quick_assign_difficulty" name="difficulty" class="form-input" required>
-                                        <option value="mild">🟢 Mild</option>
-                                        <option value="moderate">🟡 Moderate</option>
-                                        <option value="challenging">🔴 Challenging</option>
-                                    </select>
-                                </div>
+                    <div class="quick-assign-row">
+                        <div class="form-group flex-1">
+                            <div class="label-input-row">
+                                <label for="quick_assign_patient">Assign Task To:</label>
+                                <select id="quick_assign_patient" name="patient" class="form-input" required>
+                                    <option value="">Select a patient...</option>
+                                    {% for patient in provider_patients %}
+                                        <option value="{{ patient.id }}">{{ patient.user.get_full_name }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
-                        <div class="assign-row compact-button-row">
-                            <div class="form-group assign-button">
-                                <button type="button" onclick="quickAssignTask()" class="action-btn primary-btn">
+                        <div class="form-group flex-1">
+                            <div class="label-input-row">
+                                <label for="quick_assign_task">Task Type:</label>
+                                <select id="quick_assign_task" name="task_type" class="form-input" required>
+                                    <option value="">Select type...</option>
+                                    {% for task_type, display_name in task_types %}
+                                        <option value="{{ task_type }}" 
+                                                data-has-difficulty="{% if task_type in game_types %}true{% else %}false{% endif %}">
+                                            {% if task_type in game_types %}🎮 {% endif %}{{ display_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group flex-1">
+                            <div class="label-input-row">
+                                <label for="quick_assign_difficulty">
+                                    <span class="target-icon">🎯</span> Difficulty:
+                                </label>
+                                <select id="quick_assign_difficulty" name="difficulty" class="form-input" required>
+                                    <option value="">Select difficulty...</option>
+                                    {% for level, display in difficulty_levels %}
+                                        <option value="{{ level }}">
+                                            {% if level == 'mild' %}🟢
+                                            {% elif level == 'moderate' %}🟡
+                                            {% elif level == 'major' %}🔴
+                                            {% endif %} {{ display }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button onclick="quickAssignTask()" class="action-btn primary-btn">
                                     🎯 Assign Task
                                 </button>
-                            </div>
-                            <div class="form-group assign-all-button">
-                                <button type="button" onclick="assignAllTasksToPatient()" class="action-btn secondary-btn">
-                                    📝 Assign All Tasks
+                        <button onclick="assignAllTasksToPatient()" class="action-btn outline-btn">
+                            📋 Assign All Tasks
                                 </button>
-                            </div>
-                            <div class="form-group assign-all-difficulties-button" id="assign-all-difficulties-group">
-                                <button type="button" onclick="assignAllDifficulties()" class="action-btn tertiary-btn">
+                        <button onclick="assignAllDifficulties()" class="action-btn outline-btn">
                                     🎮 Assign All Difficulties
                                 </button>
-                            </div>
-                        </div>
-                    </form>
-                    <div id="assign-all-status" style="margin-top:1rem;display:none;"></div>
+                    </div>
                 </div>
                 
                 <!-- Task Cleanup Options -->
@@ -94,27 +93,24 @@
                     <div class="patient-task-management">
                         <form method="post" action="" class="patient-select-form">
                             {% csrf_token %}
-                            <div class="patient-selection-row">
-                                <div class="form-group">
+                        <div class="patient-selection-row">
+                            <div class="form-group">
                                     <div class="label-input-row">
-                                        <label for="selected_patient">Select Patient:</label>
-                                        <select id="selected_patient" name="selected_patient" class="form-input" required>
-                                            <option value="">Choose a patient...</option>
-                                            {% for patient in patients %}
-                                                <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
+                                    <label for="selected_patient">Select Patient:</label>
+                                    <select id="selected_patient" name="selected_patient" class="form-input" required>
+                                    <option value="">Choose a patient...</option>
+                                    {% for patient in patients %}
+                                            <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                                 </div>
                             </div>
                             <div class="action-buttons-row">
                                 <button type="submit" class="action-btn primary-btn">
                                     🔍 View Tasks
                                 </button>
-                                <button type="button" onclick="managePatientTasks('delete')" class="action-btn danger-btn">
-                                    🗑️ Delete All Tasks
-                                </button>
-                            </div>
+                        </div>
                         </form>
                         <style>
                             .patient-task-management {
@@ -193,7 +189,7 @@
                                 </div>
                             {% else %}
                                 <div class="empty-state">
-                                    <p>📭 No tasks found for this patient.</p>
+                                    <p>📋 No tasks found for this patient.</p>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -208,97 +204,101 @@
                 <!-- Patient Accounts Section -->
                 <div class="account-section">
                     <h3 class="section-subtitle">👤 Patient Accounts</h3>
-                    {% if patients %}
-                    <div class="user-accounts">
-                        {% for patient in patients %}
-                        <div class="user-card">
-                            <div class="user-details">
-                                <h4 class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
-                                <div class="user-info">
-                                    <p><strong>Username:</strong> {{ patient.user.username }}</p>
-                                </div>
-                                
-                                <!-- Show caregivers assigned to this patient -->
-                                <div class="relationship-data">
-                                    <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
-                                    {% with caregivers=patient.caregivers.all %}
-                                        {% if caregivers %}
-                                            <div class="relationship-list">
-                                            {% for caregiver in caregivers %}
-                                                <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
-                                            {% endfor %}
+                {% if patients %}
+                <div class="user-accounts">
+                    {% for patient in patients %}
+                    <div class="user-card">
+                        <div class="user-row-flex">
+                        <div class="user-details">
+                            <h4 class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
+                            <div class="user-info">
+                            <p><strong>Username:</strong> {{ patient.user.username }}</p>
+                            </div>
+                                <!-- Show relationships -->
+                            <div class="relationship-data">
+                                    <div class="relationship-row-container">
+                                {% with caregivers=patient.caregivers.all %}
+                                            <div class="relationship-row">
+                                                <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
+                                    {% if caregivers %}
+                                        {% for caregiver in caregivers %}
+                                                        <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="no-relationships">❌ No caregivers assigned</p>
+                                    {% endif %}
                                             </div>
-                                        {% else %}
-                                            <p class="no-relationships">❌ No caregivers assigned</p>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
-                            </div>
-                            <div class="user-actions">
-                                <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
-                                    🔗 Assign Caregivers
-                                </a>
-                                <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
-                                    ✏️ Edit
-                                </a>
-                            </div>
-                            
-                            <!-- Appointment Management -->
-                            <div class="appointment-section">
-                                <p class="relationship-title"><strong>📅 Appointments</strong></p>
-                                <button class="action-btn outline-btn schedule-btn" 
-                                        onclick="openScheduleModal('{{ patient.user.first_name }} {{ patient.user.last_name }}', '{{ patient.user.id }}')">
-                                    Schedule Appointment
-                                </button>
+                                {% endwith %}
+                                        <div class="relationship-row">
+                                            <p class="relationship-title"><strong>👨‍⚕️ Healthcare Provider:</strong></p>
+                                            {% if patient.provider %}
+                                                <div class="relationship-item">{{ patient.provider.user.first_name }} {{ patient.provider.user.last_name }} ({{ patient.provider.user.username }})</div>
+                                            {% else %}
+                                                <p class="no-relationships">❌ No provider assigned</p>
+                                            {% endif %}
                             </div>
                         </div>
-                        {% endfor %}
+                                </div>
+                            </div>
+                            <div class="user-actions user-actions-inline">
+                            <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
+                                🔗 Assign Caregivers
+                            </a>
+                                <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
+                                ✏️ Edit
+                            </a>
+                            </div>
+                        </div>
                     </div>
-                    {% else %}
-                    <div class="empty-state">
-                        <p>👤 No patient accounts found.</p>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
-
+                {% else %}
+                <div class="empty-state">
+                    <p>👤 No patient accounts found.</p>
+                </div>
+                {% endif %}
+            </div>
+            
                 <!-- Caregiver Accounts Section -->
                 <div class="account-section">
                     <h3 class="section-subtitle">🤝 Caregiver Accounts</h3>
-                    {% if caregivers %}
-                    <div class="user-accounts">
-                        {% for caregiver in caregivers %}
-                        <div class="user-card">
-                            <div class="user-details">
-                                <h4 class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
-                                <div class="user-info">
-                                    <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
-                                </div>
-                                
-                                <!-- Show assigned patient -->
-                                <div class="relationship-data">
-                                    <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
-                                    {% if caregiver.patient %}
-                                        <div class="relationship-list">
-                                            <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
-                                        </div>
-                                    {% else %}
-                                        <p class="no-relationships">❌ No patient assigned</p>
-                                    {% endif %}
-                                </div>
+                {% if caregivers %}
+                <div class="user-accounts">
+                    {% for caregiver in caregivers %}
+                    <div class="user-card">
+                        <div class="user-details">
+                            <h4 class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
+                            <div class="user-info">
+                            <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
                             </div>
-                            <div class="user-actions">
-                                <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
-                                    ✏️ Edit
-                                </a>
+                            
+                            <!-- Show assigned patient -->
+                            <div class="relationship-data">
+                                <div class="relationship-row-container">
+                                    <div class="relationship-row">
+                                <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
+                                {% if caregiver.patient %}
+                                            <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
+                                {% else %}
+                                    <p class="no-relationships">❌ No patient assigned</p>
+                                {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        {% endfor %}
+                        <div class="user-actions">
+                                <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
+                                ✏️ Edit
+                            </a>
+                        </div>
                     </div>
-                    {% else %}
-                    <div class="empty-state">
-                        <p>🤝 No caregiver accounts found.</p>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <p>🤝 No caregiver accounts found.</p>
+                </div>
+                {% endif %}
                 </div>
             </div>
         </div>
@@ -310,77 +310,77 @@
                 <!-- Create Patient Account -->
                 <div class="create-account-section">
                     <h3 class="section-subtitle">👤 New Patient Account</h3>
-                    <form method="post" action="{% url 'create_patient' %}" class="account-form">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
+            <form method="post" action="{% url 'create_patient' %}" class="account-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
                                 <div class="label-input-row">
-                                    <label for="patient_username">Username</label>
-                                    <input type="text" id="patient_username" name="username" class="form-input" required>
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" name="username" class="form-input" required>
                                 </div>
-                            </div>
-                            <div class="form-group">
+                    </div>
+                    <div class="form-group">
                                 <div class="label-input-row">
-                                    <label for="patient_password">Password</label>
-                                    <input type="password" id="patient_password" name="password" class="form-input" required>
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" class="form-input" required>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <div class="label-input-row">
-                                    <label for="patient_first_name">First Name</label>
-                                    <input type="text" id="patient_first_name" name="first_name" class="form-input" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="label-input-row">
-                                    <label for="patient_last_name">Last Name</label>
-                                    <input type="text" id="patient_last_name" name="last_name" class="form-input" required>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="action-btn primary-btn large-btn">
-                            ➕ Create Patient Account
-                        </button>
-                    </form>
+                    </div>
                 </div>
-
+                <div class="form-row">
+                    <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" id="first_name" name="first_name" class="form-input" required>
+                                </div>
+                    </div>
+                    <div class="form-group">
+                                <div class="label-input-row">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" id="last_name" name="last_name" class="form-input" required>
+                    </div>
+                </div>
+                </div>
+                <button type="submit" class="action-btn primary-btn large-btn">
+                    ➕ Create Patient Account
+                </button>
+            </form>
+    </div>
+    
                 <!-- Create Caregiver Account -->
                 <div class="create-account-section">
                     <h3 class="section-subtitle">🤝 New Caregiver Account</h3>
-                    <form method="post" action="{% url 'create_caregiver' %}" class="account-form">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
+            <form method="post" action="{% url 'create_caregiver' %}" class="account-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
                                 <div class="label-input-row">
-                                    <label for="caregiver_username">Username</label>
-                                    <input type="text" id="caregiver_username" name="username" class="form-input" required>
+                        <label for="caregiver_username">Username</label>
+                        <input type="text" id="caregiver_username" name="username" class="form-input" required>
                                 </div>
-                            </div>
-                            <div class="form-group">
+                    </div>
+                    <div class="form-group">
                                 <div class="label-input-row">
-                                    <label for="caregiver_password">Password</label>
-                                    <input type="password" id="caregiver_password" name="password" class="form-input" required>
+                        <label for="caregiver_password">Password</label>
+                        <input type="password" id="caregiver_password" name="password" class="form-input" required>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
                                 <div class="label-input-row">
-                                    <label for="caregiver_first_name">First Name</label>
-                                    <input type="text" id="caregiver_first_name" name="first_name" class="form-input" required>
+                        <label for="caregiver_first_name">First Name</label>
+                        <input type="text" id="caregiver_first_name" name="first_name" class="form-input" required>
                                 </div>
-                            </div>
-                            <div class="form-group">
+                    </div>
+                    <div class="form-group">
                                 <div class="label-input-row">
-                                    <label for="caregiver_last_name">Last Name</label>
-                                    <input type="text" id="caregiver_last_name" name="last_name" class="form-input" required>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="action-btn primary-btn large-btn">
-                            ➕ Create Caregiver Account
+                        <label for="caregiver_last_name">Last Name</label>
+                        <input type="text" id="caregiver_last_name" name="last_name" class="form-input" required>
+                    </div>
+                </div>
+                </div>
+                <button type="submit" class="action-btn primary-btn large-btn">
+                    ➕ Create Caregiver Account
                         </button>
                     </form>
                 </div>
@@ -397,7 +397,7 @@
             <span class="close">&times;</span>
         </div>
         <div class="modal-body">
-            <form id="appointmentForm">
+            <form id="appointmentForm" method="post">
                 {% csrf_token %}
                 <input type="hidden" id="patient_id" name="patient_id">
                 <div class="form-group">
@@ -524,65 +524,65 @@
             grid-template-columns: 1fr;
         }
     }
-
+    
     .assign-row {
         display: flex;
         gap: 1rem;
         margin-top: 1rem;
         align-items: center;
     }
-
+    
     .compact-button-row {
         display: flex;
         justify-content: flex-start;
         gap: 1rem;
         flex-wrap: nowrap;
     }
-
+    
     .compact-button-row .form-group {
         flex: 0 1 auto;
         margin: 0;
     }
-
+    
     .compact-button-row button {
         white-space: nowrap;
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
-
+    
     @media (max-width: 768px) {
         .compact-button-row {
             flex-direction: row;
             flex-wrap: wrap;
-        }
-        
+    }
+    
         .compact-button-row .form-group {
             flex: 1 1 auto;
         }
     }
-
+    
     .patient-selection-row {
         margin-bottom: 1.5rem;
     }
-
+    
     .action-buttons-row {
         display: flex;
         gap: 1rem;
         margin-top: 1rem;
         justify-content: flex-start;
     }
-
+    
     .action-buttons-row button {
         flex: 0 1 auto;
         white-space: nowrap;
     }
-
+    
     @media (max-width: 768px) {
         .action-buttons-row {
             flex-direction: row;
             flex-wrap: wrap;
-        }
-        
+    }
+    
         .action-buttons-row button {
             flex: 1 1 auto;
         }
@@ -594,75 +594,72 @@
         gap: 1rem;
         margin-bottom: 1rem;
     }
-
+    
     .label-input-row label {
         flex: 0 0 auto;
         white-space: nowrap;
         font-weight: 500;
         min-width: 100px;
     }
-
+    
     .label-input-row select {
         flex: 1;
         min-width: 200px;
         max-width: 400px;
     }
-
-    @media (max-width: 768px) {
-        .label-input-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .label-input-row label {
-            margin-bottom: 0.25rem;
-        }
-
-        .label-input-row select {
-            width: 100%;
-            max-width: none;
-        }
-    }
-
+    
     .form-row {
         display: flex;
         gap: 1rem;
         margin-bottom: 1rem;
+        width: 100%;
     }
-
+    
     .form-row .form-group {
         flex: 1;
+        min-width: 0;
     }
-
-    .label-input-row {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
+    
+    .form-row .label-input-row {
+        margin-bottom: 0;
     }
-
-    .label-input-row label {
-        min-width: 100px;
-        white-space: nowrap;
+    
+    .form-row .label-input-row label {
+        min-width: 80px;
     }
-
-    .label-input-row input {
-        flex: 1;
+    
+    .form-row .form-input {
+        width: 100%;
+        min-width: 0;
     }
 
     @media (max-width: 768px) {
-        .form-row {
-            flex-direction: column;
-        }
         .label-input-row {
             flex-direction: column;
             align-items: flex-start;
-        }
+        gap: 0.5rem;
+    }
+    
         .label-input-row label {
-            margin-bottom: 0.5rem;
-        }
-        .label-input-row input {
+            margin-bottom: 0.25rem;
+    }
+    
+        .label-input-row select {
             width: 100%;
+            max-width: none;
+    }
+    
+        .form-row {
+            flex-direction: column;
+            gap: 1rem;
+    }
+    
+        .form-row .form-group {
+            width: 100%;
+    }
+    
+        .form-row .label-input-row {
+            margin-bottom: 0;
         }
     }
 
@@ -677,262 +674,158 @@
         height: 100%;
         background-color: rgba(0,0,0,0.5);
     }
-
+    
     .modal-content {
-        background-color: #fefefe;
-        margin: 10% auto;
-        padding: 0;
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
         border-radius: 12px;
-        width: 90%;
+        width: 80%;
         max-width: 500px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         position: relative;
     }
-
-    .modal-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    
+    .close {
+        position: absolute;
+        right: 20px;
+        top: 10px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
     }
-
+    
+    .close:hover {
+        color: #666;
+    }
+    
+    .modal-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
     .modal-header h2 {
         margin: 0;
         font-size: 1.5rem;
         color: #2d3748;
     }
-
+    
     .modal-body {
-        padding: 1.5rem;
-    }
-
-    .close {
-        color: #aaa;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .close:hover {
-        color: #2d3748;
-    }
-
-    /* Appointments Section Styles */
-    .appointments-container {
-        margin-top: 1.5rem;
-    }
-
-    .appointment-selection {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        display: flex;
-        gap: 1.5rem;
-        align-items: flex-end;
-    }
-
-    .appointment-selection .form-group {
-        flex: 1;
-        margin: 0;
-    }
-
-    .appointment-actions {
-        display: flex;
-        gap: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .appointment-selection {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .appointment-actions {
-            justify-content: flex-end;
-        }
-    }
-
-    .relationship-data {
-        margin: 1rem 0;
+        padding: 1rem;
     }
     
-    .relationship-title {
-        color: #4a5568;
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-    
-    .relationship-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .relationship-item {
-        color: #2d3748;
-        padding: 0.5rem;
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        font-size: 0.95rem;
-    }
-    
-    .no-relationships {
-        color: #718096;
-        font-size: 0.95rem;
-        margin: 0;
-    }
-
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #e5e7eb;
-    }
-    
-    .header-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .header-info h1 {
-        margin: 0;
-        color: #1a202c;
-        font-size: 1.8rem;
-    }
-    
-    .user-type {
-        color: #4a5568;
-        font-size: 1rem;
-        font-weight: 500;
-    }
-    
-    .logout-btn {
-        padding: 0.5rem 1rem;
-        background-color: #f8f9fa;
-        color: #2d3748;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 0.95rem;
-        transition: all 0.2s ease;
-    }
-    
-    .logout-btn:hover {
-        background-color: #e9ecef;
-        border-color: #dee2e6;
-    }
-
-    .section-title {
-        color: #1a202c;
-        margin: 0 0 1.5rem 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-    
-    .subsection-title {
-        color: #2d3748;
-        margin: 0 0 1rem 0;
-        font-size: 1.2rem;
-        font-weight: 500;
-    }
-    
-    .user-name {
-        color: #1a202c;
-        margin: 0 0 0.5rem 0;
-        font-size: 1.2rem;
-        font-weight: 600;
-    }
-    
-    .user-info {
-        color: #4a5568;
+    .form-group {
         margin-bottom: 1rem;
     }
     
-    .user-info p {
-        margin: 0;
-    }
-    
-    .user-info strong {
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
         color: #2d3748;
-    }
-    
-    .patient-tasks-title {
-        color: #2d3748;
-        margin: 1.5rem 0 1rem;
-        font-size: 1.1rem;
         font-weight: 500;
     }
     
-    .empty-state {
-        color: #718096;
-        text-align: center;
-        padding: 2rem;
-        background-color: #f8f9fa;
-        border-radius: 8px;
+    .form-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    
+    .appointments-list {
         margin: 1rem 0;
     }
     
-    .empty-state p {
-        margin: 0;
-        font-size: 1rem;
+    .appointments-list .table-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        }
+        
+    .appointments-list table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .appointments-list th {
+        text-align: left;
+        padding: 0.5rem;
+        color: #4a5568;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .appointments-list td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        color: #2d3748;
+    }
+    
+    .appointments-list .appointment-datetime {
+        white-space: nowrap;
+    }
+    
+    .appointments-list .time {
+        color: #718096;
+        font-size: 0.85rem;
+    }
+
+    .no-appointments {
+        color: #718096;
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .danger-btn {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .danger-btn:hover {
+        background-color: #fecaca;
+        border-color: #fca5a5;
+    }
+    
+    /* Quick Task Assignment Layout */
+    .quick-assign-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .quick-assign-row {
         display: flex;
         gap: 1.5rem;
-        margin-bottom: 2.5rem;
-        flex-wrap: nowrap;
-        width: 100%;
-    }
-    
-    .compact-button-row {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 3rem;
-    }
-    
-    .compact-button-row button {
-        padding: 0.75rem 1.5rem;
-        white-space: nowrap;
-        min-width: 180px;
-        justify-content: center;
-    }
-    
-    .task-management-title {
         margin-bottom: 1.5rem;
     }
-    
-    @media (max-width: 768px) {
-        .quick-assign-row {
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .compact-button-row {
-            flex-direction: column;
-            margin-bottom: 2.5rem;
-        }
-        .compact-button-row button {
-            width: 100%;
-            min-width: unset;
-        }
-    }
 
-    .flex-1 {
+    .form-group {
         flex: 1;
         min-width: 0;
     }
-    
+
     .label-input-row {
         display: flex;
         align-items: center;
         gap: 1rem;
-        width: 100%;
     }
     
     .label-input-row label {
@@ -945,505 +838,463 @@
     .label-input-row select {
         flex: 1;
         min-width: 0;
-        width: 100%;
         padding: 0.75rem;
         border: 1px solid #e5e7eb;
         border-radius: 6px;
         background-color: white;
         color: #1a202c;
     }
-    
-    .quick-assign-row {
+
+    .button-row {
         display: flex;
-        gap: 1.5rem;
-        margin-bottom: 2.5rem;
-        flex-wrap: nowrap;
-        width: 100%;
+        gap: 1rem;
     }
     
-    .compact-button-row {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 3rem;
-    }
-    
-    .compact-button-row button {
-        padding: 0.75rem 1.5rem;
-        white-space: nowrap;
-        min-width: 180px;
+    .button-row button {
+        flex: 1;
         justify-content: center;
+        white-space: nowrap;
     }
-    
-    .task-management-title {
-        margin-bottom: 1.5rem;
-    }
-    
+
     @media (max-width: 768px) {
         .quick-assign-row {
             flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .compact-button-row {
-            flex-direction: column;
-            margin-bottom: 2.5rem;
-        }
-        .compact-button-row button {
-            width: 100%;
-            min-width: unset;
-        }
+            gap: 1rem;
+    }
+    
         .label-input-row {
+            flex-direction: column;
+            align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+        .label-input-row select {
+            width: 100%;
+    }
+    
+        .button-row {
+            flex-direction: column;
+            gap: 0.75rem;
+    }
+    
+        .button-row button {
             width: 100%;
         }
+    }
+
+    /* Add these styles for relationship layout */
+    .relationship-row-container {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    .relationship-row {
+        flex: 1;
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        min-width: 0;
+    }
+    
+    .relationship-title {
+        margin-bottom: 0.75rem !important;
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+    
+    .relationship-item {
+        background: white;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #2d3748;
+    }
+    
+    .no-relationships {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid #fecaca;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .relationship-row-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        }
+        
+    /* Update user-card styles */
+        .user-card {
+        display: flex;
+            flex-direction: column;
+        gap: 1rem;
+        }
+        
+    .user-details {
+        width: 100%;
+        }
+
+    .user-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+
+    .relationship-data {
+        width: 100%;
+    }
+
+    .user-row-flex {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+    .user-actions-inline {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-end;
+        margin-top: 0.5rem;
+    }
+    @media (max-width: 768px) {
+        .user-row-flex {
+            flex-direction: column;
+            gap: 1rem;
+    }
+        .user-actions-inline {
+            flex-direction: row;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-top: 1rem;
+    }
     }
 </style>
 
 <script>
-    function openTab(evt, tabName) {
-        // Hide all tab content
-        var tabContents = document.getElementsByClassName("tab-content");
-        for (var i = 0; i < tabContents.length; i++) {
-            tabContents[i].classList.remove("active");
-        }
+    // Initialize all functionality when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Content Loaded');
         
-        // Remove active class from all tab buttons
-        var tabButtons = document.getElementsByClassName("tab-button");
-        for (var i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].classList.remove("active");
-        }
-        
-        // Show the selected tab and add active class to the button
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
+        // Get DOM elements
+        const modal = document.getElementById('appointmentModal');
+        const closeBtn = modal.querySelector('.close');
+        const appointmentForm = document.getElementById('appointmentForm');
+
+        // Initialize modal functionality
+        if (modal && closeBtn && appointmentForm) {
+            // Close modal when clicking (x)
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            };
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            // Handle appointment form submission
+            appointmentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Form submitted');
+                
+                const formData = new FormData(this);
+                const patientId = formData.get('patient_id');
+                const datetime = formData.get('datetime');
+                const notes = formData.get('notes');
+                
+                console.log('Form data:', {
+                    patientId,
+                    datetime,
+                    notes,
+                    csrfToken: formData.get('csrfmiddlewaretoken')
+                });
+                
+                if (!patientId || !datetime) {
+                    alert('Please fill in all required fields');
+                return;
     }
     
-    function managePatientTasks(action) {
-        const patientId = document.getElementById('selected_patient').value;
+                fetch(`/taskmanager/create-appointment/${patientId}/`, {
+                method: 'POST',
+                    body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', Object.fromEntries(response.headers));
+                    
+                    return response.text().then(text => {
+                        console.log('Raw response:', text);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Failed to parse response as JSON:', text);
+                            throw new Error('Invalid server response');
+    }
+                    });
+                })
+            .then(data => {
+                    console.log('Response data:', data);
+                    if (data.status === 'success') {
+                        alert('Appointment scheduled successfully!');
+                        modal.style.display = 'none';
+                        location.reload();
+                } else {
+                        throw new Error(data.message || 'Error scheduling appointment');
+    }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                    alert('Error scheduling appointment: ' + error.message);
+                });
+            });
+        } else {
+            console.error('Required modal elements not found');
+    }
+
+        // Function to assign all task types to a patient
+        window.assignAllTasksToPatient = function() {
+            const patientSelect = document.getElementById('quick_assign_patient');
+            const difficultySelect = document.getElementById('quick_assign_difficulty');
+            
+            if (!patientSelect.value) {
+                alert('Please select a patient first');
+                return;
+            }
+
+            const taskTypeSelect = document.getElementById('quick_assign_task');
+            const taskOptions = Array.from(taskTypeSelect.options).filter(option => option.value);
+            let assignedCount = 0;
+
+            // Function to assign a single task
+            const assignTask = (taskType) => {
+                return fetch('/tasks/assign/' + patientSelect.value + '/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        task_type: taskType,
+                        difficulty: difficultySelect.value || 'mild'
+                    })
+                });
+            };
+
+            // Assign tasks sequentially
+            const assignTasks = async () => {
+                for (const option of taskOptions) {
+                    try {
+                        const response = await assignTask(option.value);
+                        if (response.ok) {
+                            assignedCount++;
+                        }
+                    } catch (error) {
+                        console.error('Error assigning task:', error);
+                    }
+                }
+                
+                alert(`Successfully assigned ${assignedCount} tasks to the patient`);
+                location.reload();
+            };
+
+            assignTasks();
+        };
+
+        // Function to assign all difficulties for a game task
+        window.assignAllDifficulties = function() {
+            const patientSelect = document.getElementById('quick_assign_patient');
+            const taskTypeSelect = document.getElementById('quick_assign_task');
         
-        if (!patientId) {
-            alert('Please select a patient first.');
+            if (!patientSelect.value) {
+                alert('Please select a patient first');
+                return;
+            }
+
+            if (!taskTypeSelect.value) {
+                alert('Please select a task type first');
             return;
         }
         
-        let confirmMessage;
-        let endpoint;
-        
-        switch(action) {
-            case 'delete':
-                confirmMessage = 'Delete ALL tasks for this patient? This action is irreversible and will remove all task data.';
-                endpoint = `/tasks/provider/delete-patient-tasks/${patientId}/`;
-                break;
-            default:
+            const selectedOption = taskTypeSelect.options[taskTypeSelect.selectedIndex];
+            const hasDifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
+
+            if (!hasDifficulty) {
+                alert('Selected task type does not support difficulty levels. Please select a game-type task.');
                 return;
         }
         
-        if (confirm(confirmMessage)) {
-            // Show loading state
-            const buttons = document.querySelectorAll('.clear-btn');
-            buttons.forEach(btn => {
-                btn.disabled = true;
-                btn.style.opacity = '0.6';
-            });
-            
-            // Make the request
-            fetch(endpoint, {
+            const difficulties = ['mild', 'moderate', 'major'];
+            let assignedCount = 0;
+
+            // Function to assign a single task with difficulty
+            const assignTask = (difficulty) => {
+                return fetch('/tasks/assign/' + patientSelect.value + '/', {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                     'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        task_type: taskTypeSelect.value,
+                        difficulty: difficulty
+                    })
+                });
+            };
+
+            // Assign tasks with different difficulties sequentially
+            const assignTasks = async () => {
+                for (const difficulty of difficulties) {
+                    try {
+                        const response = await assignTask(difficulty);
+                        if (response.ok) {
+                            assignedCount++;
+                }
+                    } catch (error) {
+                        console.error('Error assigning task:', error);
+                    }
+                }
+
+                if (assignedCount > 0) {
+                    alert(`Successfully assigned task with ${assignedCount} difficulty levels`);
+                } else {
+                    alert('No tasks were assigned. Please check your selections and try again.');
+                }
+                location.reload();
+            };
+
+            assignTasks();
+        };
+
+        window.quickAssignTask = function() {
+            const patientSelect = document.getElementById('quick_assign_patient');
+            const taskTypeSelect = document.getElementById('quick_assign_task');
+            const difficultySelect = document.getElementById('quick_assign_difficulty');
+        
+            if (!patientSelect.value) {
+                alert('Please select a patient first');
+            return;
+        }
+            if (!taskTypeSelect.value) {
+                alert('Please select a task type first');
+                return;
+            }
+            if (!difficultySelect.value) {
+                alert('Please select a difficulty level first');
+                return;
+    }
+    
+            fetch('/tasks/assign/' + patientSelect.value + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 },
+                body: JSON.stringify({
+                    task_type: taskTypeSelect.value,
+                    difficulty: difficultySelect.value
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Patient task management operation completed successfully!');
-                    location.reload(); // Refresh to update stats
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred during the task management operation.');
-            })
-            .finally(() => {
-                // Re-enable buttons
-                buttons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                });
-            });
-        }
-    }
-    
-    function quickAssignTask() {
-        const patientId = document.getElementById('quick_assign_patient').value;
-        const taskType = document.getElementById('quick_assign_task').value;
-        const difficulty = document.getElementById('quick_assign_difficulty').value;
-        
-        if (!patientId || !taskType) {
-            alert('Please fill in all required fields.');
-            return;
-        }
-        
-        // Redirect to the assign task page with pre-filled data
-        const assignUrl = `/tasks/assign-task/${patientId}/`;
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = assignUrl;
-        
-        // Add CSRF token
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = csrfToken;
-        form.appendChild(csrfInput);
-        
-        // Add form fields
-        const typeInput = document.createElement('input');
-        typeInput.type = 'hidden';
-        typeInput.name = 'task_type';
-        typeInput.value = taskType;
-        form.appendChild(typeInput);
-        
-        // Add difficulty if it's visible (for games only)
-        if (document.getElementById('difficulty-group').style.display !== 'none') {
-            const difficultyInput = document.createElement('input');
-            difficultyInput.type = 'hidden';
-            difficultyInput.name = 'difficulty';
-            difficultyInput.value = difficulty;
-            form.appendChild(difficultyInput);
-        }
-        
-        // Submit form
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-    function assignAllTasksToPatient() {
-        const patientId = document.getElementById('quick_assign_patient').value;
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const currentDifficulty = document.getElementById('quick_assign_difficulty').value || 'mild';
-        const taskTypes = Array.from(document.querySelectorAll('#quick_assign_task option'))
-            .filter(opt => opt.value)
-            .map(opt => ({ 
-                value: opt.value, 
-                label: opt.textContent,
-                hasdifficulty: opt.getAttribute('data-has-difficulty') === 'true'
-            }));
-        const statusDiv = document.getElementById('assign-all-status');
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = 'Assigning all tasks...';
-        
-        if (!patientId) {
-            statusDiv.innerHTML = '<span style="color:red">Please select a patient first.</span>';
-            return;
-        }
-        
-        let completed = 0;
-        let errors = [];
-        
-        taskTypes.forEach((taskType, idx) => {
-            const formData = new FormData();
-            formData.append('csrfmiddlewaretoken', csrfToken);
-            formData.append('task_type', taskType.value);
-            
-            // Add difficulty level for games only
-            if (taskType.hasdifficulty) {
-                formData.append('difficulty', currentDifficulty);
-            }
-            
-            fetch(`/tasks/assign-task/${patientId}/`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(taskType.label);
-                completed++;
-                if (completed === taskTypes.length) {
-                    if (errors.length === 0) {
-                        const difficultyText = currentDifficulty ? ` (Games at ${currentDifficulty} difficulty)` : '';
-                        statusDiv.innerHTML = `<span style="color:green">All tasks assigned successfully!${difficultyText}</span>`;
-                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
-                    } else {
-                        statusDiv.innerHTML = '<span style="color:red">Some tasks failed: ' + errors.join(', ') + '</span>';
-                    }
-                }
-            })
-            .catch(() => {
-                errors.push(taskType.label);
-                completed++;
-                if (completed === taskTypes.length) {
-                    if (errors.length === 0) {
-                        const difficultyText = currentDifficulty ? ` (Games at ${currentDifficulty} difficulty)` : '';
-                        statusDiv.innerHTML = `<span style="color:green">All tasks assigned successfully!${difficultyText}</span>`;
-                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
-                    } else {
-                        statusDiv.innerHTML = '<span style="color:red">Some tasks failed: ' + errors.join(', ') + '</span>';
-                    }
-                }
-            });
-        });
-    }
-
-    function assignAllDifficulties() {
-        const patientId = document.getElementById('quick_assign_patient').value;
-        const taskType = document.getElementById('quick_assign_task').value;
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const statusDiv = document.getElementById('assign-all-status');
-        
-        if (!patientId || !taskType) {
-            alert('Please select a patient and task type first.');
-            return;
-        }
-        
-        // Check if selected task type is a game
-        const selectedOption = document.querySelector(`#quick_assign_task option[value="${taskType}"]`);
-        const hasdifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
-        
-        if (!hasdifficulty) {
-            alert('Selected task type does not have difficulty levels.');
-            return;
-        }
-        
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = 'Assigning all difficulty levels...';
-        
-        const difficulties = ['mild', 'moderate', 'major'];
-        let completed = 0;
-        let errors = [];
-        
-        difficulties.forEach((difficulty, idx) => {
-            const formData = new FormData();
-            formData.append('csrfmiddlewaretoken', csrfToken);
-            formData.append('task_type', taskType);
-            formData.append('difficulty', difficulty);
-            
-            fetch(`/tasks/assign-task/${patientId}/`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(`${difficulty} difficulty`);
-                completed++;
-                if (completed === difficulties.length) {
-                    if (errors.length === 0) {
-                        statusDiv.innerHTML = `<span style="color:green">All difficulty levels assigned successfully! (Mild, Moderate, Major)</span>`;
-                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
-                    } else {
-                        statusDiv.innerHTML = '<span style="color:red">Some difficulties failed: ' + errors.join(', ') + '</span>';
-                    }
-                }
-            })
-            .catch(() => {
-                errors.push(`${difficulty} difficulty`);
-                completed++;
-                if (completed === difficulties.length) {
-                    if (errors.length === 0) {
-                        statusDiv.innerHTML = `<span style="color:green">All difficulty levels assigned successfully! (Mild, Moderate, Major)</span>`;
-                        setTimeout(() => { statusDiv.style.display = 'none'; location.reload(); }, 2000);
-                    } else {
-                        statusDiv.innerHTML = '<span style="color:red">Some difficulties failed: ' + errors.join(', ') + '</span>';
-                    }
-                }
-            });
-        });
-    }
-
-    // Handle dynamic difficulty field visibility
-    document.addEventListener('DOMContentLoaded', function() {
-        const taskTypeSelect = document.getElementById('quick_assign_task');
-        const difficultyGroup = document.getElementById('difficulty-group');
-        
-        // Always keep difficulty field visible for "Assign All Tasks" functionality
-        difficultyGroup.style.display = 'block';
-        difficultyGroup.classList.add('fade-in');
-        
-        function highlightDifficultyField() {
-            const selectedOption = taskTypeSelect.options[taskTypeSelect.selectedIndex];
-            const hasDifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
-            
-            // Always show, but highlight when game is selected
-            if (hasDifficulty) {
-                difficultyGroup.classList.add('fade-in');
-                difficultyGroup.style.borderColor = '#4a90e2';
-                difficultyGroup.style.backgroundColor = '#f0f7ff';
-            } else {
-                difficultyGroup.classList.remove('fade-in');
-                difficultyGroup.style.borderColor = '#e0e6ed';
-                difficultyGroup.style.backgroundColor = '#f8f9fa';
-            }
-        }
-        
-        // Initial check
-        highlightDifficultyField();
-        
-        // Listen for changes
-        taskTypeSelect.addEventListener('change', highlightDifficultyField);
-        
-        // Appointment Modal
-        const modal = document.getElementById("appointmentModal");
-        const span = document.getElementsByClassName("close")[0];
-        
-        // Close modal when clicking (x)
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-        
-        // Handle appointment form submission
-        const appointmentForm = document.getElementById("appointmentForm");
-        appointmentForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                    modal.style.display = "none";
+                    alert('Task assigned successfully!');
                     location.reload();
                 } else {
-                    alert(data.message || 'Error scheduling appointment. Please try again.');
+                    alert(data.message || 'Failed to assign task.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error scheduling appointment. Please try again.');
+                alert('An error occurred while assigning the task. Please try again.');
             });
-        });
+        };
     });
 
-    // Function to open the appointment modal
-    function openScheduleModal(patientName, patientId) {
+    // Global function to open the schedule modal
+    window.openScheduleModal = function(patientName, patientId) {
+        console.log('Opening modal for patient:', patientName, 'ID:', patientId);
         const modal = document.getElementById('appointmentModal');
-        document.getElementById('patient_id').value = patientId;
+        const patientIdInput = document.getElementById('patient_id');
+        
+        if (!modal || !patientIdInput) {
+            console.error('Modal or patient ID input not found');
+            return;
+        }
+        
+        patientIdInput.value = patientId;
         modal.style.display = 'block';
         
         // Set minimum date to today
         const today = new Date();
         const dateInput = document.getElementById('appointment_datetime');
-        dateInput.min = today.toISOString().slice(0, 16);
-    }
-    
-    // Close modal when clicking the close button or outside the modal
-    document.querySelector('.close').onclick = function() {
-        document.getElementById('appointmentModal').style.display = 'none';
-    }
-    
-    window.onclick = function(event) {
-        const modal = document.getElementById('appointmentModal');
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        if (dateInput) {
+            dateInput.min = today.toISOString().slice(0, 16);
+            // Set default time to now
+            dateInput.value = today.toISOString().slice(0, 16);
         }
-    }
-    
-    // Handle appointment form submission
-    document.getElementById('appointmentForm').onsubmit = function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        
-        fetch('/schedule-appointment/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Appointment scheduled successfully!');
-                document.getElementById('appointmentModal').style.display = 'none';
-                location.reload();
-            } else {
-                alert('Error scheduling appointment: ' + data.message);
-            }
-        })
-        .catch(error => {
-            alert('Error scheduling appointment. Please try again.');
-            console.error('Error:', error);
-        });
     };
+
+    // Global function to delete appointments
+    window.deleteAppointment = function(appointmentId) {
+        if (!appointmentId) {
+            console.error('No appointment ID provided');
+            alert('Error: Could not identify the appointment to delete');
+            return;
+                    }
     
-    // Add styles for the modal
-    const styles = `
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
+        if (confirm('Are you sure you want to delete this appointment?')) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            console.log('CSRF Token:', csrfToken ? 'Present' : 'Missing');
+            
+            fetch(`/taskmanager/delete-appointment/${appointmentId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Failed to parse response as JSON:', text);
+                        throw new Error('Invalid server response');
+                    }
+                });
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    alert('Appointment deleted successfully');
+                    location.reload();
+                    } else {
+                    throw new Error(data.message || 'Failed to delete appointment');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting appointment: ' + error.message);
+    });
         }
-        
-        .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 12px;
-            width: 80%;
-            max-width: 500px;
-            position: relative;
-        }
-        
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 10px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #666;
-        }
-        
-        .modal-header {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #2d3748;
-        }
-        
-        .appointment-section {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .schedule-btn {
-            margin-top: 0.5rem;
-            width: 100%;
-            justify-content: center;
-        }
-    `;
-    
-    const styleSheet = document.createElement("style");
-    styleSheet.innerText = styles;
-    document.head.appendChild(styleSheet);
+    };
 </script>
 {% endblock %} 

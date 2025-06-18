@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from .models import UserProfile
 from taskmanager.views import get_task_statistics
 from taskmanager.models import Task
-from taskmanager.constants import TASK_TYPES
+from taskmanager.constants import TASK_TYPES, GAME_TYPES, DIFFICULTY_LEVELS, TASK_TEMPLATES
 import logging
 from .utils import UserProfileUtils
 from django.db.utils import IntegrityError
@@ -136,17 +136,17 @@ def provider_dashboard(request):
             selected_patient = None
             patient_tasks = []
     
-    from taskmanager.constants import GAME_TYPES, DIFFICULTY_LEVELS
-    
     context = {
         'user': request.user,
         'user_type': 'Healthcare Provider',
         'patients': patients,
         'caregivers': caregivers,
         'recent_tasks': recent_tasks,
-        'task_types': TASK_TYPES,  # Use the constant directly
-        'game_types': GAME_TYPES,  # Add game types for template
-        'difficulty_levels': DIFFICULTY_LEVELS,  # Add difficulty levels
+        'task_types': TASK_TYPES,
+        'game_types': GAME_TYPES,
+        'difficulty_levels': DIFFICULTY_LEVELS,
+        'task_configs': TASK_TEMPLATES,  # Add task configurations
+        'provider_patients': patients,  # Add provider's patients for the quick assign section
         **task_statistics,
         'selected_patient': selected_patient,
         'patient_tasks': patient_tasks,
@@ -297,15 +297,15 @@ def manage_account(request, user_id):
             except Exception as e:
                 messages.error(request, f'Error updating account: {str(e)}')
             
-            return redirect('provider_dashboard')
+                    return redirect('provider_dashboard')
         
         return render(request, 'pages/manage_account.html', {
             'user_to_manage': user_to_manage
         })
-        
+    
     except User.DoesNotExist:
         messages.error(request, 'User not found.')
-        return redirect('provider_dashboard')
+            return redirect('provider_dashboard')
 
 @login_required
 def assign_caregiver(request, patient_id):
@@ -320,7 +320,7 @@ def assign_caregiver(request, patient_id):
         # Verify provider manages this patient
         if patient.provider != request.user.profile:
             messages.error(request, 'You do not have permission to manage this patient.')
-            return redirect('provider_dashboard')
+                return redirect('provider_dashboard')
         
         # Get all available caregivers for this provider
         available_caregivers = UserProfile.objects.filter(
@@ -362,10 +362,10 @@ def assign_caregiver(request, patient_id):
         }
         
         return render(request, 'users/assign_caregiver.html', context)
-        
+    
     except UserProfile.DoesNotExist:
         messages.error(request, 'Patient not found.')
-        return redirect('provider_dashboard')
+            return redirect('provider_dashboard')
 
 @login_required
 def delete_account(request, user_id):
@@ -375,13 +375,13 @@ def delete_account(request, user_id):
         
         # Check permissions
         if not request.user.is_superuser:  # Admin can delete any account
-            if request.user.profile.user_type == 'provider':
+        if request.user.profile.user_type == 'provider':
                 # Provider can only delete their patients/caregivers
                 if not hasattr(user_to_delete, 'profile') or \
                    user_to_delete.profile.provider != request.user.profile or \
                    user_to_delete == request.user:
-                    messages.error(request, 'You do not have permission to delete this account.')
-                    return redirect('provider_dashboard')
+                messages.error(request, 'You do not have permission to delete this account.')
+                return redirect('provider_dashboard')
             else:
                 # Other users can only delete their own account
                 if user_to_delete != request.user:
@@ -426,12 +426,12 @@ def delete_account(request, user_id):
             # Otherwise return to appropriate dashboard
             if request.user.profile.user_type == 'admin':
                 return redirect('admin_dashboard')
-            return redirect('provider_dashboard')
+                return redirect('provider_dashboard')
         
         return render(request, 'pages/delete_account.html', {
             'user_to_delete': user_to_delete
         })
-        
+    
     except User.DoesNotExist:
         messages.error(request, 'User not found.')
         return redirect('home')

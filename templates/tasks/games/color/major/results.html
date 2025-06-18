@@ -1,9 +1,69 @@
 <!-- Color Game (Major) Results - Placeholder -->
 {% extends 'layouts/base.html' %}
-{% block title %}Color Game Results (Major){% endblock %}
+
+{% block title %}Color Matching Results – Major{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h1>Color Game Results (Major)</h1>
-    <!-- Results summary and analysis will be shown here -->
+<div class="results-container">
+  <style>
+    .results-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .results-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .stat-label {
+      font-weight: bold;
+      color: #4a5568;
+    }
+    .stat-value {
+      color: #2d3748;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #4299e1;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    .back-btn:hover {
+      background: #3182ce;
+    }
+  </style>
+
+  <div class="results-card">
+    <h1>🎨 Color Matching Results</h1>
+    
+    <div class="stat-row">
+      <span class="stat-label">Moves Made:</span>
+      <span class="stat-value">{{ task_response.data.moves }}</span>
+    </div>
+    
+    <div class="stat-row">
+      <span class="stat-label">Time Taken:</span>
+      <span class="stat-value">{{ task_response.data.time }}</span>
+    </div>
+
+    <a href="{% url 'taskmanager:patient_tasks' %}" class="back-btn">
+      ← Back to Tasks
+    </a>
+  </div>
 </div>
 {% endblock %} 

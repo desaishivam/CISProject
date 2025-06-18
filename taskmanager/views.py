@@ -4,12 +4,16 @@ from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, Appointment
 from .constants import TASK_TYPES, TASK_TEMPLATES, DIFFICULTY_LEVELS, DIFFICULTY_CONFIGS
 from users.models import UserProfile
 import json
 from django.urls import reverse
 from collections import OrderedDict
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def assign_task(request, patient_id):
@@ -30,6 +34,45 @@ def assign_task(request, patient_id):
         templates = QuestionnaireTemplate.objects.filter(is_active=True)
         
         if request.method == 'POST':
+            # Handle JSON requests for bulk task assignment
+            if request.content_type == 'application/json':
+                try:
+                    data = json.loads(request.body)
+                    logger.info(f'Assigning task: {data} for patient_id={patient_id} by provider={request.user.profile.id}')
+                    task_type = data.get('task_type')
+                    difficulty = data.get('difficulty', 'mild')
+                    
+                    # Always set title to the display name for the selected task_type
+                    type_dict = dict(TASK_TYPES)
+                    title = type_dict.get(task_type, task_type.replace('_', ' ').title())
+                    
+                    # Create the task
+                    task = Task.objects.create(
+                        title=title,
+                        task_type=task_type,
+                        difficulty=difficulty,
+                        assigned_by=request.user.profile,
+                        assigned_to=patient_profile
+                    )
+                    
+                    # Create notification
+                    TaskNotification.objects.create(
+                        task=task,
+                        recipient=patient_profile,
+                        message=f"New task assigned: {title}",
+                        notification_type='assigned'
+                    )
+                    
+                    logger.info(f'Successfully assigned task {task.id} ({task_type}, {difficulty}) to patient {patient_id}')
+                    return JsonResponse({'success': True, 'message': f'Task "{title}" assigned successfully'})
+                except json.JSONDecodeError:
+                    logger.error('Invalid JSON data in assign_task')
+                    return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
+                except Exception as e:
+                    logger.exception(f'Error assigning task for patient_id={patient_id}: {e}')
+                    return JsonResponse({'success': False, 'message': str(e)}, status=500)
+            
+            # Handle regular form submissions
             task_type = request.POST.get('task_type')
             description = request.POST.get('description')
             due_date = request.POST.get('due_date')
@@ -616,38 +659,6 @@ def clear_provider_task_responses(request):
 
 @login_required
 @require_POST
-def delete_patient_tasks(request, patient_id):
-    """Provider view to delete all tasks for a specific patient"""
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
-        return JsonResponse({'success': False, 'message': 'Permission denied'})
-    
-    try:
-        # Verify the patient belongs to this provider
-        patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient', provider=request.user.profile)
-        
-        # Get all tasks for this patient assigned by this provider
-        patient_tasks = Task.objects.filter(
-            assigned_by=request.user.profile,
-            assigned_to=patient_profile
-        )
-        count = patient_tasks.count()
-        
-        # Delete all tasks and related data
-        TaskResponse.objects.filter(task__in=patient_tasks).delete()
-        TaskNotification.objects.filter(task__in=patient_tasks).delete()
-        patient_tasks.delete()
-        
-        return JsonResponse({
-            'success': True, 
-            'message': f'Successfully deleted {count} tasks for {patient_profile.user.first_name} {patient_profile.user.last_name}'
-        })
-    except UserProfile.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Patient not found or access denied'})
-    except Exception:
-        return JsonResponse({'success': False, 'message': 'An error occurred while deleting patient tasks'})
-
-@login_required
-@require_POST
 def delete_task(request, task_id):
     """Provider view to delete a single task by ID"""
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
@@ -688,25 +699,42 @@ def delete_task(request, task_id):
             return redirect('provider_dashboard')
 
 @login_required
+@require_POST
 def create_appointment(request, patient_id):
     """Provider view to create an appointment with a patient"""
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
-        return JsonResponse({'status': 'error', 'message': 'You do not have permission to create appointments.'})
+    print(f"Attempting to create appointment for patient {patient_id}")  # Debug log
+    print(f"Request method: {request.method}")  # Debug log
+    print(f"Request POST data: {request.POST}")  # Debug log
+    print(f"Request headers: {request.headers}")  # Debug log
+    
+    if not hasattr(request.user, 'profile'):
+        print("User has no profile")  # Debug log
+        return JsonResponse({'status': 'error', 'message': 'User profile not found'})
+        
+    if request.user.profile.user_type != 'provider':
+        print(f"Invalid user type: {request.user.profile.user_type}")  # Debug log
+        return JsonResponse({'status': 'error', 'message': 'Permission denied - not a provider'})
     
     try:
         patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
+        print(f"Found patient: {patient_profile}")  # Debug log
         
         # Verify provider manages this patient
         if patient_profile.provider != request.user.profile:
-            return JsonResponse({'status': 'error', 'message': 'You do not have permission to create appointments for this patient.'})
+            print(f"Permission denied - patient's provider {patient_profile.provider.id} != user {request.user.profile.id}")  # Debug log
+            return JsonResponse({'status': 'error', 'message': 'Permission denied - not your patient'})
         
-        if request.method == 'POST':
-            datetime_str = request.POST.get('datetime')
-            notes = request.POST.get('notes', '')
-            
-            if not datetime_str:
-                return JsonResponse({'status': 'error', 'message': 'Date and time are required.'})
-            
+        datetime_str = request.POST.get('datetime')
+        notes = request.POST.get('notes', '')
+        
+        print(f"Received datetime: {datetime_str}")  # Debug log
+        print(f"Received notes: {notes}")  # Debug log
+        
+        if not datetime_str:
+            print("No datetime provided")  # Debug log
+            return JsonResponse({'status': 'error', 'message': 'Date and time are required'})
+        
+        try:
             # Create the appointment
             appointment = Appointment.objects.create(
                 provider=request.user.profile,
@@ -714,20 +742,26 @@ def create_appointment(request, patient_id):
                 datetime=datetime_str,
                 notes=notes
             )
+            print(f"Created appointment: {appointment}")  # Debug log
             
             return JsonResponse({
                 'status': 'success',
-                'message': f'Appointment scheduled with {patient_profile.user.get_full_name()} for {datetime_str}.',
+                'message': f'Appointment scheduled with {patient_profile.user.get_full_name()} for {datetime_str}',
                 'appointment': {
                     'id': appointment.id,
                     'datetime': datetime_str,
                     'notes': appointment.notes
                 }
             })
+        except Exception as e:
+            print(f"Error creating appointment object: {str(e)}")  # Debug log
+            return JsonResponse({'status': 'error', 'message': f'Error creating appointment: {str(e)}'})
             
     except UserProfile.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Patient not found.'})
+        print(f"Patient {patient_id} not found")  # Debug log
+        return JsonResponse({'status': 'error', 'message': 'Patient not found'})
     except Exception as e:
+        print(f"Error in create_appointment view: {str(e)}")  # Debug log
         return JsonResponse({'status': 'error', 'message': f'Error creating appointment: {str(e)}'})
 
 @login_required
@@ -743,3 +777,42 @@ def patient_appointments(request):
         'appointments': appointments,
         'user_type': 'Patient'
     })
+
+@login_required
+@require_POST
+@csrf_protect
+def delete_appointment(request, appointment_id):
+    """Provider view to delete an appointment"""
+    print(f"Attempting to delete appointment {appointment_id}")  # Debug log
+    
+    if not hasattr(request.user, 'profile'):
+        print("User has no profile")  # Debug log
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+        
+    if request.user.profile.user_type != 'provider':
+        print(f"Invalid user type: {request.user.profile.user_type}")  # Debug log
+        return JsonResponse({'success': False, 'message': 'Permission denied - not a provider'})
+    
+    try:
+        appointment = Appointment.objects.get(id=appointment_id)
+        print(f"Found appointment: {appointment}")  # Debug log
+        
+        # Verify the provider owns this appointment
+        if appointment.provider != request.user.profile:
+            print(f"Permission denied - appointment provider {appointment.provider.id} != user {request.user.profile.id}")  # Debug log
+            return JsonResponse({'success': False, 'message': 'Permission denied - not your appointment'})
+        
+        # Delete the appointment
+        appointment.delete()
+        print("Appointment deleted successfully")  # Debug log
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Appointment deleted successfully'
+        })
+    except Appointment.DoesNotExist:
+        print(f"Appointment {appointment_id} not found")  # Debug log
+        return JsonResponse({'success': False, 'message': 'Appointment not found'})
+    except Exception as e:
+        print(f"Error deleting appointment: {str(e)}")  # Debug log
+        return JsonResponse({'success': False, 'message': f'Error deleting appointment: {str(e)}'})
