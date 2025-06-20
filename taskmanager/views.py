@@ -160,7 +160,11 @@ def take_task(request, task_id):
             messages.error(request, 'You do not have permission to access this task.')
             return redirect('taskmanager:patient_tasks')
     elif user_profile.user_type == 'caregiver':
-        if not user_profile.linked_patients.filter(id=task.assigned_to.id).exists():
+        # A caregiver can complete a task if they are assigned to the patient AND work for the provider who assigned the task
+        is_assigned_to_patient = user_profile.patient == task.assigned_to
+        works_for_assigning_provider = user_profile.provider == task.assigned_by
+        
+        if not (is_assigned_to_patient and works_for_assigning_provider):
             messages.error(request, 'You do not have permission to access this task.')
             return redirect('caregiver_dashboard')
     else:
@@ -191,18 +195,15 @@ def take_task(request, task_id):
                 data = json.loads(request.body)
                 if task.task_type == 'color':
                     task_response.responses = {
-                        'score': data.get('score', 0),
-                        'attempts': data.get('attempts', 0),
-                        'totalTime': data.get('totalTime', 0),
-                        'accuracy': data.get('accuracy', 0),
+                        'moves': data.get('moves', 0),
+                        'time': data.get('time', 0),
                         'difficulty': data.get('difficulty', task.difficulty or 'mild')
                     }
                     handled = True
                 elif task.task_type == 'pairs':
                     task_response.responses = {
-                        'score': data.get('score', 0),
                         'moves': data.get('moves', 0),
-                        'totalTime': data.get('totalTime', 0),
+                        'time': data.get('time', 0),
                         'difficulty': data.get('difficulty', task.difficulty or 'major')
                     }
                     handled = True
@@ -281,10 +282,16 @@ def take_task(request, task_id):
             handled = True
         
         if handled:
-            task_response.completed_at = timezone.now()
-            task_response.save()
             task.status = 'completed'
+            task.completed_at = timezone.now()
+            task_response.completed_at = timezone.now()
+            
+            # Set who completed the task
+            if user_profile.user_type == 'caregiver':
+                task.completed_by = user_profile
+            
             task.save()
+            task_response.save()
             return JsonResponse({'status': 'success', 'redirect': reverse('patient_dashboard')})
         else:
             task_response.save()
@@ -324,7 +331,12 @@ def task_results(request, task_id):
         messages.error(request, 'You do not have permission to view this task.')
         return redirect('provider_dashboard')
     elif user_profile.user_type == 'caregiver':
-        if not user_profile.linked_patients.filter(id=task.assigned_to.id).exists():
+        # Expanded permission check for caregivers
+        is_linked_to_patient = user_profile.patient == task.assigned_to
+        completed_by_this_caregiver = task.completed_by == user_profile
+        works_for_assigning_provider = user_profile.provider == task.assigned_by
+
+        if not (is_linked_to_patient or completed_by_this_caregiver or works_for_assigning_provider):
             messages.error(request, 'You do not have permission to view this task.')
             return redirect('caregiver_dashboard')
     elif user_profile.user_type == 'patient':
@@ -816,3 +828,32 @@ def delete_appointment(request, appointment_id):
     except Exception as e:
         print(f"Error deleting appointment: {str(e)}")  # Debug log
         return JsonResponse({'success': False, 'message': f'Error deleting appointment: {str(e)}'})
+
+@login_required
+@require_POST
+def delete_all_tasks(request, patient_id):
+    """Provider view to delete all tasks for a specific patient."""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        return JsonResponse({'success': False, 'message': 'Permission denied.'})
+
+    try:
+        patient = UserProfile.objects.get(id=patient_id, user_type='patient')
+        if patient.provider != request.user.profile:
+            return JsonResponse({'success': False, 'message': 'You do not have permission to manage this patient.'})
+
+        tasks_to_delete = Task.objects.filter(assigned_to=patient)
+        count = tasks_to_delete.count()
+        
+        # First, delete related objects
+        TaskResponse.objects.filter(task__in=tasks_to_delete).delete()
+        TaskNotification.objects.filter(task__in=tasks_to_delete).delete()
+        
+        # Then, delete the tasks
+        tasks_to_delete.delete()
+        
+        return JsonResponse({'success': True, 'message': f'Successfully deleted {count} tasks.'})
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Patient not found.'})
+    except Exception as e:
+        logger.error(f"Error deleting all tasks for patient {patient_id}: {e}")
+        return JsonResponse({'success': False, 'message': 'An error occurred while deleting tasks.'})

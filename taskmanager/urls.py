@@ -26,7 +26,8 @@ urlpatterns = [
     path('provider/clear-responses/', views.clear_provider_task_responses, name='clear_provider_task_responses'),
     
     # Patient-specific task management
-    path('provider/delete-task/<int:task_id>/', views.delete_task, name='delete_task'),
+    path('delete-task/<int:task_id>/', views.delete_task, name='delete_task'),
+    path('delete-all-tasks/<int:patient_id>/', views.delete_all_tasks, name='delete_all_tasks'),
     
     # Appointments
     path('create-appointment/<int:patient_id>/', views.create_appointment, name='create_appointment'),

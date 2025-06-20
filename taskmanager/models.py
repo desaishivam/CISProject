@@ -5,20 +5,22 @@ from .constants import TASK_TYPES, TASK_STATUS, DIFFICULTY_LEVELS
 import json
 
 class Task(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     task_type = models.CharField(max_length=50, choices=TASK_TYPES)
     
     # Difficulty level (only for games)
     difficulty = models.CharField(
-        max_length=20, 
+        max_length=50, 
         choices=DIFFICULTY_LEVELS, 
-        default='mild',
+        blank=True,
+        null=True,
         help_text="Cognitive difficulty level for games"
     )
     
-    assigned_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='assigned_tasks')
-    assigned_to = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='received_tasks')
+    assigned_by = models.ForeignKey(UserProfile, related_name='assigned_tasks', on_delete=models.CASCADE)
+    assigned_to = models.ForeignKey(UserProfile, related_name='tasks', on_delete=models.CASCADE)
+    completed_by = models.ForeignKey(UserProfile, related_name='completed_tasks', on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=20, choices=[
         ('assigned', 'Assigned'),
         ('in_progress', 'In Progress'),
@@ -28,7 +30,7 @@ class Task(models.Model):
     # Dates
     created_at = models.DateTimeField(auto_now_add=True)
     assigned_at = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(blank=True, null=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
     # Task configuration (JSON field for flexibility)

@@ -5,7 +5,7 @@
 {% block content %}
 {% csrf_token %}
 <div class="dashboard-container">
-    <div class="dashboard-header">
+    <div class="dashboard-header provider">
         <div class="header-info">
     <h1>Welcome, {{ user.first_name }}!</h1>
             <span class="user-type">{{ user_type }}</span>
@@ -110,7 +110,10 @@
                                 <button type="submit" class="action-btn primary-btn">
                                     🔍 View Tasks
                                 </button>
-                        </div>
+                                <button onclick="deleteAllTasks()" class="action-btn danger-btn" type="button">
+                                    🗑️ Delete All Tasks
+                                </button>
+                            </div>
                         </form>
                         <style>
                             .patient-task-management {
@@ -156,7 +159,8 @@
                                                 <th>Title</th>
                                                 <th>Difficulty</th>
                                                 <th>Status</th>
-                                                <th>Actions</th>
+                                                <th>Results</th>
+                                                <th>Manage</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -176,6 +180,15 @@
                                                     {% endif %}
                                                 </td>
                                                 <td><span class="status-badge status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+                                                <td>
+                                                    {% if task.status == 'completed' %}
+                                                        <a href="{% url 'taskmanager:task_results' task.id %}" class="action-btn view-btn">
+                                                            👁️ View Results
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-muted" style="padding: 0.5rem;">N/A</span>
+                                                    {% endif %}
+                                                </td>
                                                 <td>
                                                     <form method="post" action="{% url 'taskmanager:delete_task' task.id %}" style="display:inline;">
                                                         {% csrf_token %}
@@ -208,46 +221,42 @@
                 <div class="user-accounts">
                     {% for patient in patients %}
                     <div class="user-card">
-                        <div class="user-row-flex">
-                        <div class="user-details">
-                            <h4 class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
-                            <div class="user-info">
-                            <p><strong>Username:</strong> {{ patient.user.username }}</p>
+                        <div class="user-header-row user-header-flex">
+                            <div class="user-header-info user-header-info-vertical">
+                                <span class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</span>
+                                <span class="user-username"><strong>Username:</strong> {{ patient.user.username }}</span>
                             </div>
-                                <!-- Show relationships -->
-                            <div class="relationship-data">
-                                    <div class="relationship-row-container">
-                                {% with caregivers=patient.caregivers.all %}
-                                            <div class="relationship-row">
-                                                <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
-                                    {% if caregivers %}
-                                        {% for caregiver in caregivers %}
-                                                        <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
-                                        {% endfor %}
-                                    {% else %}
-                                        <p class="no-relationships">❌ No caregivers assigned</p>
-                                    {% endif %}
-                                            </div>
-                                {% endwith %}
-                                        <div class="relationship-row">
-                                            <p class="relationship-title"><strong>👨‍⚕️ Healthcare Provider:</strong></p>
-                                            {% if patient.provider %}
-                                                <div class="relationship-item">{{ patient.provider.user.first_name }} {{ patient.provider.user.last_name }} ({{ patient.provider.user.username }})</div>
-                                            {% else %}
-                                                <p class="no-relationships">❌ No provider assigned</p>
-                                            {% endif %}
+                            <div class="user-actions-inline-row">
+                                <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
+                                    🔗 Assign Caregivers
+                                </a>
+                                <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
+                                    ✏️ Edit
+                                </a>
                             </div>
                         </div>
-                                </div>
+                        <!-- Show relationships -->
+                            <div class="relationship-data">
+                            <div class="relationship-row-container">
+                                {% with caregivers=patient.caregivers.all %}
+                                    <div class="relationship-row">
+                                        <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
+                                        {% for caregiver in caregivers %}
+                                            <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
+                                        {% empty %}
+                                        <p class="no-relationships">❌ No caregivers assigned</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endwith %}
+                                <div class="relationship-row">
+                                    <p class="relationship-title"><strong>👨‍⚕️ Healthcare Provider:</strong></p>
+                                    {% if patient.provider %}
+                                        <div class="relationship-item">{{ patient.provider.user.first_name }} {{ patient.provider.user.last_name }} ({{ patient.provider.user.username }})</div>
+                                    {% else %}
+                                        <p class="no-relationships">❌ No provider assigned</p>
+                                    {% endif %}
                             </div>
-                            <div class="user-actions user-actions-inline">
-                            <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
-                                🔗 Assign Caregivers
-                            </a>
-                                <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
-                                ✏️ Edit
-                            </a>
-                            </div>
+                        </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -266,30 +275,29 @@
                 <div class="user-accounts">
                     {% for caregiver in caregivers %}
                     <div class="user-card">
-                        <div class="user-details">
-                            <h4 class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</h4>
-                            <div class="user-info">
-                            <p><strong>Username:</strong> {{ caregiver.user.username }}</p>
+                        <div class="user-header-row user-header-flex">
+                            <div class="user-header-info user-header-info-vertical">
+                                <span class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</span>
+                                <span class="user-username"><strong>Username:</strong> {{ caregiver.user.username }}</span>
                             </div>
-                            
+                            <div class="user-actions-inline-row">
+                                <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
+                                    ✏️ Edit
+                                </a>
+                            </div>
+                        </div>
                             <!-- Show assigned patient -->
                             <div class="relationship-data">
-                                <div class="relationship-row-container">
-                                    <div class="relationship-row">
+                            <div class="relationship-row-container">
+                                <div class="relationship-row">
                                 <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
                                 {% if caregiver.patient %}
-                                            <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
+                                        <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
                                 {% else %}
                                     <p class="no-relationships">❌ No patient assigned</p>
                                 {% endif %}
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                        <div class="user-actions">
-                                <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
-                                ✏️ Edit
-                            </a>
                         </div>
                     </div>
                     {% endfor %}
@@ -1145,7 +1153,7 @@
 
             // Function to assign a single task with difficulty
             const assignTask = (difficulty) => {
-                return fetch('/tasks/assign/' + patientSelect.value + '/', {
+                return fetch('/tasks/assign-task/' + patientSelect.value + '/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1163,9 +1171,10 @@
                 for (const difficulty of difficulties) {
                     try {
                         const response = await assignTask(difficulty);
-                        if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
                             assignedCount++;
-                }
+                        }
                     } catch (error) {
                         console.error('Error assigning task:', error);
                     }
@@ -1224,6 +1233,41 @@
                 console.error('Error:', error);
                 alert('An error occurred while assigning the task. Please try again.');
             });
+        };
+
+        window.deleteAllTasks = function() {
+            const patientSelect = document.getElementById('selected_patient');
+            const patientId = patientSelect.value;
+
+            if (!patientId) {
+                alert('Please select a patient first.');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete all tasks for this patient? This action cannot be undone.')) {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                fetch(`/tasks/delete-all-tasks/${patientId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('All tasks have been deleted successfully.');
+                        location.reload();
+                    } else {
+                        alert('Failed to delete tasks: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting tasks.');
+                });
+            }
         };
     });
 

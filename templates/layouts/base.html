@@ -1385,6 +1385,12 @@
                 });
             });
         });
+
+        // Set the theme based on user type
+        document.addEventListener('DOMContentLoaded', function() {
+            const userType = "{{ user.profile.user_type|default:'default' }}";
+            document.body.classList.add(`theme-${userType}`);
+        });
     </script>
     {% block extra_js %}{% endblock %}
 </body>

@@ -296,8 +296,7 @@ def manage_account(request, user_id):
                 messages.success(request, 'Account updated successfully.')
             except Exception as e:
                 messages.error(request, f'Error updating account: {str(e)}')
-            
-                    return redirect('provider_dashboard')
+            return redirect('provider_dashboard')
         
         return render(request, 'pages/manage_account.html', {
             'user_to_manage': user_to_manage
@@ -305,7 +304,7 @@ def manage_account(request, user_id):
     
     except User.DoesNotExist:
         messages.error(request, 'User not found.')
-            return redirect('provider_dashboard')
+        return redirect('provider_dashboard')
 
 @login_required
 def assign_caregiver(request, patient_id):
@@ -320,7 +319,7 @@ def assign_caregiver(request, patient_id):
         # Verify provider manages this patient
         if patient.provider != request.user.profile:
             messages.error(request, 'You do not have permission to manage this patient.')
-                return redirect('provider_dashboard')
+            return redirect('provider_dashboard')
         
         # Get all available caregivers for this provider
         available_caregivers = UserProfile.objects.filter(
@@ -365,7 +364,7 @@ def assign_caregiver(request, patient_id):
     
     except UserProfile.DoesNotExist:
         messages.error(request, 'Patient not found.')
-            return redirect('provider_dashboard')
+        return redirect('provider_dashboard')
 
 @login_required
 def delete_account(request, user_id):
@@ -375,13 +374,13 @@ def delete_account(request, user_id):
         
         # Check permissions
         if not request.user.is_superuser:  # Admin can delete any account
-        if request.user.profile.user_type == 'provider':
+            if request.user.profile.user_type == 'provider':
                 # Provider can only delete their patients/caregivers
                 if not hasattr(user_to_delete, 'profile') or \
                    user_to_delete.profile.provider != request.user.profile or \
                    user_to_delete == request.user:
-                messages.error(request, 'You do not have permission to delete this account.')
-                return redirect('provider_dashboard')
+                    messages.error(request, 'You do not have permission to delete this account.')
+                    return redirect('provider_dashboard')
             else:
                 # Other users can only delete their own account
                 if user_to_delete != request.user:
@@ -426,7 +425,7 @@ def delete_account(request, user_id):
             # Otherwise return to appropriate dashboard
             if request.user.profile.user_type == 'admin':
                 return redirect('admin_dashboard')
-                return redirect('provider_dashboard')
+            return redirect('provider_dashboard')
         
         return render(request, 'pages/delete_account.html', {
             'user_to_delete': user_to_delete

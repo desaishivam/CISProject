@@ -53,12 +53,12 @@
     
     <div class="stat-row">
       <span class="stat-label">Moves Made:</span>
-      <span class="stat-value">{{ task_response.data.moves }}</span>
+      <span class="stat-value">{{ task_response.responses.moves }}</span>
     </div>
     
     <div class="stat-row">
       <span class="stat-label">Time Taken:</span>
-      <span class="stat-value">{{ task_response.data.time }}</span>
+      <span class="stat-value">{{ task_response.responses.time }}</span>
     </div>
 
     <a href="{% url 'taskmanager:patient_tasks' %}" class="back-btn">
