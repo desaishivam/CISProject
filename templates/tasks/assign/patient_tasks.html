@@ -36,7 +36,12 @@
                 <tbody>
             {% for task in pending_tasks %}
                     <tr>
-                        <td>{{ task.title }}</td>
+                        <td>
+                            {{ task.title }}
+                            {% if task.difficulty %}
+                            <span class="difficulty-dot {{ task.difficulty|lower }}"></span>
+                            {% endif %}
+                        </td>
                         <td>
                             <a href="{% url 'taskmanager:take_task' task.id %}" class="action-btn start-btn">
                                 {% if task.status == 'assigned' %}
@@ -68,7 +73,12 @@
                 <tbody>
             {% for task in completed_tasks %}
                     <tr>
-                        <td>{{ task.title }}</td>
+                        <td>
+                            {{ task.title }}
+                            {% if task.difficulty %}
+                            <span class="difficulty-dot {{ task.difficulty|lower }}"></span>
+                            {% endif %}
+                        </td>
                     </tr>
             {% endfor %}
                 </tbody>
@@ -248,13 +258,31 @@
     .difficulty-badge {
         padding: 0.3rem 0.8rem;
         border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-align: center;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-transform: capitalize;
+    }
+    
+    .difficulty-dot {
+        height: 12px;
+        width: 12px;
+        border-radius: 50%;
         display: inline-block;
-        min-width: 60px;
+        margin-left: 8px;
+        vertical-align: middle;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .difficulty-dot.mild {
+        background-color: #2ecc71; /* A nice green */
+    }
+    
+    .difficulty-dot.moderate {
+        background-color: #f1c40f; /* A nice yellow */
+    }
+    
+    .difficulty-dot.major {
+        background-color: #e74c3c; /* A nice red */
     }
     
     .difficulty-mild {
@@ -349,7 +377,7 @@
     
     .empty-state-main {
         text-align: center;
-        padding: 3rem 2rem;
+        padding: 4rem 2rem;
         color: #7f8c8d;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-radius: 12px;

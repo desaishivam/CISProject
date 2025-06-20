@@ -27,6 +27,10 @@
             <p>Analysis for this task is not available.</p>
         </div>
     </div>
+    
+    <div class="actions-section">
+        <a href="{{ back_url }}" class="action-btn">← Back to Tasks</a>
+    </div>
 </div>
 
 <style>
@@ -105,6 +109,25 @@
         font-size: 1.1em;
         line-height: 1.6;
         text-align: center;
+    }
+
+    .actions-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #4299e1;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.3s;
+    }
+
+    .action-btn:hover {
+        background: #3182ce;
     }
 
     @media (max-width: 600px) {

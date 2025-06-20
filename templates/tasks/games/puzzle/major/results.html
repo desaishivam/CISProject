@@ -4,7 +4,101 @@
 <div class="container">
     <div class="task-header">
         <h1>🧩 Puzzle Game Results</h1>
-        <p>Results for the major puzzle game will be shown here.</p>
+        <p>Results for the major puzzle game.</p>
+    </div>
+
+    <div class="results-grid">
+        <div class="result-card">
+            <div class="result-icon">🎯</div>
+            <div class="result-value">{{ task_response.responses.score|default:"0" }} / {{ task_response.responses.total|default:"0" }}</div>
+            <div class="result-label">Score</div>
+        </div>
+        <div class="result-card">
+            <div class="result-icon">⏱️</div>
+            <div class="result-value">{{ task_response.responses.time|default:"00:00" }}</div>
+            <div class="result-label">Time</div>
+        </div>
+    </div>
+    
+    <div class="actions-section">
+        <a href="{{ back_url }}" class="action-btn">← Back to Tasks</a>
     </div>
 </div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .task-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .task-header h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 0.5rem;
+    }
+
+    .task-header p {
+        color: #7f8c8d;
+        font-size: 1.2em;
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .result-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .result-icon {
+        font-size: 2em;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-label {
+        color: #7f8c8d;
+        font-size: 1.1em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .actions-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #4299e1;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.3s;
+    }
+
+    .action-btn:hover {
+        background: #3182ce;
+    }
+</style>
 {% endblock %} 

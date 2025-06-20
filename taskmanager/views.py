@@ -320,59 +320,68 @@ def take_task(request, task_id):
 
 @login_required
 def task_results(request, task_id):
-    """View task results (for providers/caregivers and admins only)"""
+    """View to display the results of a completed task"""
     if not hasattr(request.user, 'profile'):
         messages.error(request, 'You do not have permission to view task results.')
         return redirect('home')
-    task = get_object_or_404(Task, id=task_id)
+    
     user_profile = request.user.profile
-    # Only allow the provider (caregiver) who assigned the task, caregivers assigned to the patient, or admin to view results
-    if user_profile.user_type == 'provider' and task.assigned_by != user_profile:
-        messages.error(request, 'You do not have permission to view this task.')
-        return redirect('provider_dashboard')
-    elif user_profile.user_type == 'caregiver':
-        # Expanded permission check for caregivers
-        is_linked_to_patient = user_profile.patient == task.assigned_to
-        completed_by_this_caregiver = task.completed_by == user_profile
-        works_for_assigning_provider = user_profile.provider == task.assigned_by
-
-        if not (is_linked_to_patient or completed_by_this_caregiver or works_for_assigning_provider):
-            messages.error(request, 'You do not have permission to view this task.')
-            return redirect('caregiver_dashboard')
-    elif user_profile.user_type == 'patient':
-        messages.error(request, 'You do not have permission to view task results.')
-        return redirect('taskmanager:patient_tasks')
-    elif user_profile.user_type not in ['provider', 'admin', 'caregiver']:
-        messages.error(request, 'You do not have permission to view task results.')
+    task = get_object_or_404(Task, id=task_id)
+    
+    # Permission check
+    is_patient_or_provider = (
+        (user_profile.user_type == 'patient' and task.assigned_to == user_profile) or
+        (user_profile.user_type == 'provider' and task.assigned_by == user_profile)
+    )
+    
+    is_authorized_caregiver = (
+        user_profile.user_type == 'caregiver' and
+        (
+            (user_profile.patient == task.assigned_to and user_profile.provider == task.assigned_by) or
+            (task.completed_by == user_profile)
+        )
+    )
+    
+    if not (is_patient_or_provider or is_authorized_caregiver):
+        messages.error(request, 'You do not have permission to view these task results.')
         return redirect('home')
-    
+        
     try:
-        task_response = TaskResponse.objects.get(task=task)
+        task_response = task.response
     except TaskResponse.DoesNotExist:
-        task_response = None
+        messages.error(request, 'No response found for this task.')
+        if user_profile.user_type == 'patient':
+            return redirect('taskmanager:patient_tasks')
+        elif user_profile.user_type == 'caregiver':
+            return redirect('caregiver_dashboard')
+        else:
+            return redirect('provider_dashboard')
+
+    # Determine the correct URL to go back to
+    if user_profile.user_type == 'caregiver':
+        back_url = reverse('caregiver_dashboard')
+    elif user_profile.user_type == 'provider':
+        back_url = reverse('provider_dashboard')
+    else: # Default to patient
+        back_url = reverse('taskmanager:patient_tasks')
+        
+    # Determine the correct template based on the task type
+    task_type = task.task_type
+    difficulty = task.difficulty or 'mild'
+    template_name = f'tasks/games/{task_type}/{difficulty}/results.html'
     
-    if task_response:
-        if task.task_type == 'puzzle':
-            # Handle puzzle results
-            pass
-        elif task.task_type == 'pairs':
-            # Handle pairs results
-            pass
-        elif task.task_type == 'checklist':
-            # Handle checklist results
-            pass
-    
-    template = TASK_TEMPLATES[task.task_type]['results_template']
-    if task.difficulty:
-        template = template.format(difficulty=task.difficulty)
-    
+    # Process results if they are in a specific format (e.g., questionnaires)
+    processed_results = None
+    if task_type == 'memory_questionnaire':
+        processed_results = process_memory_questionnaire_results(task_response.responses)
+
     context = {
         'task': task,
         'task_response': task_response,
-        'patient': task.assigned_to
+        'processed_results': processed_results,
+        'back_url': back_url
     }
-    
-    return render(request, template, context)
+    return render(request, template_name, context)
 
 def process_memory_questionnaire_results(responses):
     """Process memory questionnaire responses for analysis"""
