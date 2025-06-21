@@ -16,11 +16,66 @@ import logging
 logger = logging.getLogger(__name__)
 
 @login_required
-def assign_task(request, patient_id):
+def assign_task(request, patient_id=None):
     """Provider view to assign tasks to patients"""
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to assign tasks.')
         return redirect('home')
+    
+    # Handle JSON requests for bulk task assignment
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+            patient_id = data.get('patient_id')
+            if not patient_id:
+                return JsonResponse({'success': False, 'message': 'Patient ID is required'}, status=400)
+            
+            logger.info(f'Assigning task: {data} for patient_id={patient_id} by provider={request.user.profile.id}')
+            task_type = data.get('task_type')
+            difficulty = data.get('difficulty', 'mild')
+            
+            # Always set title to the display name for the selected task_type
+            type_dict = dict(TASK_TYPES)
+            title = type_dict.get(task_type, task_type.replace('_', ' ').title())
+            
+            # Get patient profile
+            try:
+                patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
+                if patient_profile.provider != request.user.profile:
+                    return JsonResponse({'success': False, 'message': 'You do not have permission to assign tasks to this patient.'}, status=403)
+            except UserProfile.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Patient not found.'}, status=404)
+            
+            # Create the task
+            task = Task.objects.create(
+                title=title,
+                task_type=task_type,
+                difficulty=difficulty,
+                assigned_by=request.user.profile,
+                assigned_to=patient_profile
+            )
+            
+            # Create notification
+            TaskNotification.objects.create(
+                task=task,
+                recipient=patient_profile,
+                message=f"New task assigned: {title}",
+                notification_type='assigned'
+            )
+            
+            logger.info(f'Successfully assigned task {task.id} ({task_type}, {difficulty}) to patient {patient_id}')
+            return JsonResponse({'success': True, 'message': f'Task "{title}" assigned successfully'})
+        except json.JSONDecodeError:
+            logger.error('Invalid JSON data in assign_task')
+            return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            logger.exception(f'Error assigning task for patient_id={patient_id}: {e}')
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    
+    # Handle regular form submissions (requires patient_id in URL)
+    if not patient_id:
+        messages.error(request, 'Patient ID is required.')
+        return redirect('provider_dashboard')
     
     try:
         patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
@@ -34,44 +89,6 @@ def assign_task(request, patient_id):
         templates = QuestionnaireTemplate.objects.filter(is_active=True)
         
         if request.method == 'POST':
-            # Handle JSON requests for bulk task assignment
-            if request.content_type == 'application/json':
-                try:
-                    data = json.loads(request.body)
-                    logger.info(f'Assigning task: {data} for patient_id={patient_id} by provider={request.user.profile.id}')
-                    task_type = data.get('task_type')
-                    difficulty = data.get('difficulty', 'mild')
-                    
-                    # Always set title to the display name for the selected task_type
-                    type_dict = dict(TASK_TYPES)
-                    title = type_dict.get(task_type, task_type.replace('_', ' ').title())
-                    
-                    # Create the task
-                    task = Task.objects.create(
-                        title=title,
-                        task_type=task_type,
-                        difficulty=difficulty,
-                        assigned_by=request.user.profile,
-                        assigned_to=patient_profile
-                    )
-                    
-                    # Create notification
-                    TaskNotification.objects.create(
-                        task=task,
-                        recipient=patient_profile,
-                        message=f"New task assigned: {title}",
-                        notification_type='assigned'
-                    )
-                    
-                    logger.info(f'Successfully assigned task {task.id} ({task_type}, {difficulty}) to patient {patient_id}')
-                    return JsonResponse({'success': True, 'message': f'Task "{title}" assigned successfully'})
-                except json.JSONDecodeError:
-                    logger.error('Invalid JSON data in assign_task')
-                    return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
-                except Exception as e:
-                    logger.exception(f'Error assigning task for patient_id={patient_id}: {e}')
-                    return JsonResponse({'success': False, 'message': str(e)}, status=500)
-            
             # Handle regular form submissions
             task_type = request.POST.get('task_type')
             description = request.POST.get('description')
@@ -129,6 +146,85 @@ def assign_task(request, patient_id):
     except UserProfile.DoesNotExist:
         messages.error(request, 'Patient not found.')
         return redirect('provider_dashboard')
+
+@login_required
+def assign_multiple_tasks(request):
+    """Provider view to assign multiple tasks to patients"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        return JsonResponse({'success': False, 'message': 'You do not have permission to assign tasks.'}, status=403)
+    
+    if request.method != 'POST' or request.content_type != 'application/json':
+        return JsonResponse({'success': False, 'message': 'Invalid request method or content type.'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        patient_id = data.get('patient_id')
+        tasks = data.get('tasks', [])
+        
+        if not patient_id:
+            return JsonResponse({'success': False, 'message': 'Patient ID is required'}, status=400)
+        
+        if not tasks:
+            return JsonResponse({'success': False, 'message': 'No tasks provided'}, status=400)
+        
+        # Get patient profile
+        try:
+            patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
+            if patient_profile.provider != request.user.profile:
+                return JsonResponse({'success': False, 'message': 'You do not have permission to assign tasks to this patient.'}, status=403)
+        except UserProfile.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Patient not found.'}, status=404)
+        
+        created_tasks = []
+        type_dict = dict(TASK_TYPES)
+        
+        for task_data in tasks:
+            task_type = task_data.get('task_type')
+            difficulty = task_data.get('difficulty', 'mild')
+            
+            if not task_type:
+                continue
+            
+            # Always set title to the display name for the selected task_type
+            title = type_dict.get(task_type, task_type.replace('_', ' ').title())
+            
+            # Create the task
+            task = Task.objects.create(
+                title=title,
+                task_type=task_type,
+                difficulty=difficulty,
+                assigned_by=request.user.profile,
+                assigned_to=patient_profile
+            )
+            
+            # Create notification
+            TaskNotification.objects.create(
+                task=task,
+                recipient=patient_profile,
+                message=f"New task assigned: {title}",
+                notification_type='assigned'
+            )
+            
+            created_tasks.append({
+                'id': task.id,
+                'title': title,
+                'task_type': task_type,
+                'difficulty': difficulty
+            })
+        
+        logger.info(f'Successfully assigned {len(created_tasks)} tasks to patient {patient_id}')
+        return JsonResponse({
+            'success': True, 
+            'message': f'{len(created_tasks)} tasks assigned successfully',
+            'tasks': created_tasks
+        })
+        
+    except json.JSONDecodeError:
+        logger.error('Invalid JSON data in assign_multiple_tasks')
+        return JsonResponse({'success': False, 'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        logger.exception(f'Error assigning multiple tasks: {e}')
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @login_required
 def patient_tasks(request):

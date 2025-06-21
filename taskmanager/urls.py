@@ -5,7 +5,8 @@ app_name = 'taskmanager'
 
 urlpatterns = [
     # Provider URLs
-    path('assign-task/<int:patient_id>/', views.assign_task, name='assign_task'),
+    path('assign-task/', views.assign_task, name='assign_task'),
+    path('assign-multiple-tasks/', views.assign_multiple_tasks, name='assign_multiple_tasks'),
     path('provider/tasks/', views.provider_task_management, name='provider_task_management'),
     
     # Patient URLs
