@@ -6,11 +6,12 @@
 ======================================== */
 
 /* FORM COMPONENTS */
-.form-page {
-    min-height: 100vh;
-    display: block;
-    padding: 2rem;
-    font-family: Arial, sans-serif;
+.form-page { 
+    min-height: 100vh; 
+    display: block; 
+    padding: 2rem; 
+    font-family: 
+    Arial, sans-serif; 
     background: #f8f9fa;
 }
 
@@ -105,35 +106,98 @@
 
 /* BUTTON SYSTEM */
 .btn {
-    padding: 0.7rem 1.2rem;
-    border: 1px solid #888;
-    border-radius: 4px;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
     font-size: 1rem;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    display: inline-block;
-    background: #f0f0f0;
-    color: #222;
-    min-width: 100px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-width: 120px;
     box-sizing: border-box;
-    font-family: inherit;
-    transition: none;
 }
 
 .btn:hover {
-    background: #e0e0e0;
+    transform: translateY(-2px);
     text-decoration: none;
 }
 
-.btn:active {
-    background: #d0d0d0;
+.btn.full-width {
+    width: 100%;
 }
 
-.btn.full-width { width: 100%; }
-.btn.large { padding: 1rem 1.5rem; font-size: 1.1rem; min-width: 140px; }
-.btn.small { padding: 0.5rem 0.8rem; font-size: 0.9rem; min-width: 80px; }
+.btn.large {
+    padding: 1.2rem 2rem;
+    font-size: 1.1rem;
+    min-width: 180px;
+}
 
-/* Remove role-specific and outline/gradient button styles */
+.btn.small {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    min-width: 100px;
+}
+
+/* Role-specific button styles */
+.btn.patient {
+    background: linear-gradient(135deg, var(--patient-primary), var(--patient-secondary));
+    color: white;
+    box-shadow: 0 4px 15px rgba(147, 51, 234, 0.4);
+}
+
+.btn.patient:hover {
+    box-shadow: 0 8px 25px rgba(147, 51, 234, 0.5);
+}
+
+.btn.caregiver {
+    background: linear-gradient(135deg, var(--caregiver-primary), var(--caregiver-secondary));
+    color: white;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+}
+
+.btn.caregiver:hover {
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.5);
+}
+
+.btn.provider {
+    background: linear-gradient(135deg, var(--provider-primary), var(--provider-secondary));
+    color: white;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+}
+
+.btn.provider:hover {
+    box-shadow: 0 8px 25px rgba(30, 58, 138, 0.5);
+}
+
+.btn.admin {
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+    color: white;
+    box-shadow: 0 4px 15px rgba(26, 32, 44, 0.4);
+}
+
+.btn.admin:hover {
+    box-shadow: 0 8px 25px rgba(26, 32, 44, 0.5);
+}
+
+.btn.outline {
+    background: white;
+    border: 2px solid;
+}
+
+.btn.outline.patient {
+    border-color: var(--patient-primary);
+    color: var(--patient-primary);
+}
+
+.btn.outline.patient:hover {
+    background: var(--patient-primary);
+    color: white;
+}
 
 /* BASIC LAYOUT UTILS */
 .mt-1 { margin-top: 0.5rem; }

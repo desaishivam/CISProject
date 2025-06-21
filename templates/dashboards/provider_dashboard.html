@@ -49,7 +49,11 @@
                                     {% for task_type, display_name in task_types %}
                                         <option value="{{ task_type }}" 
                                                 data-has-difficulty="{% if task_type in game_types %}true{% else %}false{% endif %}">
-                                            {% if task_type in game_types %}🎮 {% endif %}{{ display_name }}
+                                            {% if task_type == 'memory_questionnaire' %}📝 
+                                            {% elif task_type == 'checklist' %}✅ 
+                                            {% elif task_type in game_types %}🎮 
+                                            {% endif %}
+                                            {{ display_name }}
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -990,285 +994,220 @@
 </style>
 
 <script>
-    // Initialize all functionality when the DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM Content Loaded');
-        
-        // Get DOM elements
-        const modal = document.getElementById('appointmentModal');
-        const closeBtn = modal.querySelector('.close');
-        const appointmentForm = document.getElementById('appointmentForm');
-
-        // Initialize modal functionality
-        if (modal && closeBtn && appointmentForm) {
-            // Close modal when clicking (x)
-            closeBtn.onclick = function() {
-                modal.style.display = 'none';
-            };
-
-            // Close modal when clicking outside
-            window.onclick = function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-            };
-
-            // Handle appointment form submission
-            appointmentForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                console.log('Form submitted');
-                
-                const formData = new FormData(this);
-                const patientId = formData.get('patient_id');
-                const datetime = formData.get('datetime');
-                const notes = formData.get('notes');
-                
-                console.log('Form data:', {
-                    patientId,
-                    datetime,
-                    notes,
-                    csrfToken: formData.get('csrfmiddlewaretoken')
-                });
-                
-                if (!patientId || !datetime) {
-                    alert('Please fill in all required fields');
-                return;
-    }
-    
-                fetch(`/taskmanager/create-appointment/${patientId}/`, {
-                method: 'POST',
-                    body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-            })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', Object.fromEntries(response.headers));
-                    
-                    return response.text().then(text => {
-                        console.log('Raw response:', text);
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            console.error('Failed to parse response as JSON:', text);
-                            throw new Error('Invalid server response');
-    }
-                    });
-                })
-            .then(data => {
-                    console.log('Response data:', data);
-                    if (data.status === 'success') {
-                        alert('Appointment scheduled successfully!');
-                        modal.style.display = 'none';
-                        location.reload();
-                } else {
-                        throw new Error(data.message || 'Error scheduling appointment');
-    }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                    alert('Error scheduling appointment: ' + error.message);
-                });
-            });
-        } else {
-            console.error('Required modal elements not found');
-    }
-
-        // Function to assign all task types to a patient
-        window.assignAllTasksToPatient = function() {
-            const patientSelect = document.getElementById('quick_assign_patient');
-            const difficultySelect = document.getElementById('quick_assign_difficulty');
-            
-            if (!patientSelect.value) {
-                alert('Please select a patient first');
-                return;
             }
+        }
+        return cookieValue;
+    }
 
-            const taskTypeSelect = document.getElementById('quick_assign_task');
-            const taskOptions = Array.from(taskTypeSelect.options).filter(option => option.value);
-            let assignedCount = 0;
+    function quickAssignTask() {
+        const patientId = document.getElementById('quick_assign_patient').value;
+        const taskType = document.getElementById('quick_assign_task').value;
+        const difficulty = document.getElementById('quick_assign_difficulty').value;
+        const hasDifficulty = document.getElementById('quick_assign_task').options[document.getElementById('quick_assign_task').selectedIndex].dataset.hasDifficulty === 'true';
 
-            // Function to assign a single task
-            const assignTask = (taskType) => {
-                return fetch('/tasks/assign/' + patientSelect.value + '/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify({
-                        task_type: taskType,
-                        difficulty: difficultySelect.value || 'mild'
-                    })
-                });
-            };
-
-            // Assign tasks sequentially
-            const assignTasks = async () => {
-                for (const option of taskOptions) {
-                    try {
-                        const response = await assignTask(option.value);
-                        if (response.ok) {
-                            assignedCount++;
-                        }
-                    } catch (error) {
-                        console.error('Error assigning task:', error);
-                    }
-                }
-                
-                alert(`Successfully assigned ${assignedCount} tasks to the patient`);
-                location.reload();
-            };
-
-            assignTasks();
-        };
-
-        // Function to assign all difficulties for a game task
-        window.assignAllDifficulties = function() {
-            const patientSelect = document.getElementById('quick_assign_patient');
-            const taskTypeSelect = document.getElementById('quick_assign_task');
-        
-            if (!patientSelect.value) {
-                alert('Please select a patient first');
-                return;
-            }
-
-            if (!taskTypeSelect.value) {
-                alert('Please select a task type first');
+        if (!patientId) {
+            alert('Please select a patient first.');
             return;
         }
-        
-            const selectedOption = taskTypeSelect.options[taskTypeSelect.selectedIndex];
-            const hasDifficulty = selectedOption.getAttribute('data-has-difficulty') === 'true';
 
-            if (!hasDifficulty) {
-                alert('Selected task type does not support difficulty levels. Please select a game-type task.');
-                return;
+        if (!taskType) {
+            alert('Please select a task type first.');
+            return;
         }
-        
-            const difficulties = ['mild', 'moderate', 'major'];
-            let assignedCount = 0;
 
-            // Function to assign a single task with difficulty
-            const assignTask = (difficulty) => {
-                return fetch('/tasks/assign-task/' + patientSelect.value + '/', {
+        if (hasDifficulty && !difficulty) {
+            alert('Please select a difficulty level first.');
+            return;
+        }
+
+        const payload = {
+            patient_id: patientId,
+            task_type: taskType
+        };
+
+        if (hasDifficulty) {
+            payload.difficulty = difficulty;
+        }
+
+        const url = `/tasks/assign-task/${payload.patient_id}/`;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Task assigned successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error assigning task:', error);
+            alert('An unexpected error occurred. Please try again.');
+        });
+    }
+
+    function assignAllTasksToPatient() {
+        const patientId = document.getElementById('quick_assign_patient').value;
+        const difficulty = document.getElementById('quick_assign_difficulty').value;
+
+        if (!patientId) {
+            alert('Please select a patient first.');
+            return;
+        }
+
+        const tasks = [
+            // Games
+            { task_type: 'color', difficulty: difficulty },
+            { task_type: 'pairs', difficulty: difficulty },
+            { task_type: 'puzzle', difficulty: difficulty },
+            // Non-games
+            { task_type: 'checklist' },
+            { task_type: 'memory_questionnaire' }
+        ].map(task => ({
+            patient_id: patientId,
+            ...task
+        }));
+
+        fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ tasks: tasks })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.total_assigned + ' tasks assigned successfully to the patient.');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error assigning tasks:', error);
+            alert('An unexpected error occurred. Please try again.');
+        });
+    }
+
+    function assignAllDifficulties() {
+        const patientId = document.getElementById('quick_assign_patient').value;
+        const taskType = document.getElementById('quick_assign_task').value;
+
+        if (!patientId || !taskType) {
+            alert('Please select a patient and a task type first.');
+            return;
+        }
+
+        const selectedOption = document.getElementById('quick_assign_task').options[document.getElementById('quick_assign_task').selectedIndex];
+        if (selectedOption.dataset.hasDifficulty !== 'true') {
+            alert('This task type does not have different difficulty levels.');
+            return;
+        }
+
+        const difficulties = ['mild', 'moderate', 'major'];
+        const tasks = difficulties.map(difficulty => ({
+            patient_id: patientId,
+            task_type: taskType,
+            difficulty: difficulty
+        }));
+
+        fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ tasks: tasks })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('All difficulties for ' + selectedOption.text.trim() + ' assigned successfully to the patient.');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error assigning tasks:', error);
+            alert('An unexpected error occurred. Please try again.');
+        });
+    }
+
+    function deleteAllTasks() {
+        const patientId = document.getElementById('selected_patient').value;
+        if (!patientId) {
+            alert('Please select a patient whose tasks you want to delete.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete all tasks for this patient? This action cannot be undone.')) {
+            fetch(`/tasks/delete_all_tasks/${patientId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify({
-                        task_type: taskTypeSelect.value,
-                        difficulty: difficulty
-                    })
-                });
-            };
-
-            // Assign tasks with different difficulties sequentially
-            const assignTasks = async () => {
-                for (const difficulty of difficulties) {
-                    try {
-                        const response = await assignTask(difficulty);
-                        const data = await response.json();
-                        if (data.success) {
-                            assignedCount++;
-                        }
-                    } catch (error) {
-                        console.error('Error assigning task:', error);
-                    }
+                    'X-CSRFToken': getCookie('csrftoken')
                 }
-
-                if (assignedCount > 0) {
-                    alert(`Successfully assigned task with ${assignedCount} difficulty levels`);
-                } else {
-                    alert('No tasks were assigned. Please check your selections and try again.');
-                }
-                location.reload();
-            };
-
-            assignTasks();
-        };
-
-        window.quickAssignTask = function() {
-            const patientSelect = document.getElementById('quick_assign_patient');
-            const taskTypeSelect = document.getElementById('quick_assign_task');
-            const difficultySelect = document.getElementById('quick_assign_difficulty');
-        
-            if (!patientSelect.value) {
-                alert('Please select a patient first');
-            return;
-        }
-            if (!taskTypeSelect.value) {
-                alert('Please select a task type first');
-                return;
-            }
-            if (!difficultySelect.value) {
-                alert('Please select a difficulty level first');
-                return;
-    }
-    
-            fetch('/tasks/assign/' + patientSelect.value + '/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({
-                    task_type: taskTypeSelect.value,
-                    difficulty: difficultySelect.value
-                })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    alert('Task assigned successfully!');
+                if (data.status === 'success') {
+                    alert(data.deleted_count + ' tasks have been deleted.');
                     location.reload();
                 } else {
-                    alert(data.message || 'Failed to assign task.');
+                    alert('Error: ' + data.message);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while assigning the task. Please try again.');
+                console.error('Error deleting tasks:', error);
+                alert('An unexpected error occurred.');
             });
-        };
+        }
+    }
 
-        window.deleteAllTasks = function() {
-            const patientSelect = document.getElementById('selected_patient');
-            const patientId = patientSelect.value;
+    document.addEventListener('DOMContentLoaded', function() {
+        const taskSelect = document.getElementById('quick_assign_task');
+        const difficultySelect = document.getElementById('quick_assign_difficulty');
+        const difficultyContainer = difficultySelect.closest('.form-group');
 
-            if (!patientId) {
-                alert('Please select a patient first.');
-                return;
+        function toggleDifficulty() {
+            const selectedOption = taskSelect.options[taskSelect.selectedIndex];
+            const hasDifficulty = selectedOption.dataset.hasDifficulty === 'true';
+            
+            if (hasDifficulty) {
+                difficultyContainer.style.display = 'block';
+                difficultySelect.required = true;
+                difficultySelect.disabled = false;
+            } else {
+                difficultyContainer.style.display = 'none';
+                difficultySelect.required = false;
+                difficultySelect.disabled = true;
             }
+        }
 
-            if (confirm('Are you sure you want to delete all tasks for this patient? This action cannot be undone.')) {
-                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                
-                fetch(`/tasks/delete-all-tasks/${patientId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('All tasks have been deleted successfully.');
-                        location.reload();
-                    } else {
-                        alert('Failed to delete tasks: ' + (data.message || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting tasks.');
-                });
-            }
-        };
+        taskSelect.addEventListener('change', toggleDifficulty);
+        toggleDifficulty(); // Initial check
     });
 
     // Global function to open the schedule modal

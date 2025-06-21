@@ -69,10 +69,13 @@
       border: 2px dashed #888;
       padding: 20px;
       min-width: 150px;
-      height: 200px;
+      min-height: 200px;
       margin: 10px;
       background: #fff;
       border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     .drop-zone h3 {
       margin-top: 0;
@@ -92,6 +95,7 @@
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 20px;
     }
   </style>
   <script>
@@ -159,12 +163,12 @@
         }
       });
       clearInterval(timerInterval);
-      const time = document.getElementById("timer").textContent;
+      const elapsedSeconds = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
       // Prepare results
       const results = {
         score: score,
         total: total,
-        time: time,
+        time: elapsedSeconds,
         difficulty: 'major'
       };
       console.log('Submitting results:', results);

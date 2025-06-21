@@ -193,22 +193,24 @@ def take_task(request, task_id):
         if request.content_type == 'application/json':
             try:
                 data = json.loads(request.body)
-                if task.task_type == 'color':
-                    task_response.responses = {
-                        'moves': data.get('moves', 0),
-                        'time': data.get('time', 0),
-                        'difficulty': data.get('difficulty', task.difficulty or 'mild')
-                    }
-                    handled = True
-                elif task.task_type == 'pairs':
-                    task_response.responses = {
-                        'moves': data.get('moves', 0),
-                        'time': data.get('time', 0),
-                        'difficulty': data.get('difficulty', task.difficulty or 'major')
-                    }
-                    handled = True
-            except (json.JSONDecodeError, ValueError):
-                pass
+                task_response.responses = data
+                task.status = 'completed'
+                task.completed_by = user_profile
+                task.date_completed = timezone.now()
+                task.save()
+                task_response.save()
+                
+                # Determine redirect URL based on user type
+                if user_profile.user_type == 'caregiver':
+                    redirect_url = reverse('caregiver_dashboard')
+                else: # Default to patient
+                    redirect_url = reverse('patient_dashboard')
+                
+                return JsonResponse({'success': True, 'redirect': redirect_url})
+
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.error(f"Error processing JSON for task {task_id}: {e}")
+                return JsonResponse({'success': False, 'message': 'Invalid data received.'}, status=400)
         
         # Handle puzzle task responses
         if task.task_type == 'puzzle' and 'complete_task' in request.POST:

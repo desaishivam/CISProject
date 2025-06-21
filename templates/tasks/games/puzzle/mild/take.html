@@ -23,10 +23,6 @@
     <div class="draggable" draggable="true" id="Pizza">Pizza</div>
     <div class="draggable" draggable="true" id="Rice">Rice</div>
     <div class="draggable" draggable="true" id="Cheese">Cheese</div>
-    <!-- Plant -->
-    <div class="draggable" draggable="true" id="Rose">Rose</div>
-    <div class="draggable" draggable="true" id="Bamboo">Bamboo</div>
-    <div class="draggable" draggable="true" id="Cactus">Cactus</div>
     <!-- Vehicle -->
     <div class="draggable" draggable="true" id="Car">Car</div>
     <div class="draggable" draggable="true" id="Bike">Bike</div>
@@ -45,9 +41,6 @@
     </div>
     <div class="drop-zone" id="food" ondragover="allowDrop(event)" ondrop="drop(event)">
       <h3>🍽️ Food</h3>
-    </div>
-    <div class="drop-zone" id="plant" ondragover="allowDrop(event)" ondrop="drop(event)">
-      <h3>🌳 Plant</h3>
     </div>
     <div class="drop-zone" id="vehicle" ondragover="allowDrop(event)" ondrop="drop(event)">
       <h3>🚗 Vehicle</h3>
@@ -89,10 +82,13 @@
       border: 2px dashed #888;
       padding: 20px;
       min-width: 150px;
-      height: 200px;
+      min-height: 200px;
       margin: 10px;
       background: #fff;
       border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     .drop-zone h3 {
       margin-top: 0;
@@ -112,6 +108,7 @@
       font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 20px;
     }
   </style>
   <script>
@@ -128,9 +125,6 @@
       Pizza: "food",
       Rice: "food",
       Cheese: "food",
-      Rose: "plant",
-      Bamboo: "plant",
-      Cactus: "plant",
       Car: "vehicle",
       Bike: "vehicle",
       Bus: "vehicle"
@@ -173,12 +167,12 @@
         if (parentId === correct) score++;
       }
       clearInterval(timerInterval);
-      const time = document.getElementById("timer").textContent;
+      const elapsedSeconds = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
       // Prepare results
       const results = {
         score: score,
-        total: 18,
-        time: time,
+        total: 15,
+        time: elapsedSeconds,
         difficulty: 'mild'
       };
       console.log('Submitting results:', results);

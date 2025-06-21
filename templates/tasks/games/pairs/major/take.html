@@ -1,24 +1,26 @@
 {% extends 'layouts/base.html' %}
 {% block title %}Related Pairing (Major){% endblock %}
-{% csrf_token %}
 
 {% block content %}
-<div class="container">
-    <div class="task-header">
-        <h1>Related Pairing (Major)</h1>
-        <p>Pair together the related items.</p>
-    </div>
+<form id="game-form">
+    {% csrf_token %}
+    <div class="container">
+        <div class="task-header">
+            <h1>Related Pairing (Major)</h1>
+            <p>Pair together the related items.</p>
+        </div>
 
-    <div class="stats-container">
-        <div>Moves: <span id="moves">0</span></div>
-        <div>Matches: <span id="matches">0</span></div>
-        <div>Time: <span id="time">00:00</span></div>
-    </div>
+        <div class="stats-container">
+            <div>Moves: <span id="moves">0</span></div>
+            <div>Matches: <span id="matches">0</span></div>
+            <div>Time: <span id="time">00:00</span></div>
+        </div>
 
-    <div class="game-container">
-        <div class="game-board" id="gameBoard"></div>
+        <div class="game-container">
+            <div class="game-board" id="gameBoard"></div>
+        </div>
     </div>
-</div>
+</form>
 
 <style>
     body {
@@ -156,7 +158,7 @@ let state;
     state.cards.forEach((card, index) => {
         const el = document.createElement('div');
         el.className = 'card';
-        el.innerHTML = `<div>${card.emoji}</div><div style=\"font-size: 0.5em;\">${card.word}</div>`;
+        el.innerHTML = `<div>${card.emoji}</div><div style="font-size: 0.5em;">${card.word}</div>`;
         if (card.matched) {
             el.classList.add('matched');
         } else if (state.wrong && state.wrong.includes(index)) {
@@ -168,26 +170,34 @@ let state;
             }
         board.appendChild(el);
         });
-    // Check for completion after rendering
-    if (!state.completed && state.matched === state.cards.length / 2) {
-        state.completed = true;
-        gameCompleted();
-        }
     }
 
 function flipCard(index) {
-    if (state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) return;
+    if (state.completed || state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) {
+        return;
+    }
+
     state.flipped.push(index);
-        renderGame();
+    renderGame();
+
     if (state.flipped.length === 2) {
         state.moves++;
+        updateStats(); // Update moves immediately
+
         const [i1, i2] = state.flipped;
         if (state.cards[i1].id === state.cards[i2].id) {
-            state.cards[i1].matched = state.cards[i2].matched = true;
+            state.cards[i1].matched = true;
+            state.cards[i2].matched = true;
             state.matched++;
+            updateStats(); // Update matches immediately
+            
             state.flipped = [];
             renderGame();
-            if (state.matched === state.cards.length / 2) gameCompleted();
+
+            if (state.matched === state.cards.length / 2) {
+                state.completed = true;
+                setTimeout(gameCompleted, 500);
+            }
         } else {
             state.wrong = [i1, i2];
             renderGame();
@@ -196,10 +206,9 @@ function flipCard(index) {
                 state.wrong = [];
                 renderGame();
             }, 1000);
+        }
     }
-    }
-    updateStats();
-    }
+}
 
     function updateStats() {
     document.getElementById('moves').textContent = state.moves;
@@ -215,14 +224,13 @@ function flipCard(index) {
 
 function gameCompleted() {
     clearInterval(state.timer);
-    const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
+    const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+    
     const results = {
-        score: state.matched * 10,
         moves: state.moves,
-        time: totalTime,
-        difficulty: 'major'
+        time: elapsedSeconds
     };
-    console.log('Submitting results:', results);
+
     fetch(window.location.href, {
         method: 'POST',
         headers: {
@@ -230,16 +238,18 @@ function gameCompleted() {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
         body: JSON.stringify(results)
-    }).then((res) => res.json())
-    .then((data) => {
+    }).then(res => res.json())
+    .then(data => {
         if (data.redirect) {
             window.location.href = data.redirect;
         } else {
-        window.location.href = '/tasks/patient/tasks/';
+            console.error('Redirect URL not provided by server. Falling back to patient dashboard.');
+            window.location.href = '/patient-dashboard/';
         }
-    }).catch((err) => {
-        console.error('Fetch error:', err);
-        window.location.href = '/tasks/patient/tasks/';
+    }).catch(error => {
+        console.error('Error submitting results:', error);
+        alert('Could not save your results. Redirecting to the dashboard.');
+        window.location.href = '/patient-dashboard/';
     });
 }
 

@@ -1,0 +1,242 @@
+/* static/css/base.css */
+
+:root {
+    /* Patient Theme */
+    --patient-primary: #9333ea;
+    --patient-secondary: #7c3aed;
+    --patient-accent: #8b5cf6;
+    
+    /* Caregiver Theme */
+    --caregiver-primary: #059669;
+    --caregiver-secondary: #047857;
+    --caregiver-accent: #10b981;
+    
+    /* Provider Theme */
+    --provider-primary: #1e3a8a;
+    --provider-secondary: #1e40af;
+    --provider-accent: #3730a3;
+    
+    /* Admin Theme */
+    --admin-primary: #1a202c;
+    --admin-secondary: #2d3748;
+    --admin-accent: #fbbf24;
+    
+    /* Neutral Colors */
+    --neutral-50: #f8fafc;
+    --neutral-100: #f1f5f9;
+    --neutral-200: #e2e8f0;
+    --neutral-300: #cbd5e1;
+    --neutral-400: #94a3b8;
+    --neutral-500: #64748b;
+    --neutral-600: #475569;
+    --neutral-700: #334155;
+    --neutral-800: #1e293b;
+    --neutral-900: #0f172a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, var(--neutral-50) 0%, var(--neutral-100) 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    color: var(--neutral-700);
+    line-height: 1.6;
+}
+
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 72px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.top-nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--provider-primary), var(--provider-accent), var(--patient-primary), var(--caregiver-primary), var(--admin-accent));
+    background-size: 300% 100%;
+    animation: gradientShift 8s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 25% 50%; }
+    50% { background-position: 50% 50%; }
+    75% { background-position: 75% 50%; }
+}
+
+.site-title {
+    color: var(--neutral-800);
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.site-title::before {
+    content: '🧠';
+    font-size: 1.8rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.site-title:hover {
+    transform: translateY(-2px);
+    color: var(--provider-primary);
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    color: var(--neutral-600);
+    text-decoration: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(124, 58, 237, 0.1));
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.nav-link:hover::before {
+    left: 0;
+}
+
+.nav-link:hover {
+    color: var(--neutral-800);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Role-specific nav styling */
+.nav-link.patient-link {
+    border: 2px solid transparent;
+}
+
+.nav-link.patient-link:hover {
+    border-color: var(--patient-primary);
+    color: var(--patient-primary);
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(124, 58, 237, 0.05));
+}
+
+.nav-link.caregiver-link:hover {
+    border-color: var(--caregiver-primary);
+    color: var(--caregiver-primary);
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.05), rgba(4, 120, 87, 0.05));
+}
+
+.nav-link.provider-link:hover {
+    border-color: var(--provider-primary);
+    color: var(--provider-primary);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.05), rgba(30, 64, 175, 0.05));
+}
+
+.nav-link.admin-link:hover {
+    border-color: var(--admin-accent);
+    color: var(--admin-primary);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(245, 158, 11, 0.05));
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--neutral-600);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    background: var(--neutral-100);
+    color: var(--neutral-800);
+}
+
+main {
+    padding-top: 88px;
+    min-height: calc(100vh - 88px);
+}
+
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.messages {
+    margin-bottom: 2rem;
+}
+
+.message {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.message.success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message.info {
+    background: linear-gradient(135deg, #cce7ff, #b3d9ff);
+    color: #004085;
+    border: 1px solid #b3d9ff;
+} 

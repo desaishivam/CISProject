@@ -49,7 +49,7 @@
   </style>
 
   <div class="results-card">
-    <h1>🎨 Color Matching Results</h1>
+    <h1>Color Matching Results</h1>
     
     <div class="stat-row">
       <span class="stat-label">Moves Made:</span>
@@ -58,7 +58,7 @@
     
     <div class="stat-row">
       <span class="stat-label">Time Taken:</span>
-      <span class="stat-value">{{ task_response.responses.time }}</span>
+      <span class="stat-value" id="time-taken">{{ task_response.responses.time }}</span>
     </div>
 
     <a href="{{ back_url }}" class="back-btn">
@@ -66,4 +66,15 @@
     </a>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const timeInSeconds = parseInt(document.getElementById('time-taken').textContent, 10);
+    if (!isNaN(timeInSeconds)) {
+      const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
+      const seconds = (timeInSeconds % 60).toString().padStart(2, '0');
+      document.getElementById('time-taken').textContent = `${minutes}:${seconds} seconds`;
+    }
+  });
+</script>
 {% endblock %} 

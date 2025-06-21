@@ -1,156 +1,79 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Pairs Game Results - CogniCare{% endblock %}
+
+{% block title %}Related Pairing Results – Moderate{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="task-header">
-        <h1>Pairs Game Results</h1>
-        <p>Task completed by {{ patient.user.first_name }} {{ patient.user.last_name }}</p>
+<div class="results-container">
+  <style>
+    .results-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .results-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 15px 0;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .stat-label {
+      font-weight: bold;
+      color: #4a5568;
+    }
+    .stat-value {
+      color: #2d3748;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #4299e1;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    .back-btn:hover {
+      background: #3182ce;
+    }
+  </style>
+
+  <div class="results-card">
+    <h1>Related Pairing Results</h1>
+    
+    <div class="stat-row">
+      <span class="stat-label">Moves Made:</span>
+      <span class="stat-value">{{ task_response.responses.moves }}</span>
+    </div>
+    
+    <div class="stat-row">
+      <span class="stat-label">Time Taken:</span>
+      <span class="stat-value" id="time-taken">{{ task_response.responses.time }}</span>
     </div>
 
-    <div class="results-grid">
-        <div class="result-card">
-            <div class="result-icon">🔄</div>
-            <div class="result-value">{{ task_response.responses.moves }}</div>
-            <div class="result-label">Moves</div>
-        </div>
-        <div class="result-card">
-            <div class="result-icon">⏱️</div>
-            <div class="result-value">{{ task_response.responses.time }}</div>
-            <div class="result-label">Time</div>
-        </div>
-    </div>
-
-    <div class="analysis-section">
-        <h2>Performance Analysis</h2>
-        <div class="analysis-content">
-            <p>Analysis for this task is not available.</p>
-        </div>
-    </div>
-
-    <div class="actions-section">
-        <a href="{{ back_url }}" class="action-btn">← Back to Tasks</a>
-    </div>
+    <a href="{{ back_url }}" class="back-btn">
+      ← Back to Tasks
+    </a>
+  </div>
 </div>
 
-<style>
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const timeInSeconds = parseInt(document.getElementById('time-taken').textContent, 10);
+    if (!isNaN(timeInSeconds)) {
+      const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
+      const seconds = (timeInSeconds % 60).toString().padStart(2, '0');
+      document.getElementById('time-taken').textContent = `${minutes}:${seconds} seconds`;
     }
-
-    .task-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .task-header h1 {
-        color: #2c3e50;
-        font-size: 2.5em;
-        margin-bottom: 0.5rem;
-    }
-
-    .task-header p {
-        color: #7f8c8d;
-        font-size: 1.2em;
-    }
-
-    .results-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .result-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    .result-icon {
-        font-size: 2em;
-        margin-bottom: 0.5rem;
-    }
-
-    .result-value {
-        font-size: 2.5em;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-    }
-
-    .result-label {
-        color: #7f8c8d;
-        font-size: 1.1em;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .analysis-section {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .analysis-section h2 {
-        color: #2c3e50;
-        margin-bottom: 1rem;
-        font-size: 1.8em;
-        text-align: center;
-    }
-
-    .analysis-content {
-        color: #34495e;
-        font-size: 1.1em;
-        line-height: 1.6;
-        text-align: center;
-    }
-
-    .actions-section {
-        text-align: center;
-        margin-top: 2rem;
-    }
-
-    .action-btn {
-        display: inline-block;
-        padding: 10px 20px;
-        background: #4299e1;
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
-        transition: background 0.3s;
-    }
-
-    .action-btn:hover {
-        background: #3182ce;
-    }
-
-    @media (max-width: 600px) {
-        .container {
-            padding: 1rem;
-        }
-
-        .results-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .result-value {
-            font-size: 2em;
-        }
-
-        .task-header h1 {
-            font-size: 2em;
-        }
-
-        .analysis-section {
-            padding: 1.5rem;
-        }
-    }
-</style>
+  });
+</script>
 {% endblock %}
