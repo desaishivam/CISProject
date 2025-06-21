@@ -1,0 +1,129 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Results for {{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-header">
+        <h1>Results for "{{ task.title }}"</h1>
+    </div>
+
+    {% if processed_results %}
+    <div class="results-section">
+        <h2 class="section-title">📊 Overall Summary</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Overall Score</h3>
+                <p>{{ processed_results.overall_score }}</p>
+                <span class="card-subtitle">Avg. Frequency + Avg. Seriousness</span>
+            </div>
+            <div class="summary-card">
+                <h3>Average Frequency</h3>
+                <p>{{ processed_results.avg_frequency }}</p>
+                 <span class="card-subtitle">0=Never, 3=Always</span>
+            </div>
+            <div class="summary-card">
+                <h3>Average Seriousness</h3>
+                <p>{{ processed_results.avg_seriousness }}</p>
+                <span class="card-subtitle">0=Not Serious, 2=Very Serious</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-section">
+        <h2 class="section-title">😟 High Concern Issues</h2>
+        <p class="section-subtitle">Issues with a combined score of 4 or higher.</p>
+        {% if processed_results.high_concern_issues %}
+            <ul class="issue-list">
+                {% for issue in processed_results.high_concern_issues %}
+                <li>{{ issue.issue }} (Score: {{ issue.combined_score }})</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">No high concern issues reported.</p>
+        {% endif %}
+    </div>
+
+    <div class="results-section">
+        <h2 class="section-title">🤔 Reported Memory Techniques</h2>
+        {% if processed_results.techniques %}
+            <ul class="technique-list">
+                {% for technique in processed_results.techniques %}
+                <li>{{ technique }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">No specific memory techniques were reported.</p>
+        {% endif %}
+    </div>
+
+    <div class="results-section">
+        <h2 class="section-title">📝 Detailed Responses</h2>
+        <div class="table-container">
+            <table class="enhanced-table">
+                <thead>
+                    <tr>
+                        <th>Memory Issue</th>
+                        <th>Frequency</th>
+                        <th>Seriousness</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for issue in processed_results.processed_issues %}
+                    <tr>
+                        <td>{{ issue.issue }}</td>
+                        <td>{{ issue.frequency }}</td>
+                        <td>{{ issue.seriousness }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>There was an error processing the results for this questionnaire.</p>
+    </div>
+    {% endif %}
+
+    <div class="footer-actions">
+        <a href="{{ back_url }}" class="action-btn outline-btn">← Back to Tasks</a>
+    </div>
+</div>
+
+<style>
+    .results-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+    }
+    .results-header { text-align: center; margin-bottom: 2rem; }
+    .results-header h1 { color: #343a40; }
+    .results-section {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .section-title { margin-top: 0; color: #495057; border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; }
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    .summary-card {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .summary-card h3 { margin: 0 0 0.5rem; color: #495057; }
+    .summary-card p { font-size: 2rem; font-weight: bold; color: #343a40; margin: 0; }
+    .card-subtitle { font-size: 0.8rem; color: #6c757d; }
+    .issue-list, .technique-list { list-style-type: none; padding-left: 0; }
+    .issue-list li, .technique-list li { background-color: #f8f9fa; padding: 0.5rem 1rem; border-radius: 4px; margin-bottom: 0.5rem; }
+</style>
+{% endblock %} 

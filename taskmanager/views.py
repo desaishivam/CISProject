@@ -283,9 +283,9 @@ def take_task(request, task_id):
         task.save()
     
     if request.method == 'POST':
-        handled = False
+        # Unified handler for all submissions (JSON or form)
         
-        # Handle JSON submissions for modern games
+        # 1. Handle JSON submissions (modern games)
         if request.content_type == 'application/json':
             try:
                 data = json.loads(request.body)
@@ -307,94 +307,49 @@ def take_task(request, task_id):
             except (json.JSONDecodeError, ValueError) as e:
                 logger.error(f"Error processing JSON for task {task_id}: {e}")
                 return JsonResponse({'success': False, 'message': 'Invalid data received.'}, status=400)
-        
-        # Handle puzzle task responses
-        if task.task_type == 'puzzle' and 'complete_task' in request.POST:
-            score = request.POST.get('score', 0)
-            time_taken = request.POST.get('time', '00:00')
-            answers = json.loads(request.POST.get('answers', '{}'))
-            task_response.responses = {
-                'score': score,
-                'time': time_taken,
-                'answers': answers
-            }
-            handled = True
-        # Handle JSON submissions for puzzle tasks
-        elif task.task_type == 'puzzle' and request.content_type == 'application/json':
-            try:
-                data = json.loads(request.body)
-                task_response.responses = {
-                    'score': data.get('score', 0),
-                    'total': data.get('total', 0),
-                    'time': data.get('time', '00:00'),
-                    'difficulty': data.get('difficulty', task.difficulty or 'mild')
-                }
-                handled = True
-            except (json.JSONDecodeError, ValueError):
-                pass
-        # Handle color task responses (form-based fallback)
-        elif task.task_type == 'color' and 'complete_task' in request.POST:
-            score = request.POST.get('score', 0)
-            tries = request.POST.get('tries', 0)
-            time_taken = request.POST.get('time', 0)
-            task_response.responses = {
-                'score': score,
-                'tries': tries,
-                'time': time_taken
-            }
-            handled = True
-        # Handle pairs game responses
-        elif task.task_type == 'pairs' and 'complete_task' in request.POST:
-            score = request.POST.get('score', 0)
-            moves = request.POST.get('moves', 0)
-            time_taken = request.POST.get('time', 0)
-            task_response.responses = {
-                'score': score,
-                'moves': moves,
-                'time': time_taken
-            }
-            handled = True
-        # Handle memory questionnaire responses
-        elif task.task_type == 'memory_questionnaire' and 'complete_task' in request.POST:
-            # Collect all relevant answers from POST
-            responses = {}
-            for key in request.POST:
-                if key.startswith('freq_') or key.startswith('serious_') or key.startswith('technique_'):
-                    responses[key] = request.POST.get(key)
-            task_response.responses = responses
-            handled = True
-        # Handle checklist task responses
-        elif task.task_type == 'checklist' and 'complete_task' in request.POST:
-            responses = {}
-            # Save checked items
-            for i in [1, 2, 3, 5, 6, 7]:
-                responses[f'item_{i}'] = request.POST.get(f'item_{i}', '') == 'on'
-            # Save mood
-            responses['mood'] = request.POST.get('mood', '')
-            # Save memory entry
-            responses['memory_entry'] = request.POST.get('memory_entry', '')
-            task_response.responses = responses
-            handled = True
-        # Handle other task types
+
+        # 2. Handle standard form submissions (checklists, questionnaires, older games)
         elif 'complete_task' in request.POST:
-            handled = True
-        
-        if handled:
+            responses = {}
+            if task.task_type == 'memory_questionnaire':
+                for key in request.POST:
+                    if key.startswith('freq_') or key.startswith('serious_') or key.startswith('technique_'):
+                        responses[key] = request.POST.get(key)
+            elif task.task_type == 'checklist':
+                for i in [1, 2, 3, 5, 6, 7]: # Assuming these are the item numbers
+                    responses[f'item_{i}'] = request.POST.get(f'item_{i}', '') == 'on'
+                responses['mood'] = request.POST.get('mood', '')
+            # (Future non-JSON games can be added here)
+            
+            # Save the collected responses
+            task_response.responses = responses
+            task_response.save()
+
+            # Mark task as completed
             task.status = 'completed'
-            task.completed_at = timezone.now()
-            task_response.completed_at = timezone.now()
-            
-            # Set who completed the task
-            if user_profile.user_type == 'caregiver':
-                task.completed_by = user_profile
-            
+            task.completed_by = user_profile
+            task.date_completed = timezone.now()
             task.save()
-            task_response.save()
-            return JsonResponse({'status': 'success', 'redirect': reverse('patient_dashboard')})
-        else:
-            task_response.save()
-            messages.success(request, 'Your progress has been saved.')
-    
+            
+            messages.success(request, f'Successfully completed task: "{task.title}"')
+            
+            # Determine redirect URL based on user type
+            if user_profile.user_type == 'caregiver':
+                return redirect('caregiver_dashboard')
+            else: # Default to patient
+                return redirect('patient_dashboard')
+
+    # This part handles the initial GET request to show the task page
+    template_name = f'tasks/non-games/{task.task_type.lower()}.html'
+    if task.task_type in ['color', 'pairs', 'puzzle']:
+        template_name = f'tasks/games/{task.task_type.lower()}/{task.difficulty}.html'
+    elif task.task_type in ['memory_questionnaire', 'checklist']:
+        template_name = f'tasks/non-games/{task.task_type.lower()}.html'
+    else:
+        # Fallback for any other task types
+        messages.error(request, f'Unknown task type: {task.task_type}')
+        return redirect('patient_dashboard')
+
     # Get template based on task type and difficulty
     print("TASK_TEMPLATES keys:", TASK_TEMPLATES.keys())
     print("task.task_type:", task.task_type)
@@ -414,7 +369,7 @@ def take_task(request, task_id):
         'config': config
     }
     
-    return render(request, template, context)
+    return render(request, template_name, context)
 
 @login_required
 def task_results(request, task_id):
@@ -466,7 +421,19 @@ def task_results(request, task_id):
     # Determine the correct template based on the task type
     task_type = task.task_type
     difficulty = task.difficulty or 'mild'
-    template_name = f'tasks/games/{task_type}/{difficulty}/results.html'
+
+    game_types = ['color', 'pairs', 'puzzle']
+    if task_type in game_types:
+        template_name = f'tasks/games/{task_type}/{difficulty}/results.html'
+    elif task_type in ['memory_questionnaire', 'checklist']:
+        template_name = f'tasks/non-games/results/{task_type}.html'
+    else:
+        # Fallback for any other task types
+        messages.error(request, f'No results template found for task type: {task_type}')
+        # Redirect based on user type if template is missing
+        if hasattr(request.user, 'profile') and request.user.profile.user_type == 'provider':
+            return redirect('provider_dashboard')
+        return redirect('patient_dashboard') # Default redirect
     
     # Process results if they are in a specific format (e.g., questionnaires)
     processed_results = None

@@ -1040,7 +1040,7 @@
             payload.difficulty = difficulty;
         }
 
-        const url = `/tasks/assign-task/${payload.patient_id}/`;
+        const url = "{% url 'taskmanager:assign_task' %}";
 
         fetch(url, {
             method: 'POST',
@@ -1052,11 +1052,11 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                alert('Task assigned successfully!');
+            if (data.success) {
+                alert(data.message || 'Task assigned successfully!');
                 location.reload();
             } else {
-                alert('Error: ' + data.message);
+                alert('Error: ' + (data.message || 'Could not assign task.'));
             }
         })
         .catch(error => {
@@ -1067,7 +1067,6 @@
 
     function assignAllTasksToPatient() {
         const patientId = document.getElementById('quick_assign_patient').value;
-        const difficulty = document.getElementById('quick_assign_difficulty').value;
 
         if (!patientId) {
             alert('Please select a patient first.');
@@ -1076,16 +1075,22 @@
 
         const tasks = [
             // Games
-            { task_type: 'color', difficulty: difficulty },
-            { task_type: 'pairs', difficulty: difficulty },
-            { task_type: 'puzzle', difficulty: difficulty },
+            { task_type: 'color', difficulty: 'mild' },
+            { task_type: 'color', difficulty: 'moderate' },
+            { task_type: 'color', difficulty: 'major' },
+
+            { task_type: 'pairs', difficulty: 'mild' },
+            { task_type: 'pairs', difficulty: 'moderate' },
+            { task_type: 'pairs', difficulty: 'major' },
+
+            { task_type: 'puzzle', difficulty: 'mild' },
+            { task_type: 'puzzle', difficulty: 'moderate' },
+            { task_type: 'puzzle', difficulty: 'major' },
+            
             // Non-games
             { task_type: 'checklist' },
             { task_type: 'memory_questionnaire' }
-        ].map(task => ({
-            patient_id: patientId,
-            ...task
-        }));
+        ];
 
         fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
             method: 'POST',
@@ -1093,15 +1098,15 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify({ tasks: tasks })
+            body: JSON.stringify({ patient_id: patientId, tasks: tasks })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                alert(data.total_assigned + ' tasks assigned successfully to the patient.');
+            if (data.success) {
+                alert((data.tasks ? data.tasks.length : 0) + ' tasks assigned successfully to the patient.');
                 location.reload();
             } else {
-                alert('Error: ' + data.message);
+                alert('Error: ' + (data.message || 'Could not assign tasks.'));
             }
         })
         .catch(error => {
@@ -1127,7 +1132,6 @@
 
         const difficulties = ['mild', 'moderate', 'major'];
         const tasks = difficulties.map(difficulty => ({
-            patient_id: patientId,
             task_type: taskType,
             difficulty: difficulty
         }));
@@ -1138,15 +1142,15 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken')
             },
-            body: JSON.stringify({ tasks: tasks })
+            body: JSON.stringify({ patient_id: patientId, tasks: tasks })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
+            if (data.success) {
                 alert('All difficulties for ' + selectedOption.text.trim() + ' assigned successfully to the patient.');
                 location.reload();
             } else {
-                alert('Error: ' + data.message);
+                alert('Error: ' + (data.message || 'Could not assign tasks.'));
             }
         })
         .catch(error => {
@@ -1163,7 +1167,8 @@
         }
 
         if (confirm('Are you sure you want to delete all tasks for this patient? This action cannot be undone.')) {
-            fetch(`/tasks/delete_all_tasks/${patientId}/`, {
+            const url = `/tasks/delete-all-tasks/${patientId}/`;
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1172,11 +1177,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success') {
-                    alert(data.deleted_count + ' tasks have been deleted.');
+                if (data.success) {
+                    alert(data.message || 'Tasks have been deleted.');
                     location.reload();
                 } else {
-                    alert('Error: ' + data.message);
+                    alert('Error: ' + (data.message || 'Could not delete tasks.'));
                 }
             })
             .catch(error => {
