@@ -31,6 +31,9 @@ python manage.py collectstatic --noinput || echo "Static collection skipped"\n\
 # Run migrations (skip if no database)\n\
 python manage.py migrate || echo "Migrations skipped"\n\
 \n\
+# Set up initial data (create default users)\n\
+python manage.py setup_initial_data || echo "Initial data setup skipped"\n\
+\n\
 # Get port from environment variable (Railway sets PORT)\n\
 PORT=${PORT:-8000}\n\
 \n\
