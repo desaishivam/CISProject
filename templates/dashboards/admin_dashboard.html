@@ -57,8 +57,6 @@
             <h2 class="section-title">👥 User Account Management</h2>
             <div class="tabs">
                 <button class="tab-button active" onclick="openTab(event, 'provider-tab')">👨‍⚕️ Providers</button>
-                <button class="tab-button" onclick="openTab(event, 'caregiver-tab')">🤝 Caregivers</button>
-                <button class="tab-button" onclick="openTab(event, 'patient-tab')">👤 Patients</button>
             </div>
             
             <div id="provider-tab" class="tab-content active">
@@ -98,94 +96,6 @@
                 {% else %}
                 <div class="empty-state">
                     <p>👨‍⚕️ No provider accounts found.</p>
-                </div>
-                {% endif %}
-            </div>
-            
-            <div id="caregiver-tab" class="tab-content">
-                <h3 class="tab-title">Caregiver Accounts</h3>
-                {% if caregivers %}
-                <div class="user-accounts">
-                    {% for caregiver_data in caregivers %}
-                    <div class="user-card">
-                        <div class="user-details">
-                            <h4 class="user-name">{{ caregiver_data.profile.user.first_name }} {{ caregiver_data.profile.user.last_name }}</h4>
-                            <div class="user-info">
-                            <p><strong>Username:</strong> {{ caregiver_data.profile.user.username }}</p>
-                            </div>
-                            
-                            <!-- Show assigned patient -->
-                            <div class="relationship-data">
-                                <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
-                                {% if caregiver_data.assigned_patient %}
-                                    <p class="relationship-item">{{ caregiver_data.assigned_patient.first_name }} {{ caregiver_data.assigned_patient.last_name }} ({{ caregiver_data.assigned_patient.username }})</p>
-                                {% else %}
-                                    <p class="no-relationships">❌ No patient assigned</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="user-actions">
-                            <a href="{% url 'manage_account' caregiver_data.profile.user.id %}" class="action-btn outline-btn">
-                                ✏️ Edit
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <p>🤝 No caregiver accounts found.</p>
-                </div>
-                {% endif %}
-            </div>
-            
-            <div id="patient-tab" class="tab-content">
-                <h3 class="tab-title">Patient Accounts</h3>
-                {% if patients %}
-                <div class="user-accounts">
-                    {% for patient_data in patients %}
-                    <div class="user-card">
-                        <div class="user-details">
-                            <h4 class="user-name">{{ patient_data.profile.user.first_name }} {{ patient_data.profile.user.last_name }}</h4>
-                            <div class="user-info">
-                            <p><strong>Username:</strong> {{ patient_data.profile.user.username }}</p>
-                            </div>
-                            
-                            <!-- Show provider and caregivers -->
-                            <div class="relationship-data">
-                                <p class="relationship-title"><strong>👨‍⚕️ Healthcare Provider:</strong></p>
-                                {% if patient_data.provider %}
-                                    <p class="relationship-item">{{ patient_data.provider.first_name }} {{ patient_data.provider.last_name }} ({{ patient_data.provider.username }})</p>
-                                {% else %}
-                                    <p class="no-relationships">❌ No provider assigned</p>
-                                {% endif %}
-                                
-                                <p class="relationship-title"><strong>🤝 Caregivers:</strong></p>
-                                {% if patient_data.caregivers %}
-                                    <ul class="relationship-list">
-                                    {% for caregiver in patient_data.caregivers %}
-                                        <li class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</li>
-                                    {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    <p class="no-relationships">❌ No caregivers assigned</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="user-actions">
-                            <a href="{% url 'assign_caregiver' patient_data.profile.user.id %}" class="action-btn primary-btn">
-                                🔗 Assign Caregivers
-                            </a>
-                            <a href="{% url 'manage_account' patient_data.profile.user.id %}" class="action-btn outline-btn">
-                                ✏️ Edit
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <p>👤 No patient accounts found.</p>
                 </div>
                 {% endif %}
             </div>
@@ -414,6 +324,10 @@
     
     .tab-content {
         display: none;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 0 12px 12px 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     
     .tab-content.active {
@@ -422,6 +336,7 @@
     
     .user-accounts {
         display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
     }
     
@@ -621,22 +536,21 @@
 </style>
 
 <script>
-    function openTab(evt, tabName) {
-        // Hide all tab content
-        var tabContents = document.getElementsByClassName("tab-content");
-        for (var i = 0; i < tabContents.length; i++) {
-            tabContents[i].classList.remove("active");
+    function openTab(event, tabName) {
+        let i, tabcontent, tablinks;
+        
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
         }
         
-        // Remove active class from all tab buttons
-        var tabButtons = document.getElementsByClassName("tab-button");
-        for (var i = 0; i < tabButtons.length; i++) {
-            tabButtons[i].classList.remove("active");
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
         
-        // Show the selected tab and add active class to the button
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
+        document.getElementById(tabName).style.display = "block";
+        event.currentTarget.className += " active";
     }
 </script>
 {% endblock %} 
