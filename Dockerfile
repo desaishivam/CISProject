@@ -31,11 +31,14 @@ python manage.py collectstatic --noinput || echo "Static collection skipped"\n\
 # Run migrations (skip if no database)\n\
 python manage.py migrate || echo "Migrations skipped"\n\
 \n\
+# Get port from environment variable (Railway sets PORT)\n\
+PORT=${PORT:-8000}\n\
+\n\
 # Start gunicorn\n\
-exec gunicorn --bind 0.0.0.0:8000 CISProject.wsgi:application\n\
+exec gunicorn --bind 0.0.0.0:$PORT CISProject.wsgi:application\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
-# Expose port
+# Expose port (Railway will override this)
 EXPOSE 8000
 
 # Start command
