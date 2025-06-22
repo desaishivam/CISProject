@@ -99,13 +99,7 @@ TASK_TEMPLATES = {
         'template_name': 'tasks/non-games/questionnaires/take.html',
         'results_template': 'tasks/non-games/questionnaires/results.html',
         'icon': '📝',
-        'description': 'Memory Questionnaire',
-        'templates': {
-            'default': 'tasks/non-games/questionnaires/take.html',
-        },
-        'results_templates': {
-            'default': 'tasks/non-games/questionnaires/results.html',
-        }
+        'description': 'Memory Questionnaire'
     },
 }
 

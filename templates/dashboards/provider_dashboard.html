@@ -95,10 +95,11 @@
                 <div class="clear-actions">
                     <h4 class="subsection-title task-management-title">🗂️ Patient Task Management</h4>
                     <div class="patient-task-management">
-                        <form method="post" action="" class="patient-select-form">
-                            {% csrf_token %}
-                            <div class="patient-selection-row" style="display: flex; gap: 1rem; align-items: flex-end;">
-                                <div class="form-group" style="flex-grow: 1;">
+                        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                            <!-- Form for patient selection -->
+                            <form method="post" action="{% url 'provider_dashboard' %}" class="patient-select-form" style="flex-grow: 1; margin: 0;">
+                                {% csrf_token %}
+                                <div class="form-group">
                                     <label for="selected_patient">Select Patient:</label>
                                     <select id="selected_patient" name="selected_patient" class="form-input" required onchange="this.form.submit()">
                                         <option value="">Choose a patient...</option>
@@ -107,16 +108,22 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="action-buttons-row">
-                                    <button formaction="{% if selected_patient %}{% url 'taskmanager:view_tasks' selected_patient.id %}{% endif %}" {% if not selected_patient %}disabled{% endif %} class="action-btn primary-btn">
-                                        🔍 View Tasks
-                                    </button>
-                                    <button formaction="{% if selected_patient %}{% url 'taskmanager:delete_all_tasks' selected_patient.id %}{% endif %}" {% if not selected_patient %}disabled{% endif %} class="action-btn danger-btn" type="button" onclick="return confirm('Are you sure you want to delete all tasks for this patient?');">
+                            </form>
+                            
+                            <!-- Action buttons -->
+                            <div class="action-buttons-row">
+                                <a href="{% if selected_patient %}{% url 'taskmanager:patient_tasks' selected_patient.id %}{% else %}javascript:void(0);{% endif %}" class="action-btn primary-btn {% if not selected_patient %}disabled{% endif %}">
+                                    🔍 View Tasks
+                                </a>
+                                <form method="post" action="{% if selected_patient %}{% url 'taskmanager:delete_patient_tasks' selected_patient.id %}{% else %}javascript:void(0);{% endif %}" style="display: inline;" onsubmit="if(!document.getElementById('selected_patient').value) return false; return confirm('Are you sure you want to delete all tasks for this patient?');">
+                                    {% csrf_token %}
+                                    <button type="submit" {% if not selected_patient %}disabled{% endif %} class="action-btn danger-btn">
                                         🗑️ Delete All Tasks
                                     </button>
-                                </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
+                        
                         {% if selected_patient %}
                             <h5 class="patient-tasks-title">Tasks for {{ selected_patient.user.get_full_name }}</h5>
                             {% if patient_tasks %}
@@ -218,7 +225,7 @@
                                     {% endwith %}
                                 </div>
                                 <div style="margin-top: 1rem;">
-                                    <button onclick="openScheduleModal('{{ patient.user.get_full_name }}', {{ patient.user.id }})" class="action-btn secondary-btn">
+                                    <button onclick="openScheduleModal('{{ patient.user.get_full_name }}', {{ patient.id }})" class="action-btn secondary-btn">
                                         📅 Schedule Appointment
                                     </button>
                                 </div>

@@ -228,19 +228,47 @@ def assign_multiple_tasks(request):
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @login_required
-def patient_tasks(request):
-    """Patient view to see assigned tasks"""
-    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'patient':
-        messages.error(request, 'You do not have permission to access patient tasks.')
+def patient_tasks(request, patient_id=None):
+    """
+    View for patients to see their tasks. Can also be used by providers 
+    to see the tasks of a specific patient.
+    """
+    if not hasattr(request.user, 'profile'):
+        messages.error(request, 'You do not have permission to view tasks.')
         return redirect('home')
+
+    user_profile = request.user.profile
     
-    tasks = Task.objects.filter(assigned_to=request.user.profile)
-    
+    if patient_id:
+        # Provider is viewing a specific patient's tasks
+        if user_profile.user_type != 'provider':
+            messages.error(request, 'You do not have permission to view these tasks.')
+            return redirect('home')
+        
+        target_patient_profile = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
+        
+        # Security check: ensure provider manages this patient
+        if target_patient_profile.provider != user_profile:
+            messages.error(request, 'You do not have permission to view tasks for this patient.')
+            return redirect('provider_dashboard')
+            
+        tasks = Task.objects.filter(assigned_to=target_patient_profile).order_by('-created_at')
+        page_title = f"Tasks for {target_patient_profile.user.get_full_name()}"
+        
+    else:
+        # Patient or Caregiver is viewing their own assigned tasks
+        if user_profile.user_type not in ['patient', 'caregiver']:
+            messages.error(request, 'You must be a patient or caregiver to view this page.')
+            return redirect('home')
+            
+        tasks = Task.objects.filter(assigned_to=user_profile).order_by('-created_at')
+        page_title = "My Tasks"
+
     context = {
         'tasks': tasks,
-        'pending_tasks': tasks.filter(status__in=['assigned', 'in_progress']),
-        'completed_tasks': tasks.filter(status='completed')
+        'page_title': page_title,
     }
+    
     return render(request, 'tasks/assign/patient_tasks.html', context)
 
 @login_required
@@ -341,25 +369,20 @@ def take_task(request, task_id):
                 return redirect('patient_dashboard')
 
     # This part handles the initial GET request to show the task page
-    template_name = f'tasks/non-games/{task.task_type.lower()}.html'
-    if task.task_type in ['color', 'pairs', 'puzzle']:
-        template_name = f'tasks/games/{task.task_type.lower()}/{task.difficulty}.html'
-    elif task.task_type in ['memory_questionnaire', 'checklist']:
-        template_name = f'tasks/non-games/{task.task_type.lower()}.html'
-    else:
-        # Fallback for any other task types
-        messages.error(request, f'Unknown task type: {task.task_type}')
-        return redirect('patient_dashboard')
-
-    # Get template based on task type and difficulty
-    print("TASK_TEMPLATES keys:", TASK_TEMPLATES.keys())
-    print("task.task_type:", task.task_type)
-    template = TASK_TEMPLATES[task.task_type]['template_name']
-    if task.difficulty:
-        template = template.format(difficulty=task.difficulty)
-
+    try:
+        template_config = TASK_TEMPLATES[task.task_type]
+        template_name = template_config['template_name']
+        if '{difficulty}' in template_name and task.difficulty:
+            template_name = template_name.format(difficulty=task.difficulty)
+    except KeyError:
+        messages.error(request, f'No template configuration found for task type: {task.task_type}')
+        # Redirect based on user type if template is missing
+        if hasattr(request.user, 'profile') and request.user.profile.user_type == 'provider':
+            return redirect('provider_dashboard')
+        return redirect('patient_dashboard') # Default redirect
+        
     # Use 'default' config for non-game tasks
-    config_dict = DIFFICULTY_CONFIGS[task.task_type]
+    config_dict = DIFFICULTY_CONFIGS.get(task.task_type, {})
     if task.difficulty in config_dict:
         config = config_dict[task.difficulty]
     else:
@@ -420,17 +443,19 @@ def task_results(request, task_id):
         back_url = reverse('taskmanager:patient_tasks')
         
     # Determine the correct template based on the task type
-    task_type = task.task_type
-    difficulty = task.difficulty or 'mild'
-
-    game_types = ['color', 'pairs', 'puzzle']
-    if task_type in game_types:
-        template_name = f'tasks/games/{task_type}/{difficulty}/results.html'
-    elif task_type in ['memory_questionnaire', 'checklist']:
-        template_name = f'tasks/non-games/results/{task_type}.html'
-    else:
+    try:
+        template_config = TASK_TEMPLATES[task.task_type]
+        template_name = template_config.get('results_template')
+        
+        if not template_name:
+             raise KeyError # Fallback to error if no results template is defined
+        
+        if '{difficulty}' in template_name and task.difficulty:
+            template_name = template_name.format(difficulty=task.difficulty)
+            
+    except KeyError:
         # Fallback for any other task types
-        messages.error(request, f'No results template found for task type: {task_type}')
+        messages.error(request, f'No results template found for task type: {task.task_type}')
         # Redirect based on user type if template is missing
         if hasattr(request.user, 'profile') and request.user.profile.user_type == 'provider':
             return redirect('provider_dashboard')
@@ -438,7 +463,7 @@ def task_results(request, task_id):
     
     # Process results if they are in a specific format (e.g., questionnaires)
     processed_results = None
-    if task_type == 'memory_questionnaire':
+    if task.task_type == 'memory_questionnaire':
         processed_results = process_memory_questionnaire_results(task_response.responses)
 
     context = {
@@ -907,28 +932,32 @@ def delete_appointment(request, appointment_id):
 @login_required
 @require_POST
 def delete_all_tasks(request, patient_id):
-    """Provider view to delete all tasks for a specific patient."""
+    """Provider view to delete all tasks for a specific patient"""
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
-        return JsonResponse({'success': False, 'message': 'Permission denied.'})
+        messages.error(request, 'Permission denied.')
+        return redirect('provider_dashboard')
 
     try:
-        patient = UserProfile.objects.get(id=patient_id, user_type='patient')
+        patient = get_object_or_404(UserProfile, id=patient_id, user_type='patient')
+        
+        # Security check: ensure the provider manages this patient
         if patient.provider != request.user.profile:
-            return JsonResponse({'success': False, 'message': 'You do not have permission to manage this patient.'})
-
+            messages.error(request, 'You do not have permission to delete tasks for this patient.')
+            return redirect('provider_dashboard')
+            
         tasks_to_delete = Task.objects.filter(assigned_to=patient)
         count = tasks_to_delete.count()
         
-        # First, delete related objects
+        # Delete related responses and notifications first
         TaskResponse.objects.filter(task__in=tasks_to_delete).delete()
         TaskNotification.objects.filter(task__in=tasks_to_delete).delete()
         
-        # Then, delete the tasks
         tasks_to_delete.delete()
         
-        return JsonResponse({'success': True, 'message': f'Successfully deleted {count} tasks.'})
+        messages.success(request, f'Successfully deleted all {count} tasks for {patient.user.get_full_name()}.')
     except UserProfile.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Patient not found.'})
+        messages.error(request, 'Patient not found.')
     except Exception as e:
-        logger.error(f"Error deleting all tasks for patient {patient_id}: {e}")
-        return JsonResponse({'success': False, 'message': 'An error occurred while deleting tasks.'})
+        messages.error(request, f'An error occurred: {str(e)}')
+    
+    return redirect('provider_dashboard')
