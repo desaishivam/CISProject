@@ -1,0 +1,594 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}{{ task.title }} - Results - CogniCare{% endblock %}
+
+{% block content %}
+{# Unified structure: .container, .section, .card, .mdc-button #}
+<div class="container">
+    <div class="results-header">
+        <h1>{{ task.title }} - Results</h1>
+        <div class="task-info">
+            <p><strong>Patient:</strong> {{ task.assigned_to.user.first_name }} {{ task.assigned_to.user.last_name }}</p>
+            <p><strong>Assigned by:</strong> {{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</p>
+            <p><strong>Completed:</strong> {{ task_response.completed_at|date:"M d, Y g:i A" }}</p>
+            <p><strong>Status:</strong> <span class="status-{{ task.status }}">{{ task.get_status_display }}</span></p>
+        </div>
+    </div>
+
+    {% if task.task_type == 'memory_questionnaire' and memory_results %}
+        <!-- Memory Questionnaire Results -->
+        <div class="memory-results">
+            <!-- Summary Section -->
+            <div class="section">
+                <h3>Assessment Summary</h3>
+                <div class="summary-grid">
+                    <div class="card">
+                        <h4>Overall Score</h4>
+                        <div class="score-value">{{ memory_results.overall_score }}/5.0</div>
+                        <p>Combined frequency and seriousness rating</p>
+                    </div>
+                    <div class="card">
+                        <h4>Average Frequency</h4>
+                        <div class="score-value">{{ memory_results.avg_frequency }}/3.0</div>
+                        <p>How often issues occur</p>
+                    </div>
+                    <div class="card">
+                        <h4>Average Seriousness</h4>
+                        <div class="score-value">{{ memory_results.avg_seriousness }}/2.0</div>
+                        <p>How serious issues are perceived</p>
+                    </div>
+                    <div class="card">
+                        <h4>Issues Assessed</h4>
+                        <div class="score-value">{{ memory_results.total_issues }}</div>
+                        <p>Total memory areas evaluated</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Areas of Concern -->
+            {% if memory_results.high_concern_issues %}
+            <div class="section">
+                <h3>High Concern Areas</h3>
+                <div class="concern-list high-concern">
+                    {% for issue in memory_results.high_concern_issues %}
+                    <div class="concern-item">
+                        <div class="issue-name">{{ issue.issue }}</div>
+                        <div class="issue-ratings">
+                            <span class="frequency">{{ issue.frequency }}</span>
+                            <span class="seriousness">{{ issue.seriousness }}</span>
+                            <span class="combined-score">Score: {{ issue.combined_score }}/5</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if memory_results.moderate_concern_issues %}
+            <div class="section">
+                <h3>Moderate Concern Areas</h3>
+                <div class="concern-list moderate-concern">
+                    {% for issue in memory_results.moderate_concern_issues %}
+                    <div class="concern-item">
+                        <div class="issue-name">{{ issue.issue }}</div>
+                        <div class="issue-ratings">
+                            <span class="frequency">{{ issue.frequency }}</span>
+                            <span class="seriousness">{{ issue.seriousness }}</span>
+                            <span class="combined-score">Score: {{ issue.combined_score }}/5</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Memory Techniques -->
+            {% if memory_results.techniques %}
+            <div class="section">
+                <h3>Memory Techniques Used</h3>
+                <div class="techniques-list">
+                    {% for technique in memory_results.techniques %}
+                    <div class="technique-item">
+                        <i class="technique-icon">💡</i>
+                        <span>{{ technique }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Detailed Results Table -->
+            <div class="section">
+                <h3>Detailed Assessment Results</h3>
+                <div class="table-container">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Memory Issue</th>
+                                <th>Frequency</th>
+                                <th>Seriousness</th>
+                                <th>Combined Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for issue in memory_results.processed_issues %}
+                            <tr class="{% if issue.combined_score >= 4 %}high-concern{% elif issue.combined_score >= 2 %}moderate-concern{% else %}low-concern{% endif %}">
+                                <td class="issue-name">{{ issue.issue }}</td>
+                                <td class="frequency-cell">
+                                    <span class="rating-badge frequency-{{ issue.frequency_score }}">{{ issue.frequency }}</span>
+                                </td>
+                                <td class="seriousness-cell">
+                                    <span class="rating-badge seriousness-{{ issue.seriousness_score }}">{{ issue.seriousness }}</span>
+                                </td>
+                                <td class="score-cell">
+                                    <span class="score-badge score-{{ issue.combined_score }}">{{ issue.combined_score }}/5</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Distribution Charts -->
+            <div class="section">
+                <h3>Response Distribution</h3>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h4>Frequency Distribution</h4>
+                        <div class="distribution-chart">
+                            <div class="chart-bar">
+                                <div class="bar-label">Not at all</div>
+                                <div class="bar-fill" style="width: {{ memory_results.frequency_percentages.not_at_all }}%">
+                                    {{ memory_results.frequency_distribution.not_at_all }}
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="bar-label">Occasionally</div>
+                                <div class="bar-fill" style="width: {{ memory_results.frequency_percentages.occasionally }}%">
+                                    {{ memory_results.frequency_distribution.occasionally }}
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="bar-label">Frequently</div>
+                                <div class="bar-fill" style="width: {{ memory_results.frequency_percentages.frequently }}%">
+                                    {{ memory_results.frequency_distribution.frequently }}
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="bar-label">Always</div>
+                                <div class="bar-fill" style="width: {{ memory_results.frequency_percentages.always }}%">
+                                    {{ memory_results.frequency_distribution.always }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h4>Seriousness Distribution</h4>
+                        <div class="distribution-chart">
+                            <div class="chart-bar">
+                                <div class="bar-label">Not Serious</div>
+                                <div class="bar-fill" style="width: {{ memory_results.seriousness_percentages.not_serious }}%">
+                                    {{ memory_results.seriousness_distribution.not_serious }}
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="bar-label">Somewhat Serious</div>
+                                <div class="bar-fill" style="width: {{ memory_results.seriousness_percentages.somewhat_serious }}%">
+                                    {{ memory_results.seriousness_distribution.somewhat_serious }}
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="bar-label">Very Serious</div>
+                                <div class="bar-fill" style="width: {{ memory_results.seriousness_percentages.very_serious }}%">
+                                    {{ memory_results.seriousness_distribution.very_serious }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Generic Task Results -->
+        <div class="generic-results">
+            <div class="section">
+                <h3>Task Responses</h3>
+                {% if task_response %}
+                    {% if questions %}
+                        <div class="responses-list">
+                            {% for question in questions %}
+                                <div class="question-item">
+                                    <label>{{ question.text }}</label>
+                                    {% with question_key="question_"|add:question.id %}
+                                    <input type="text" name="{{ question_key }}" value="{{ task_response.responses.question_key|default:'No response provided' }}">
+                                    {% endwith %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="general-response">
+                            <h4>General Notes</h4>
+                            <p>{{ task_response.responses.general_notes|default:"No notes provided" }}</p>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p>No responses have been submitted for this task yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="results-actions">
+        {% if request.user.profile.user_type == 'patient' %}
+            <a href="{% url 'taskmanager:patient_tasks' %}" class="mdc-button mdc-button--outlined">
+                <span class="mdc-button__label">Back to My Tasks</span>
+            </a>
+        {% else %}
+            <a href="{% url 'provider_dashboard' %}" class="mdc-button mdc-button--outlined">
+                <span class="mdc-button__label">Back to Dashboard</span>
+            </a>
+        {% endif %}
+        
+        {% if task.status != 'completed' and request.user.profile.user_type == 'patient' %}
+            <a href="{% url 'taskmanager:take_task' task.id %}" class="mdc-button mdc-button--raised">
+                <span class="mdc-button__label">Continue Task</span>
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .results-header {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .results-header h1 {
+        color: #003366;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .task-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .task-info p {
+        margin: 0.5rem 0;
+        color: #666;
+    }
+    
+    .status-completed {
+        color: #10b981;
+        font-weight: 600;
+    }
+    
+    .status-in_progress {
+        color: #f59e0b;
+        font-weight: 600;
+    }
+    
+    .status-assigned {
+        color: #6b7280;
+        font-weight: 600;
+    }
+    
+    .section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .section h3 {
+        color: #003366;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .card {
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card h4 {
+        margin: 0 0 1rem 0;
+        color: #374151;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .card p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+    
+    .score-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #003366;
+        margin-bottom: 0.5rem;
+    }
+    
+    .concern-list {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .concern-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 4px solid;
+    }
+    
+    .high-concern .concern-item {
+        background: #fef2f2;
+        border-left-color: #dc2626;
+    }
+    
+    .moderate-concern .concern-item {
+        background: #fffbeb;
+        border-left-color: #f59e0b;
+    }
+    
+    .issue-name {
+        font-weight: 500;
+        color: #374151;
+        flex: 1;
+    }
+    
+    .issue-ratings {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .issue-ratings span {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .frequency {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .seriousness {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .combined-score {
+        background: #f3f4f6;
+        color: #374151;
+        font-weight: 600;
+    }
+    
+    .techniques-list {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .technique-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f0fdf4;
+        border-radius: 6px;
+        border-left: 4px solid #10b981;
+    }
+    
+    .technique-icon {
+        font-size: 1.5rem;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    
+    .results-table th,
+    .results-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .results-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .results-table tr.high-concern {
+        background: #fef2f2;
+    }
+    
+    .results-table tr.moderate-concern {
+        background: #fffbeb;
+    }
+    
+    .results-table tr.low-concern {
+        background: #f0fdf4;
+    }
+    
+    .rating-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .frequency-0 { background: #f0fdf4; color: #166534; }
+    .frequency-1 { background: #fef3c7; color: #92400e; }
+    .frequency-2 { background: #fed7aa; color: #c2410c; }
+    .frequency-3 { background: #fecaca; color: #dc2626; }
+    
+    .seriousness-0 { background: #f0fdf4; color: #166534; }
+    .seriousness-1 { background: #fef3c7; color: #92400e; }
+    .seriousness-2 { background: #fecaca; color: #dc2626; }
+    
+    .score-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .score-0, .score-1 { background: #f0fdf4; color: #166534; }
+    .score-2, .score-3 { background: #fef3c7; color: #92400e; }
+    .score-4, .score-5 { background: #fecaca; color: #dc2626; }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    
+    .chart-container h4 {
+        color: #374151;
+        margin-bottom: 1rem;
+    }
+    
+    .distribution-chart {
+        display: grid;
+        gap: 0.5rem;
+    }
+    
+    .chart-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .bar-label {
+        min-width: 120px;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    
+    .bar-fill {
+        background: linear-gradient(90deg, #003366, #0066cc);
+        color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        min-width: 30px;
+        text-align: center;
+    }
+    
+    .responses-list {
+        display: grid;
+        gap: 1.5rem;
+    }
+    
+    .question-item {
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 6px;
+        border-left: 4px solid #003366;
+    }
+    
+    .question {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .answer {
+        color: #6b7280;
+    }
+    
+    .general-response {
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 6px;
+        border-left: 4px solid #003366;
+    }
+    
+    .general-response h4 {
+        margin-top: 0;
+        color: #374151;
+    }
+    
+    .results-actions {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+        
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .concern-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .results-actions {
+            flex-direction: column;
+        }
+        
+        .task-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %} 
