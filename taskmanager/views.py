@@ -795,20 +795,20 @@ def create_appointment(request, patient_id):
     
     if not hasattr(request.user, 'profile'):
         print("User has no profile")  # Debug log
-        return JsonResponse({'status': 'error', 'message': 'User profile not found'})
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
         
     if request.user.profile.user_type != 'provider':
         print(f"Invalid user type: {request.user.profile.user_type}")  # Debug log
-        return JsonResponse({'status': 'error', 'message': 'Permission denied - not a provider'})
+        return JsonResponse({'success': False, 'message': 'Permission denied - not a provider'})
     
     try:
         patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
         print(f"Found patient: {patient_profile}")  # Debug log
         
-        # Verify provider manages this patient
-        if patient_profile.provider != request.user.profile:
+        # Verify provider manages this patient, or patient has no provider
+        if patient_profile.provider and patient_profile.provider != request.user.profile:
             print(f"Permission denied - patient's provider {patient_profile.provider.id} != user {request.user.profile.id}")  # Debug log
-            return JsonResponse({'status': 'error', 'message': 'Permission denied - not your patient'})
+            return JsonResponse({'success': False, 'message': 'Permission denied - not your patient'})
         
         datetime_str = request.POST.get('datetime')
         notes = request.POST.get('notes', '')
@@ -818,7 +818,7 @@ def create_appointment(request, patient_id):
         
         if not datetime_str:
             print("No datetime provided")  # Debug log
-            return JsonResponse({'status': 'error', 'message': 'Date and time are required'})
+            return JsonResponse({'success': False, 'message': 'Date and time are required'})
         
         try:
             # Create the appointment
@@ -831,7 +831,7 @@ def create_appointment(request, patient_id):
             print(f"Created appointment: {appointment}")  # Debug log
             
             return JsonResponse({
-                'status': 'success',
+                'success': True,
                 'message': f'Appointment scheduled with {patient_profile.user.get_full_name()} for {datetime_str}',
                 'appointment': {
                     'id': appointment.id,
@@ -841,14 +841,14 @@ def create_appointment(request, patient_id):
             })
         except Exception as e:
             print(f"Error creating appointment object: {str(e)}")  # Debug log
-            return JsonResponse({'status': 'error', 'message': f'Error creating appointment: {str(e)}'})
+            return JsonResponse({'success': False, 'message': f'Error creating appointment: {str(e)}'})
             
     except UserProfile.DoesNotExist:
         print(f"Patient {patient_id} not found")  # Debug log
-        return JsonResponse({'status': 'error', 'message': 'Patient not found'})
+        return JsonResponse({'success': False, 'message': 'Patient not found'})
     except Exception as e:
         print(f"Error in create_appointment view: {str(e)}")  # Debug log
-        return JsonResponse({'status': 'error', 'message': f'Error creating appointment: {str(e)}'})
+        return JsonResponse({'success': False, 'message': f'Error creating appointment: {str(e)}'})
 
 @login_required
 def patient_appointments(request):

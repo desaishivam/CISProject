@@ -8,7 +8,6 @@ from taskmanager.views import get_task_statistics
 from taskmanager.models import Task
 from taskmanager.constants import TASK_TYPES, GAME_TYPES, DIFFICULTY_LEVELS, TASK_TEMPLATES
 import logging
-from .utils import UserProfileUtils
 from django.db.utils import IntegrityError
 
 # Set up logging
@@ -60,20 +59,20 @@ def admin_dashboard(request):
         messages.error(request, 'You do not have permission to access the admin dashboard.')
         return redirect('home')
     
-    # Get all the peeps by role using our utils (so much cleaner)
-    providers_with_patients = UserProfileUtils.providers_w_patients()
-    caregivers_with_patients = UserProfileUtils.caregivers_w_patients()
-    patients_with_relationships = UserProfileUtils.patients_w_relationships()
+    # Get all users by role using direct database queries
+    providers = UserProfile.objects.filter(user_type='provider').select_related('user')
+    caregivers = UserProfile.objects.filter(user_type='caregiver').select_related('user')
+    patients = UserProfile.objects.filter(user_type='patient').select_related('user')
     
-    # Get task stats (still the same)
+    # Get task stats
     task_statistics = get_task_statistics()
     
     context = {
         'user': request.user,
         'user_type': 'Administrator',
-        'providers': providers_with_patients,
-        'caregivers': caregivers_with_patients,
-        'patients': patients_with_relationships,
+        'providers': providers,
+        'caregivers': caregivers,
+        'patients': patients,
         **task_statistics  # Unpack task statistics into context
     }
     return render(request, 'dashboards/admin_dashboard.html', context)
@@ -95,10 +94,23 @@ def create_provider(request):
             return redirect('admin_dashboard')
         
         try:
-            user, profile = UserProfileUtils.create_user_w_profile(
-                username, password, first_name, last_name, 'provider'
+            # Create user without email
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
             )
+            
+            # Create provider profile
+            UserProfile.objects.create(
+                user=user,
+                user_type='provider'
+            )
+            
             messages.success(request, f'Provider account for {first_name} {last_name} has been created successfully.')
+        except IntegrityError:
+            messages.error(request, 'Username already exists. Please choose a different username.')
         except Exception as e:
             messages.error(request, f'Error creating provider account: {str(e)}')
         

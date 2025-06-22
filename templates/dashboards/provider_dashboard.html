@@ -221,96 +221,120 @@
                 <!-- Patient Accounts Section -->
                 <div class="account-section">
                     <h3 class="section-subtitle">👤 Patient Accounts</h3>
-                {% if patients %}
-                <div class="user-accounts">
-                    {% for patient in patients %}
-                    <div class="user-card">
-                        <div class="user-header-row user-header-flex">
-                            <div class="user-header-info user-header-info-vertical">
-                                <span class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</span>
-                                <span class="user-username"><strong>Username:</strong> {{ patient.user.username }}</span>
+                    {% if patients %}
+                    <div class="user-accounts">
+                        {% for patient in patients %}
+                        <div class="user-card">
+                            <div class="user-header-row user-header-flex">
+                                <div class="user-header-info user-header-info-vertical">
+                                    <span class="user-name">{{ patient.user.first_name }} {{ patient.user.last_name }}</span>
+                                    <span class="user-username"><strong>Username:</strong> {{ patient.user.username }}</span>
+                                </div>
+                                <div class="user-actions-inline-row">
+                                    <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
+                                        🔗 Assign Caregivers
+                                    </a>
+                                    <button onclick="openScheduleModal('{{ patient.user.get_full_name }}', {{ patient.user.id }})" class="action-btn secondary-btn">
+                                        📅 Schedule Appointment
+                                    </button>
+                                    <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
+                                        ✏️ Edit
+                                    </a>
+                                </div>
                             </div>
-                            <div class="user-actions-inline-row">
-                                <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
-                                    🔗 Assign Caregivers
-                                </a>
-                                <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
-                                    ✏️ Edit
-                                </a>
-                            </div>
-                        </div>
-                        <!-- Show relationships -->
+                            <!-- Show relationships -->
                             <div class="relationship-data">
-                            <div class="relationship-row-container">
-                                {% with caregivers=patient.caregivers.all %}
-                                    <div class="relationship-row">
-                                        <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
-                                        {% for caregiver in caregivers %}
-                                            <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
-                                        {% empty %}
-                                        <p class="no-relationships">❌ No caregivers assigned</p>
-                                        {% endfor %}
+                                <div class="relationship-row-container">
+                                    {% with caregivers=patient.caregivers.all %}
+                                        <div class="relationship-row">
+                                            <p class="relationship-title"><strong>🤝 Assigned Caregivers:</strong></p>
+                                            {% for caregiver in caregivers %}
+                                                <div class="relationship-item">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }} ({{ caregiver.user.username }})</div>
+                                            {% empty %}
+                                            <p class="no-relationships">❌ No caregivers assigned</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endwith %}
+                                </div>
+                                <div class="appointment-section">
+                                    <p class="relationship-title"><strong>🗓️ Upcoming Appointments:</strong></p>
+                                    <div class="appointments-list">
+                                        {% with appointments=patient.appointments.all %}
+                                            {% if appointments %}
+                                                <table>
+                                                    <tbody>
+                                                        {% for appt in appointments %}
+                                                            <tr>
+                                                                <td class="appointment-datetime">
+                                                                    {{ appt.datetime|date:"F j, Y" }}
+                                                                    <br>
+                                                                    <span class="time">{{ appt.datetime|date:"g:i A" }}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <button class="action-btn danger-btn" onclick="deleteAppointment({{ appt.id }})">
+                                                                        Delete
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            {% else %}
+                                                <p class="no-appointments">No upcoming appointments.</p>
+                                            {% endif %}
+                                        {% endwith %}
                                     </div>
-                                {% endwith %}
-                                <div class="relationship-row">
-                                    <p class="relationship-title"><strong>👨‍⚕️ Healthcare Provider:</strong></p>
-                                    {% if patient.provider %}
-                                        <div class="relationship-item">{{ patient.provider.user.first_name }} {{ patient.provider.user.last_name }} ({{ patient.provider.user.username }})</div>
-                                    {% else %}
-                                        <p class="no-relationships">❌ No provider assigned</p>
-                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        <p>👤 No patient accounts found.</p>
+                    </div>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="empty-state">
-                    <p>👤 No patient accounts found.</p>
-                </div>
-                {% endif %}
-            </div>
-            
+                
                 <!-- Caregiver Accounts Section -->
                 <div class="account-section">
                     <h3 class="section-subtitle">🤝 Caregiver Accounts</h3>
-                {% if caregivers %}
-                <div class="user-accounts">
-                    {% for caregiver in caregivers %}
-                    <div class="user-card">
-                        <div class="user-header-row user-header-flex">
-                            <div class="user-header-info user-header-info-vertical">
-                                <span class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</span>
-                                <span class="user-username"><strong>Username:</strong> {{ caregiver.user.username }}</span>
+                    {% if caregivers %}
+                    <div class="user-accounts">
+                        {% for caregiver in caregivers %}
+                        <div class="user-card">
+                            <div class="user-header-row user-header-flex">
+                                <div class="user-header-info user-header-info-vertical">
+                                    <span class="user-name">{{ caregiver.user.first_name }} {{ caregiver.user.last_name }}</span>
+                                    <span class="user-username"><strong>Username:</strong> {{ caregiver.user.username }}</span>
+                                </div>
+                                <div class="user-actions-inline-row">
+                                    <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
+                                        ✏️ Edit
+                                    </a>
+                                </div>
                             </div>
-                            <div class="user-actions-inline-row">
-                                <a href="{% url 'manage_account' caregiver.user.id %}" class="action-btn outline-btn">
-                                    ✏️ Edit
-                                </a>
-                            </div>
-                        </div>
                             <!-- Show assigned patient -->
                             <div class="relationship-data">
-                            <div class="relationship-row-container">
-                                <div class="relationship-row">
-                                <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
-                                {% if caregiver.patient %}
-                                        <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
-                                {% else %}
-                                    <p class="no-relationships">❌ No patient assigned</p>
-                                {% endif %}
+                                <div class="relationship-row-container">
+                                    <div class="relationship-row">
+                                        <p class="relationship-title"><strong>👤 Assigned Patient:</strong></p>
+                                        {% if caregiver.patient %}
+                                            <div class="relationship-item">{{ caregiver.patient.user.first_name }} {{ caregiver.patient.user.last_name }} ({{ caregiver.patient.user.username }})</div>
+                                        {% else %}
+                                            <p class="no-relationships">❌ No patient assigned</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <p>🤝 No caregiver accounts found.</p>
-                </div>
-                {% endif %}
+                    {% else %}
+                    <div class="empty-state">
+                        <p>🤝 No caregiver accounts found.</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -685,6 +709,7 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0,0,0,0.5);
+        overflow: auto; /* Enable scroll if needed */
     }
     
     .modal-content {
@@ -1000,7 +1025,6 @@
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -1016,13 +1040,8 @@
         const difficulty = document.getElementById('quick_assign_difficulty').value;
         const hasDifficulty = document.getElementById('quick_assign_task').options[document.getElementById('quick_assign_task').selectedIndex].dataset.hasDifficulty === 'true';
 
-        if (!patientId) {
-            alert('Please select a patient first.');
-            return;
-        }
-
-        if (!taskType) {
-            alert('Please select a task type first.');
+        if (!patientId || !taskType) {
+            alert(`Please select a ${!patientId ? 'patient' : 'task type'} first.`);
             return;
         }
 
@@ -1031,23 +1050,12 @@
             return;
         }
 
-        const payload = {
-            patient_id: patientId,
-            task_type: taskType
-        };
+        const payload = { patient_id: patientId, task_type: taskType };
+        if (hasDifficulty) payload.difficulty = difficulty;
 
-        if (hasDifficulty) {
-            payload.difficulty = difficulty;
-        }
-
-        const url = "{% url 'taskmanager:assign_task' %}";
-
-        fetch(url, {
+        fetch("{% url 'taskmanager:assign_task' %}", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify(payload)
         })
         .then(response => response.json())
@@ -1059,60 +1067,38 @@
                 alert('Error: ' + (data.message || 'Could not assign task.'));
             }
         })
-        .catch(error => {
-            console.error('Error assigning task:', error);
-            alert('An unexpected error occurred. Please try again.');
-        });
+        .catch(error => console.error('Error assigning task:', error));
     }
 
     function assignAllTasksToPatient() {
         const patientId = document.getElementById('quick_assign_patient').value;
-
         if (!patientId) {
             alert('Please select a patient first.');
             return;
         }
 
         const tasks = [
-            // Games
-            { task_type: 'color', difficulty: 'mild' },
-            { task_type: 'color', difficulty: 'moderate' },
-            { task_type: 'color', difficulty: 'major' },
-
-            { task_type: 'pairs', difficulty: 'mild' },
-            { task_type: 'pairs', difficulty: 'moderate' },
-            { task_type: 'pairs', difficulty: 'major' },
-
-            { task_type: 'puzzle', difficulty: 'mild' },
-            { task_type: 'puzzle', difficulty: 'moderate' },
-            { task_type: 'puzzle', difficulty: 'major' },
-            
-            // Non-games
-            { task_type: 'checklist' },
-            { task_type: 'memory_questionnaire' }
+            { task_type: 'color', difficulty: 'mild' }, { task_type: 'color', difficulty: 'moderate' }, { task_type: 'color', difficulty: 'major' },
+            { task_type: 'pairs', difficulty: 'mild' }, { task_type: 'pairs', difficulty: 'moderate' }, { task_type: 'pairs', difficulty: 'major' },
+            { task_type: 'puzzle', difficulty: 'mild' }, { task_type: 'puzzle', difficulty: 'moderate' }, { task_type: 'puzzle', difficulty: 'major' },
+            { task_type: 'checklist' }, { task_type: 'memory_questionnaire' }
         ];
 
         fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify({ patient_id: patientId, tasks: tasks })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert((data.tasks ? data.tasks.length : 0) + ' tasks assigned successfully to the patient.');
+                alert((data.tasks ? data.tasks.length : 0) + ' tasks assigned to the patient.');
                 location.reload();
             } else {
                 alert('Error: ' + (data.message || 'Could not assign tasks.'));
             }
         })
-        .catch(error => {
-            console.error('Error assigning tasks:', error);
-            alert('An unexpected error occurred. Please try again.');
-        });
+        .catch(error => console.error('Error assigning multiple tasks:', error));
     }
 
     function assignAllDifficulties() {
@@ -1120,169 +1106,149 @@
         const taskType = document.getElementById('quick_assign_task').value;
 
         if (!patientId || !taskType) {
-            alert('Please select a patient and a task type first.');
+            alert(`Please select a ${!patientId ? 'patient' : 'task type'} first.`);
             return;
         }
 
         const selectedOption = document.getElementById('quick_assign_task').options[document.getElementById('quick_assign_task').selectedIndex];
         if (selectedOption.dataset.hasDifficulty !== 'true') {
-            alert('This task type does not have different difficulty levels.');
+            alert('This task type does not have difficulty levels.');
             return;
         }
 
         const difficulties = ['mild', 'moderate', 'major'];
-        const tasks = difficulties.map(difficulty => ({
-            task_type: taskType,
-            difficulty: difficulty
-        }));
+        const tasks = difficulties.map(difficulty => ({ task_type: taskType, difficulty: difficulty }));
 
         fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
             body: JSON.stringify({ patient_id: patientId, tasks: tasks })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('All difficulties for ' + selectedOption.text.trim() + ' assigned successfully to the patient.');
+                alert(`All difficulties for ${selectedOption.text.trim()} assigned.`);
                 location.reload();
             } else {
                 alert('Error: ' + (data.message || 'Could not assign tasks.'));
             }
         })
-        .catch(error => {
-            console.error('Error assigning tasks:', error);
-            alert('An unexpected error occurred. Please try again.');
-        });
+        .catch(error => console.error('Error assigning difficulties:', error));
     }
 
     function deleteAllTasks() {
         const patientId = document.getElementById('selected_patient').value;
         if (!patientId) {
-            alert('Please select a patient whose tasks you want to delete.');
+            alert('Please select a patient first.');
             return;
         }
 
-        if (confirm('Are you sure you want to delete all tasks for this patient? This action cannot be undone.')) {
-            const url = `/tasks/delete-all-tasks/${patientId}/`;
-            fetch(url, {
+        if (confirm('Are you sure you want to delete all tasks for this patient?')) {
+            fetch(`/tasks/delete-all-tasks/${patientId}/`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message || 'Tasks have been deleted.');
+                    alert(data.message || 'Tasks deleted.');
                     location.reload();
                 } else {
                     alert('Error: ' + (data.message || 'Could not delete tasks.'));
                 }
             })
-            .catch(error => {
-                console.error('Error deleting tasks:', error);
-                alert('An unexpected error occurred.');
-            });
+            .catch(error => console.error('Error deleting tasks:', error));
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const taskSelect = document.getElementById('quick_assign_task');
-        const difficultySelect = document.getElementById('quick_assign_difficulty');
-        const difficultyContainer = difficultySelect.closest('.form-group');
-
-        function toggleDifficulty() {
-            const selectedOption = taskSelect.options[taskSelect.selectedIndex];
-            const hasDifficulty = selectedOption.dataset.hasDifficulty === 'true';
-            
-            if (hasDifficulty) {
-                difficultyContainer.style.display = 'block';
-                difficultySelect.required = true;
-                difficultySelect.disabled = false;
-            } else {
-                difficultyContainer.style.display = 'none';
-                difficultySelect.required = false;
-                difficultySelect.disabled = true;
-            }
-        }
-
-        taskSelect.addEventListener('change', toggleDifficulty);
-        toggleDifficulty(); // Initial check
-    });
-
-    // Global function to open the schedule modal
     window.openScheduleModal = function(patientName, patientId) {
-        console.log('Opening modal for patient:', patientName, 'ID:', patientId);
         const modal = document.getElementById('appointmentModal');
         const patientIdInput = document.getElementById('patient_id');
+        const modalTitle = modal.querySelector('.modal-header h2');
         
-        if (!modal || !patientIdInput) {
-            console.error('Modal or patient ID input not found');
-            return;
-        }
+        if (modalTitle) modalTitle.textContent = `Schedule Appointment for ${patientName}`;
+        if (patientIdInput) patientIdInput.value = patientId;
         
-        patientIdInput.value = patientId;
-        modal.style.display = 'block';
-        
-        // Set minimum date to today
-        const today = new Date();
         const dateInput = document.getElementById('appointment_datetime');
         if (dateInput) {
+            const today = new Date();
             dateInput.min = today.toISOString().slice(0, 16);
-            // Set default time to now
             dateInput.value = today.toISOString().slice(0, 16);
         }
+        
+        if (modal) modal.style.display = 'block';
     };
 
-    // Global function to delete appointments
     window.deleteAppointment = function(appointmentId) {
-        if (!appointmentId) {
-            console.error('No appointment ID provided');
-            alert('Error: Could not identify the appointment to delete');
-            return;
-                    }
-    
         if (confirm('Are you sure you want to delete this appointment?')) {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-            console.log('CSRF Token:', csrfToken ? 'Present' : 'Missing');
-            
             fetch(`/taskmanager/delete-appointment/${appointmentId}/`, {
                 method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
             })
-            .then(response => {
-                console.log('Response status:', response.status);
-                return response.text().then(text => {
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        console.error('Failed to parse response as JSON:', text);
-                        throw new Error('Invalid server response');
-                    }
-                });
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Response data:', data);
                 if (data.success) {
-                    alert('Appointment deleted successfully');
+                    alert('Appointment deleted successfully.');
                     location.reload();
-                    } else {
+                } else {
                     throw new Error(data.message || 'Failed to delete appointment');
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deleting appointment: ' + error.message);
-    });
+            .catch(error => alert('Error: ' + error.message));
         }
     };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('appointmentModal');
+        if (modal) {
+            const span = modal.querySelector('.close');
+            if (span) span.onclick = () => modal.style.display = "none";
+            window.onclick = (event) => {
+                if (event.target == modal) modal.style.display = "none";
+            };
+            
+            const appointmentForm = document.getElementById('appointmentForm');
+            if (appointmentForm) {
+                appointmentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const patientId = formData.get('patient_id');
+                    // Note: Using 'create-appointment' URL which matches urls.py
+                    const url = `/taskmanager/create-appointment/${patientId}/`;
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        body: new URLSearchParams(formData),
+                        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Appointment scheduled!');
+                            modal.style.display = 'none';
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.message || 'Could not schedule appointment.'));
+                        }
+                    })
+                    .catch(error => console.error('Scheduling error:', error));
+                });
+            }
+        }
+
+        const taskSelect = document.getElementById('quick_assign_task');
+        const difficultySelect = document.getElementById('quick_assign_difficulty');
+        if (taskSelect && difficultySelect) {
+            const difficultyContainer = difficultySelect.closest('.form-group');
+            const toggleDifficulty = () => {
+                const hasDifficulty = taskSelect.options[taskSelect.selectedIndex].dataset.hasDifficulty === 'true';
+                difficultyContainer.style.display = hasDifficulty ? 'block' : 'none';
+                difficultySelect.required = hasDifficulty;
+                difficultySelect.disabled = !hasDifficulty;
+            };
+            taskSelect.addEventListener('change', toggleDifficulty);
+            toggleDifficulty();
+        }
+    });
 </script>
 {% endblock %} 

@@ -4,97 +4,67 @@ from users.models import UserProfile
 from django.db import transaction
 
 class Command(BaseCommand):
-    help = 'Set up initial data for the application'
+    help = 'Set up initial data for the application, updating passwords if users exist.'
 
     def handle(self, *args, **options):
         with transaction.atomic():
-            # Create superuser if it doesn't exist
-            if not User.objects.filter(username='admin').exists():
+            # --- Superuser ---
+            try:
+                superuser = User.objects.get(username='admin')
+                superuser.set_password('admin')
+                superuser.save()
+                self.stdout.write(self.style.SUCCESS('Superuser password updated.'))
+            except User.DoesNotExist:
                 superuser = User.objects.create_superuser(
-                    username='admin',
-                    email='admin@example.com',
-                    password='admin'
+                    username='admin', email='admin@example.com', password='admin'
                 )
-                self.stdout.write(
-                    self.style.SUCCESS(f'Successfully created superuser: admin/admin')
-                )
-            else:
-                self.stdout.write(
-                    self.style.WARNING('Superuser already exists')
-                )
+                self.stdout.write(self.style.SUCCESS('Successfully created superuser: admin/admin'))
 
-            # Create a sample provider
-            if not User.objects.filter(username='provider').exists():
+            # --- Provider ---
+            try:
+                provider_user = User.objects.get(username='provider')
+                provider_user.set_password('provider')
+                provider_user.save()
+                self.stdout.write(self.style.SUCCESS('Provider password updated.'))
+            except User.DoesNotExist:
                 provider_user = User.objects.create_user(
-                    username='provider',
-                    email='provider@example.com',
-                    password='provider123',
-                    first_name='Dr. Smith',
-                    last_name='Provider'
+                    username='provider', password='provider', first_name='Dr. Smith', last_name='Provider'
                 )
-                provider_profile = UserProfile.objects.create(
-                    user=provider_user,
-                    user_type='provider',
-                    phone_number='555-0100'
-                )
-                self.stdout.write(
-                    self.style.SUCCESS(f'Successfully created provider: provider/provider123')
-                )
-            else:
-                self.stdout.write(
-                    self.style.WARNING('Provider already exists')
-                )
+                UserProfile.objects.create(user=provider_user, user_type='provider')
+                self.stdout.write(self.style.SUCCESS('Successfully created provider: provider/provider'))
 
-            # Create a sample patient
-            if not User.objects.filter(username='patient').exists():
+            provider_profile = UserProfile.objects.get(user=provider_user)
+
+            # --- Patient ---
+            try:
+                patient_user = User.objects.get(username='patient')
+                patient_user.set_password('patient')
+                patient_user.save()
+                self.stdout.write(self.style.SUCCESS('Patient password updated.'))
+            except User.DoesNotExist:
                 patient_user = User.objects.create_user(
-                    username='patient',
-                    email='patient@example.com',
-                    password='patient123',
-                    first_name='John',
-                    last_name='Patient'
+                    username='patient', password='patient', first_name='John', last_name='Patient'
                 )
-                provider_profile = UserProfile.objects.get(user__username='provider')
-                patient_profile = UserProfile.objects.create(
-                    user=patient_user,
-                    user_type='patient',
-                    phone_number='555-0200',
-                    provider=provider_profile
-                )
-                self.stdout.write(
-                    self.style.SUCCESS(f'Successfully created patient: patient/patient123')
-                )
-            else:
-                self.stdout.write(
-                    self.style.WARNING('Patient already exists')
-                )
+                UserProfile.objects.create(user=patient_user, user_type='patient', provider=provider_profile)
+                self.stdout.write(self.style.SUCCESS('Successfully created patient: patient/patient'))
+            
+            patient_profile = UserProfile.objects.get(user=patient_user)
 
-            # Create a sample caregiver
-            if not User.objects.filter(username='caregiver').exists():
+            # --- Caregiver ---
+            try:
+                caregiver_user = User.objects.get(username='caregiver')
+                caregiver_user.set_password('caregiver')
+                caregiver_user.save()
+                self.stdout.write(self.style.SUCCESS('Caregiver password updated.'))
+            except User.DoesNotExist:
                 caregiver_user = User.objects.create_user(
-                    username='caregiver',
-                    email='caregiver@example.com',
-                    password='caregiver123',
-                    first_name='Jane',
-                    last_name='Caregiver'
+                    username='caregiver', password='caregiver', first_name='Jane', last_name='Caregiver'
                 )
-                provider_profile = UserProfile.objects.get(user__username='provider')
-                patient_profile = UserProfile.objects.get(user__username='patient')
-                caregiver_profile = UserProfile.objects.create(
-                    user=caregiver_user,
-                    user_type='caregiver',
-                    phone_number='555-0300',
-                    provider=provider_profile,
-                    patient=patient_profile
+                UserProfile.objects.create(
+                    user=caregiver_user, user_type='caregiver', provider=provider_profile, patient=patient_profile
                 )
-                self.stdout.write(
-                    self.style.SUCCESS(f'Successfully created caregiver: caregiver/caregiver123')
-                )
-            else:
-                self.stdout.write(
-                    self.style.WARNING('Caregiver already exists')
-                )
+                self.stdout.write(self.style.SUCCESS('Successfully created caregiver: caregiver/caregiver'))
 
         self.stdout.write(
-            self.style.SUCCESS('Initial data setup completed successfully!')
+            self.style.SUCCESS('Initial data setup/update completed successfully!')
         ) 
