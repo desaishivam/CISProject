@@ -97,62 +97,26 @@
                     <div class="patient-task-management">
                         <form method="post" action="" class="patient-select-form">
                             {% csrf_token %}
-                        <div class="patient-selection-row">
-                            <div class="form-group">
-                                    <div class="label-input-row">
+                            <div class="patient-selection-row" style="display: flex; gap: 1rem; align-items: flex-end;">
+                                <div class="form-group" style="flex-grow: 1;">
                                     <label for="selected_patient">Select Patient:</label>
-                                    <select id="selected_patient" name="selected_patient" class="form-input" required>
-                                    <option value="">Choose a patient...</option>
-                                    {% for patient in patients %}
+                                    <select id="selected_patient" name="selected_patient" class="form-input" required onchange="this.form.submit()">
+                                        <option value="">Choose a patient...</option>
+                                        {% for patient in patients %}
                                             <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="action-buttons-row">
+                                    <button formaction="{% if selected_patient %}{% url 'taskmanager:view_tasks' selected_patient.id %}{% endif %}" {% if not selected_patient %}disabled{% endif %} class="action-btn primary-btn">
+                                        🔍 View Tasks
+                                    </button>
+                                    <button formaction="{% if selected_patient %}{% url 'taskmanager:delete_all_tasks' selected_patient.id %}{% endif %}" {% if not selected_patient %}disabled{% endif %} class="action-btn danger-btn" type="button" onclick="return confirm('Are you sure you want to delete all tasks for this patient?');">
+                                        🗑️ Delete All Tasks
+                                    </button>
                                 </div>
                             </div>
-                            <div class="action-buttons-row">
-                                <button type="submit" class="action-btn primary-btn">
-                                    🔍 View Tasks
-                                </button>
-                                <button onclick="deleteAllTasks()" class="action-btn danger-btn" type="button">
-                                    🗑️ Delete All Tasks
-                                </button>
-                            </div>
                         </form>
-                        <style>
-                            .patient-task-management {
-                                margin-top: 1.5rem;
-                            }
-                            
-                            .patient-selection-row {
-                                margin-bottom: 1.5rem;
-                            }
-                            
-                            .patient-selection-row .form-group {
-                                width: 100%;
-                            }
-                            
-                            .action-buttons-row {
-                                display: flex;
-                                gap: 1.5rem;
-                            }
-                            
-                            .action-buttons-row button {
-                                padding: 0.75rem 1.5rem;
-                                white-space: nowrap;
-                            }
-                            
-                            @media (max-width: 768px) {
-                                .action-buttons-row {
-                                    flex-direction: column;
-                                    gap: 1rem;
-                                }
-                                
-                                .action-buttons-row button {
-                                    width: 100%;
-                                }
-                            }
-                        </style>
                         {% if selected_patient %}
                             <h5 class="patient-tasks-title">Tasks for {{ selected_patient.user.get_full_name }}</h5>
                             {% if patient_tasks %}
@@ -234,9 +198,6 @@
                                     <a href="{% url 'assign_caregiver' patient.user.id %}" class="action-btn primary-btn">
                                         🔗 Assign Caregivers
                                     </a>
-                                    <button onclick="openScheduleModal('{{ patient.user.get_full_name }}', {{ patient.user.id }})" class="action-btn secondary-btn">
-                                        📅 Schedule Appointment
-                                    </button>
                                     <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
                                         ✏️ Edit
                                     </a>
@@ -255,6 +216,11 @@
                                             {% endfor %}
                                         </div>
                                     {% endwith %}
+                                </div>
+                                <div style="margin-top: 1rem;">
+                                    <button onclick="openScheduleModal('{{ patient.user.get_full_name }}', {{ patient.user.id }})" class="action-btn secondary-btn">
+                                        📅 Schedule Appointment
+                                    </button>
                                 </div>
                                 <div class="appointment-section">
                                     <p class="relationship-title"><strong>🗓️ Upcoming Appointments:</strong></p>

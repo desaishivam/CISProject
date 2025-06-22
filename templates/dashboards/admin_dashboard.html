@@ -66,17 +66,17 @@
                     {% for provider_data in providers %}
                     <div class="user-card">
                         <div class="user-details">
-                            <h4 class="user-name">{{ provider_data.profile.user.first_name }} {{ provider_data.profile.user.last_name }}</h4>
+                            <h4 class="user-name">{{ provider_data.user.first_name }} {{ provider_data.user.last_name }}</h4>
                             <div class="user-info">
-                            <p><strong>Username:</strong> {{ provider_data.profile.user.username }}</p>
+                            <p><strong>Username:</strong> {{ provider_data.user.username }}</p>
                             </div>
                             
                             <!-- Show managed patients -->
                             <div class="relationship-data">
                                 <p class="relationship-title"><strong>👤 Manages Patients:</strong></p>
-                                {% if provider_data.managed_patients %}
+                                {% if provider_data.managed_patients.all %}
                                     <ul class="relationship-list">
-                                    {% for patient in provider_data.managed_patients %}
+                                    {% for patient in provider_data.managed_patients.all %}
                                         <li class="relationship-item">{{ patient.user.first_name }} {{ patient.user.last_name }} ({{ patient.user.username }})</li>
                                     {% endfor %}
                                     </ul>
@@ -86,7 +86,7 @@
                             </div>
                         </div>
                         <div class="user-actions">
-                            <a href="{% url 'manage_account' provider_data.profile.user.id %}" class="action-btn outline-btn">
+                            <a href="{% url 'manage_account' provider_data.user.id %}" class="action-btn outline-btn">
                                 ✏️ Edit
                             </a>
                         </div>
