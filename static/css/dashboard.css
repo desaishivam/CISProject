@@ -63,6 +63,27 @@
     color: white;
 }
 
+/* Header for plain pages like the appointments list */
+.dashboard-header-plain {
+    background: var(--light-gray);
+    border: 1px solid var(--border-color);
+}
+
+.dashboard-header-plain h1 {
+    color: var(--dark-gray);
+}
+
+.dashboard-header-plain .action-btn {
+    color: var(--provider-primary);
+    border-color: var(--provider-primary);
+    background: transparent;
+}
+
+.dashboard-header-plain .action-btn:hover {
+    background: var(--provider-primary);
+    color: white;
+}
+
 .header-info h1 {
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
