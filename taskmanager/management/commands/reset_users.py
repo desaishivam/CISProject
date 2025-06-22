@@ -19,6 +19,7 @@ class Command(BaseCommand):
                 email='admin@example.com',
                 password='admin'
             )
+            UserProfile.objects.create(user=admin_user, user_type='admin')
             
             # --- Provider ---
             provider_user = User.objects.create_user(
