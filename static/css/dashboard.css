@@ -40,6 +40,29 @@
     box-shadow: 0 4px 15px rgba(26, 32, 44, 0.2);
 }
 
+/* Header for pages without a specific role (e.g., appointments list) */
+.dashboard-header:not(.patient):not(.caregiver):not(.provider):not(.admin) {
+    background: var(--light-gray);
+    color: var(--dark-gray);
+    border: 1px solid var(--border-color);
+}
+
+.dashboard-header:not(.patient):not(.caregiver):not(.provider):not(.admin) h1,
+.dashboard-header:not(.patient):not(.caregiver):not(.provider):not(.admin) .user-type {
+    color: var(--dark-gray);
+}
+
+.dashboard-header:not(.patient):not(.caregiver):not(.provider):not(.admin) .action-btn {
+    color: var(--provider-primary);
+    border-color: var(--provider-primary);
+    background: transparent;
+}
+
+.dashboard-header:not(.patient):not(.caregiver):not(.provider):not(.admin) .action-btn:hover {
+    background: var(--provider-primary);
+    color: white;
+}
+
 .header-info h1 {
     margin: 0 0 0.5rem 0;
     font-size: 2rem;

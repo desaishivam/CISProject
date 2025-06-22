@@ -30,7 +30,7 @@ urlpatterns = [
     path('', include('users.urls')),
     
     # Include questionnaires URLs
-    path('tasks/', include('taskmanager.urls')),
+    path('taskmanager/', include('taskmanager.urls')),
     
     # Account management URLs
     path('create-provider/', users_views.create_provider, name='create_provider'),

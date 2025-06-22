@@ -12,6 +12,7 @@ import json
 from django.urls import reverse
 from collections import OrderedDict
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -788,47 +789,47 @@ def delete_task(request, task_id):
 @require_POST
 def create_appointment(request, patient_id):
     """Provider view to create an appointment with a patient"""
-    print(f"Attempting to create appointment for patient {patient_id}")  # Debug log
-    print(f"Request method: {request.method}")  # Debug log
-    print(f"Request POST data: {request.POST}")  # Debug log
-    print(f"Request headers: {request.headers}")  # Debug log
+    logger.info(f"Received request to create appointment for patient_id: {patient_id}")
+    logger.info(f"Request POST data: {request.POST}")
     
     if not hasattr(request.user, 'profile'):
-        print("User has no profile")  # Debug log
+        logger.error("User has no profile.")
         return JsonResponse({'success': False, 'message': 'User profile not found'})
         
     if request.user.profile.user_type != 'provider':
-        print(f"Invalid user type: {request.user.profile.user_type}")  # Debug log
+        logger.error(f"Permission denied: User type is '{request.user.profile.user_type}', not 'provider'.")
         return JsonResponse({'success': False, 'message': 'Permission denied - not a provider'})
     
     try:
         patient_profile = UserProfile.objects.get(id=patient_id, user_type='patient')
-        print(f"Found patient: {patient_profile}")  # Debug log
+        logger.info(f"Successfully found patient: {patient_profile.user.username}")
         
         # Verify provider manages this patient, or patient has no provider
         if patient_profile.provider and patient_profile.provider != request.user.profile:
-            print(f"Permission denied - patient's provider {patient_profile.provider.id} != user {request.user.profile.id}")  # Debug log
+            logger.error(f"Permission denied: Patient is assigned to another provider.")
             return JsonResponse({'success': False, 'message': 'Permission denied - not your patient'})
         
         datetime_str = request.POST.get('datetime')
         notes = request.POST.get('notes', '')
         
-        print(f"Received datetime: {datetime_str}")  # Debug log
-        print(f"Received notes: {notes}")  # Debug log
-        
         if not datetime_str:
-            print("No datetime provided")  # Debug log
+            logger.error("No datetime provided in POST data.")
             return JsonResponse({'success': False, 'message': 'Date and time are required'})
         
         try:
+            # Convert string to a naive datetime object first
+            naive_datetime = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M')
+            # Make it timezone-aware
+            aware_datetime = timezone.make_aware(naive_datetime)
+
             # Create the appointment
             appointment = Appointment.objects.create(
                 provider=request.user.profile,
                 patient=patient_profile,
-                datetime=datetime_str,
+                datetime=aware_datetime,
                 notes=notes
             )
-            print(f"Created appointment: {appointment}")  # Debug log
+            logger.info(f"Successfully created appointment {appointment.id} for patient {patient_profile.user.username}")
             
             return JsonResponse({
                 'success': True,
@@ -840,14 +841,14 @@ def create_appointment(request, patient_id):
                 }
             })
         except Exception as e:
-            print(f"Error creating appointment object: {str(e)}")  # Debug log
+            logger.error(f"Database error creating appointment object: {str(e)}", exc_info=True)
             return JsonResponse({'success': False, 'message': f'Error creating appointment: {str(e)}'})
             
     except UserProfile.DoesNotExist:
-        print(f"Patient {patient_id} not found")  # Debug log
+        logger.error(f"Patient with id {patient_id} not found.")
         return JsonResponse({'success': False, 'message': 'Patient not found'})
     except Exception as e:
-        print(f"Error in create_appointment view: {str(e)}")  # Debug log
+        logger.error(f"An unexpected error occurred in create_appointment view: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'message': f'Error creating appointment: {str(e)}'})
 
 @login_required
