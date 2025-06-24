@@ -8,8 +8,6 @@
     <div class="questionnaire-header">
         <h1>{{ task.title }}</h1>
         <div class="task-info">
-            <p><strong>Type:</strong> {{ task.get_task_type_display }}</p>
-            <p><strong>Assigned by:</strong> {{ task.assigned_by.user.first_name }} {{ task.assigned_by.user.last_name }}</p>
             {% if task.due_date %}
                 <p><strong>Due:</strong> {{ task.due_date|date:"M d, Y g:i A" }}</p>
             {% endif %}
@@ -346,44 +344,15 @@
                 <h4>Memory Techniques</h4>
                 <div class="techniques-section">
                     <p><strong>What techniques do you use most often to help you remember things?</strong></p>
-                    <div class="techniques-list">
-                        <div class="technique-item">
-                            <label for="technique_1">1.</label>
-                            <input type="text" id="technique_1" name="technique_1" placeholder="Enter a memory technique you use..." value="{{ responses.technique_1|default:'' }}">
-                        </div>
-                        <div class="technique-item">
-                            <label for="technique_2">2.</label>
-                            <input type="text" id="technique_2" name="technique_2" placeholder="Enter another memory technique..." value="{{ responses.technique_2|default:'' }}">
-                        </div>
-                        <div class="technique-item">
-                            <label for="technique_3">3.</label>
-                            <input type="text" id="technique_3" name="technique_3" placeholder="Enter another memory technique..." value="{{ responses.technique_3|default:'' }}">
-                        </div>
-                        <div class="technique-item">
-                            <label for="technique_4">4.</label>
-                            <input type="text" id="technique_4" name="technique_4" placeholder="Enter another memory technique..." value="{{ responses.technique_4|default:'' }}">
-                        </div>
-                        <div class="technique-item">
-                            <label for="technique_5">5.</label>
-                            <input type="text" id="technique_5" name="technique_5" placeholder="Enter another memory technique..." value="{{ responses.technique_5|default:'' }}">
-                        </div>
-                    </div>
+                    <textarea id="techniques" name="techniques" rows="6" style="width:100%; min-height:120px; font-size:1.1rem; padding:1rem; border-radius:6px; border:1px solid #d1d5db; resize:vertical;" placeholder="List your memory techniques here...">{{ responses.techniques|default:'' }}</textarea>
                 </div>
             </div>
 
             <!-- Form Controls -->
             <div class="form-controls">
-                <button type="submit" name="save_progress" class="mdc-button mdc-button--outlined">
-                    <span class="mdc-button__label">Save Progress</span>
-                </button>
-                
                 <button type="submit" name="complete_task" class="mdc-button mdc-button--raised">
                     <span class="mdc-button__label">Complete Questionnaire</span>
                 </button>
-                
-                <a href="{% url 'taskmanager:patient_tasks' %}" class="mdc-button mdc-button--outlined">
-                    <span class="mdc-button__label">Back to Tasks</span>
-                </a>
             </div>
         </form>
     {% else %}
@@ -408,17 +377,9 @@
             </div>
             
             <div class="form-controls">
-                <button type="submit" name="save_progress" class="mdc-button mdc-button--outlined">
-                    <span class="mdc-button__label">Save Progress</span>
-                </button>
-                
                 <button type="submit" name="complete_task" class="mdc-button mdc-button--raised">
                     <span class="mdc-button__label">Complete Task</span>
                 </button>
-                
-                <a href="{% url 'taskmanager:patient_tasks' %}" class="mdc-button mdc-button--outlined">
-                    <span class="mdc-button__label">Back to Tasks</span>
-                </a>
             </div>
         </form>
     {% endif %}

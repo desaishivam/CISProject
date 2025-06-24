@@ -22,22 +22,45 @@
     
     <!-- Dashboard content -->
     <div class="dashboard-section">
-        <h2 class="section-title patient">🚀 Quick Actions</h2>
-        <div class="quick-actions">
-            <a href="{% url 'taskmanager:patient_tasks' %}" class="action-card tasks-card">
-                <div class="action-icon">📋</div>
-                <h3>My Tasks</h3>
-                <p>View and complete assigned tasks and assessments</p>
-                <div class="card-overlay"></div>
-            </a>
-            
-            <a href="{% url 'taskmanager:patient_appointments' %}" class="action-card appointments-card">
-                <div class="action-icon">📅</div>
-                <h3>Appointments</h3>
-                <p>View your upcoming healthcare appointments</p>
-                <div class="card-overlay"></div>
-            </a>
+        <h2 class="section-title patient">📋 My Tasks</h2>
+        {% if pending_tasks %}
+        <div class="tasks-list">
+            <table class="enhanced-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for task in pending_tasks %}
+                    <tr>
+                        <td>
+                            {{ task.title }}
+                            {% if task.difficulty %}
+                            <span class="difficulty-dot {{ task.difficulty|lower }}"></span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'taskmanager:take_task' task.id %}" class="action-btn start-btn">
+                                {% if task.status == 'assigned' %}
+                                    🚀 Start Task
+                                {% else %}
+                                    ⏳ Continue Task
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
+        {% else %}
+        <div class="empty-state-main">
+            <h2>📋 No Tasks Assigned</h2>
+            <p>You don't have any tasks assigned at the moment. Your healthcare provider will assign questionnaires and assessments as needed.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 

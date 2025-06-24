@@ -279,9 +279,17 @@ def patient_dashboard(request):
         messages.error(request, 'You do not have permission to access the patient dashboard.')
         return redirect('home')
     
+    # Fetch all pending tasks for the patient
+    from taskmanager.models import Task
+    pending_tasks = Task.objects.filter(
+        assigned_to=request.user.profile,
+        status__in=['assigned', 'in_progress']
+    ).order_by('due_date', 'created_at')
+    
     context = {
         'user': request.user,
-        'user_type': 'Patient'
+        'user_type': 'Patient',
+        'pending_tasks': pending_tasks
     }
     return render(request, 'dashboards/patient_dashboard.html', context)
 
