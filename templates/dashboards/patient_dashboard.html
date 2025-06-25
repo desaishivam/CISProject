@@ -62,6 +62,39 @@
         </div>
         {% endif %}
     </div>
+    <!-- Appointments section -->
+    <div class="dashboard-section">
+        <h2 class="section-title patient">📅 Upcoming Appointments</h2>
+        {% if appointments %}
+            <div class="table-container">
+                <table class="enhanced-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Provider</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td class="appointment-datetime">
+                                {{ appt.datetime|date:"F j, Y" }}<br>
+                                <span class="time">{{ appt.datetime|date:"g:i A" }}</span>
+                            </td>
+                            <td>Dr. {{ appt.provider.user.get_full_name }}</td>
+                            <td>{{ appt.notes|default:"No notes provided." }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>📅 You have no upcoming appointments.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 
 <style>

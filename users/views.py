@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import UserProfile
 from taskmanager.views import get_task_statistics
-from taskmanager.models import Task
+from taskmanager.models import Task, Appointment
 from taskmanager.constants import TASK_TYPES, GAME_TYPES, DIFFICULTY_LEVELS, TASK_TEMPLATES
 import logging
 from django.db.utils import IntegrityError
@@ -256,7 +256,6 @@ def caregiver_dashboard(request):
         ).order_by('due_date', 'created_at')
         
         # Get patient's appointments
-        from taskmanager.models import Appointment
         appointments = Appointment.objects.filter(patient=patient).order_by('datetime')
         
         patients_with_tasks.append({
@@ -280,16 +279,18 @@ def patient_dashboard(request):
         return redirect('home')
     
     # Fetch all pending tasks for the patient
-    from taskmanager.models import Task
+    from taskmanager.models import Task, Appointment
     pending_tasks = Task.objects.filter(
         assigned_to=request.user.profile,
         status__in=['assigned', 'in_progress']
     ).order_by('due_date', 'created_at')
+    appointments = Appointment.objects.filter(patient=request.user.profile).order_by('datetime')
     
     context = {
         'user': request.user,
         'user_type': 'Patient',
-        'pending_tasks': pending_tasks
+        'pending_tasks': pending_tasks,
+        'appointments': appointments
     }
     return render(request, 'dashboards/patient_dashboard.html', context)
 
