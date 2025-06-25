@@ -4,8 +4,65 @@
 {% block title %}Color Matching Game{% endblock %}
 
 {% block content %}
-<div class="game-container">
-  <style>
+<form id="game-form">
+    {% csrf_token %}
+    <div class="container">
+        <div class="task-header">
+            <h1>Color Matching</h1>
+            <p>Find all the matching color pairs as quickly as you can!</p>
+        </div>
+        <div class="stats-container">
+            <div>Moves: <span id="moves">0</span></div>
+            <div>Time: <span id="timer">00:00</span></div>
+        </div>
+        <div class="game-container">
+            <div class="board" id="board"></div>
+        </div>
+        <form id="gameForm" method="post" style="display: none;">
+            {% csrf_token %}
+            <input type="hidden" name="moves" id="finalMoves">
+            <input type="hidden" name="time" id="finalTime">
+        </form>
+    </div>
+</form>
+<style>
+    .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 2rem;
+    }
+    .task-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    .task-header h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 0.5rem;
+    }
+    .task-header p {
+        color: #7f8c8d;
+        font-size: 1.2em;
+    }
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        background: #e9ecef;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .game-container {
+        display: flex;
+        justify-content: center;
+    }
+    .board {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        max-width: 660px;
+        margin: 0 auto;
+    }
     .game-container {
       font-family: Arial, sans-serif;
       text-align: center;
@@ -14,13 +71,6 @@
     #stats {
       margin: 10px 0;
       font-size: 18px;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-      max-width: 660px;
-      margin: 0 auto;
     }
     .card {
       width: 100px;
@@ -69,167 +119,189 @@
       color: #ffd700;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
-  </style>
-
-  <h1>Color Matching</h1>
-  <div class="preview-countdown" id="countdown">
-    <span class="preview-text">Memorize the colors! Game starts in:</span>
-    <span class="countdown-number">12</span>
-  </div>
-  <div id="stats">
-    Moves: <span id="moves">0</span> |
-    Time: <span id="timer">00:00</span>
-  </div>
-  <div class="board" id="board"></div>
-
-  <form id="gameForm" method="post" style="display: none;">
-    {% csrf_token %}
-    <input type="hidden" name="moves" id="finalMoves">
-    <input type="hidden" name="time" id="finalTime">
-  </form>
-
-  <script>
-    const colors = ['red','green','blue','yellow','orange','purple'];
-    let deck = [...colors, ...colors];
-    let first = null, second = null, moves = 0, matches = 0, seconds = 0, timer;
-    let gameStarted = false;
-
-    const board = document.getElementById('board');
-    const movesEl = document.getElementById('moves');
-    const timerEl = document.getElementById('timer');
-    const gameForm = document.getElementById('gameForm');
-    const finalMoves = document.getElementById('finalMoves');
-    const finalTime = document.getElementById('finalTime');
-    const countdownEl = document.getElementById('countdown');
-    const countdownNumberEl = countdownEl.querySelector('.countdown-number');
-
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
+    .game-header-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      padding: 2rem 1rem 1rem 1rem;
+      margin: 0 auto 2rem auto;
+      max-width: 600px;
+      text-align: center;
     }
-
-    function startTimer() {
-      timer = setInterval(() => {
-        seconds++;
-        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-        const s = String(seconds % 60).padStart(2, '0');
-        timerEl.textContent = `${m}:${s}`;
-      }, 1000);
+    .game-header-card h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2.5rem;
+      color: #2c3e50;
+      font-weight: 800;
     }
-
-    function init() {
-      shuffle(deck);
-      board.innerHTML = '';
-      deck.forEach(color => {
-        const card = document.createElement('div');
-        card.className = 'card revealed';
-        card.dataset.color = color;
-        card.style.setProperty('--color', color);
-        card.style.backgroundColor = color;
-        card.textContent = color.charAt(0).toUpperCase() + color.slice(1);
-        card.addEventListener('click', flip);
-        board.appendChild(card);
-      });
-      moves = 0;
-      matches = 0;
-      seconds = 0;
-      movesEl.textContent = moves;
-      timerEl.textContent = '00:00';
-      clearInterval(timer);
-      first = second = null;
-      
-      // Show preview countdown
-      countdownEl.style.display = 'block';
-      let countdown = 12;
-      
-      const countdownTimer = setInterval(() => {
-        countdown--;
-        countdownNumberEl.textContent = countdown;
-        
-        if (countdown === 0) {
-          clearInterval(countdownTimer);
-          countdownEl.style.display = 'none';
-          
-          // Hide all cards
-          document.querySelectorAll('.card').forEach(card => {
-            card.style.backgroundColor = '#ccc';
-            card.textContent = '';
-            card.classList.remove('revealed');
-          });
-          
-          gameStarted = true;
-          startTimer();
-        }
-      }, 1000);
+    .game-subtitle {
+      color: #6b7280;
+      font-size: 1.2rem;
+      margin: 0;
+      font-weight: 500;
     }
-
-    function flip(e) {
-      if (!gameStarted) return;
-      
-      const card = e.currentTarget;
-      if (card.classList.contains('revealed') || second) return;
-
-      card.classList.add('revealed');
-      card.style.backgroundColor = card.dataset.color;
-      card.textContent = card.dataset.color.charAt(0).toUpperCase() + card.dataset.color.slice(1);
-      
-      if (!first) {
-        first = card;
-      } else {
-        second = card;
-        movesEl.textContent = ++moves;
-
-        if (first.dataset.color === second.dataset.color) {
-          first.classList.add('matched');
-          second.classList.add('matched');
-          resetPicks();
-          if (++matches === colors.length) finish();
-        } else {
-          setTimeout(() => {
-            first.classList.remove('revealed');
-            second.classList.remove('revealed');
-            first.style.backgroundColor = '#ccc';
-            second.style.backgroundColor = '#ccc';
-            first.textContent = '';
-            second.textContent = '';
-            resetPicks();
-          }, 800);
-        }
-      }
+    .game-stats-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      padding: 1rem 2rem;
+      margin: 0 auto 2rem auto;
+      max-width: 400px;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-size: 1.1rem;
+      color: #374151;
+      font-weight: 600;
     }
+</style>
 
-    function resetPicks() {
-      first = null;
-      second = null;
-    }
-
-    function finish() {
-      clearInterval(timer);
-      const results = {
-        score: matches * 10,
-        moves: moves,
-        time: timerEl.textContent,
-        difficulty: 'moderate'
-      };
-      fetch(window.location.href, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify(results)
-      }).then((res) => res.json())
-      .then((data) => {
-        window.location.href = '/patient-dashboard/';
-      }).catch((err) => {
-        console.error('Error submitting results:', err);
-        window.location.href = '/patient-dashboard/';
-      });
-    }
-
-    init();
-  </script>
+<div class="preview-countdown" id="countdown">
+  <span class="preview-text">Memorize the colors! Game starts in:</span>
+  <span class="countdown-number">12</span>
 </div>
+
+<script>
+  const colors = ['red','green','blue','yellow','orange','purple'];
+  let deck = [...colors, ...colors];
+  let first = null, second = null, moves = 0, matches = 0, seconds = 0, timer;
+  let gameStarted = false;
+
+  const board = document.getElementById('board');
+  const movesEl = document.getElementById('moves');
+  const timerEl = document.getElementById('timer');
+  const gameForm = document.getElementById('gameForm');
+  const finalMoves = document.getElementById('finalMoves');
+  const finalTime = document.getElementById('finalTime');
+  const countdownEl = document.getElementById('countdown');
+  const countdownNumberEl = countdownEl.querySelector('.countdown-number');
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function startTimer() {
+    timer = setInterval(() => {
+      seconds++;
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  function init() {
+    shuffle(deck);
+    board.innerHTML = '';
+    deck.forEach(color => {
+      const card = document.createElement('div');
+      card.className = 'card revealed';
+      card.dataset.color = color;
+      card.style.setProperty('--color', color);
+      card.style.backgroundColor = color;
+      card.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+      card.addEventListener('click', flip);
+      board.appendChild(card);
+    });
+    moves = 0;
+    matches = 0;
+    seconds = 0;
+    movesEl.textContent = moves;
+    timerEl.textContent = '00:00';
+    clearInterval(timer);
+    first = second = null;
+    
+    // Show preview countdown
+    countdownEl.style.display = 'block';
+    let countdown = 12;
+    
+    const countdownTimer = setInterval(() => {
+      countdown--;
+      countdownNumberEl.textContent = countdown;
+      
+      if (countdown === 0) {
+        clearInterval(countdownTimer);
+        countdownEl.style.display = 'none';
+        
+        // Hide all cards
+        document.querySelectorAll('.card').forEach(card => {
+          card.style.backgroundColor = '#ccc';
+          card.textContent = '';
+          card.classList.remove('revealed');
+        });
+        
+        gameStarted = true;
+        startTimer();
+      }
+    }, 1000);
+  }
+
+  function flip(e) {
+    if (!gameStarted) return;
+    
+    const card = e.currentTarget;
+    if (card.classList.contains('revealed') || second) return;
+
+    card.classList.add('revealed');
+    card.style.backgroundColor = card.dataset.color;
+    card.textContent = card.dataset.color.charAt(0).toUpperCase() + card.dataset.color.slice(1);
+    
+    if (!first) {
+      first = card;
+    } else {
+      second = card;
+      movesEl.textContent = ++moves;
+
+      if (first.dataset.color === second.dataset.color) {
+        first.classList.add('matched');
+        second.classList.add('matched');
+        resetPicks();
+        if (++matches === colors.length) finish();
+      } else {
+        setTimeout(() => {
+          first.classList.remove('revealed');
+          second.classList.remove('revealed');
+          first.style.backgroundColor = '#ccc';
+          second.style.backgroundColor = '#ccc';
+          first.textContent = '';
+          second.textContent = '';
+          resetPicks();
+        }, 800);
+      }
+    }
+  }
+
+  function resetPicks() {
+    first = null;
+    second = null;
+  }
+
+  function finish() {
+    clearInterval(timer);
+    const results = {
+      score: matches * 10,
+      moves: moves,
+      time: timerEl.textContent,
+      difficulty: 'moderate'
+    };
+    fetch(window.location.href, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: JSON.stringify(results)
+    }).then((res) => res.json())
+    .then((data) => {
+      window.location.href = '/patient-dashboard/';
+    }).catch((err) => {
+      console.error('Error submitting results:', err);
+      window.location.href = '/patient-dashboard/';
+    });
+  }
+
+  init();
+</script>
 {% endblock %} 

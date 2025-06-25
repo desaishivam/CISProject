@@ -69,12 +69,16 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const timeInSeconds = parseInt(document.getElementById('time-taken').textContent, 10);
-    if (!isNaN(timeInSeconds)) {
+    const timeEl = document.getElementById('time-taken');
+    let timeVal = timeEl.textContent.trim();
+    // If it's already mm:ss, show as is. If it's a number, convert to mm:ss
+    if (/^\d+$/.test(timeVal)) {
+      const timeInSeconds = parseInt(timeVal, 10);
       const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
       const seconds = (timeInSeconds % 60).toString().padStart(2, '0');
-      document.getElementById('time-taken').textContent = `${minutes}:${seconds} seconds`;
+      timeEl.textContent = `${minutes}:${seconds}`;
     }
+    // If it's already mm:ss, do nothing
   });
 </script>
 {% endblock %} 
