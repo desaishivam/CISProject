@@ -194,10 +194,18 @@ def assign_multiple_tasks(request):
         
         created_tasks = []
         type_dict = dict(TASK_TYPES)
+        GAME_TYPES = {'color', 'pairs', 'puzzle'}
         
         for task_data in tasks:
             task_type = task_data.get('task_type')
-            difficulty = task_data.get('difficulty', 'mild')
+            # For games, require difficulty; for non-games, ignore difficulty
+            if task_type in GAME_TYPES:
+                difficulty = task_data.get('difficulty')
+                if not difficulty:
+                    # If missing, skip or default to 'mild'
+                    difficulty = 'mild'
+            else:
+                difficulty = None
             
             if not task_type:
                 continue

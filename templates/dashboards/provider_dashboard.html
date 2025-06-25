@@ -1045,17 +1045,25 @@
 
     function assignAllTasksToPatient() {
         const patientId = document.getElementById('quick_assign_patient').value;
+        const difficulty = document.getElementById('quick_assign_difficulty').value;
         if (!patientId) {
             alert('Please select a patient first.');
             return;
         }
+        if (!difficulty) {
+            alert('Please select a difficulty level first.');
+            return;
+        }
 
-        const tasks = [
-            { task_type: 'color', difficulty: 'mild' }, { task_type: 'color', difficulty: 'moderate' }, { task_type: 'color', difficulty: 'major' },
-            { task_type: 'pairs', difficulty: 'mild' }, { task_type: 'pairs', difficulty: 'moderate' }, { task_type: 'pairs', difficulty: 'major' },
-            { task_type: 'puzzle', difficulty: 'mild' }, { task_type: 'puzzle', difficulty: 'moderate' }, { task_type: 'puzzle', difficulty: 'major' },
-            { task_type: 'checklist' }, { task_type: 'memory_questionnaire' }
+        // List of all task types and which require difficulty
+        const allTaskTypes = [
+            { type: 'color', hasDifficulty: true },
+            { type: 'pairs', hasDifficulty: true },
+            { type: 'puzzle', hasDifficulty: true },
+            { type: 'checklist', hasDifficulty: false },
+            { type: 'memory_questionnaire', hasDifficulty: false }
         ];
+        const tasks = allTaskTypes.map(t => t.hasDifficulty ? { task_type: t.type, difficulty: difficulty } : { task_type: t.type });
 
         fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
             method: 'POST',
