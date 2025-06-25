@@ -1,1 +1,1 @@
-web: gunicorn CISProject.wsgi 
+web: gunicorn config.wsgi 

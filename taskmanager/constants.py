@@ -2,6 +2,10 @@
 Constants and configuration for the task management system.
 """
 
+# ===================== APP CONSTANTS =====================
+# This file defines constants used throughout the app, such as task types, difficulty levels, and template configs.
+# These are used for consistency and to avoid magic strings in the codebase.
+
 # Task Types Configuration
 TASK_TYPES = (
     ('memory_questionnaire', 'Memory Questionnaire'),

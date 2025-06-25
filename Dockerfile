@@ -4,7 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE=CISProject.settings
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 # Set work directory
 WORKDIR /app
@@ -38,7 +38,7 @@ python manage.py reset_users || echo "User reset skipped"\n\
 PORT=${PORT:-8000}\n\
 \n\
 # Start gunicorn\n\
-exec gunicorn --bind 0.0.0.0:$PORT CISProject.wsgi:application\n\
+exec gunicorn --bind 0.0.0.0:$PORT config.wsgi:application\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Expose port (Railway will override this)

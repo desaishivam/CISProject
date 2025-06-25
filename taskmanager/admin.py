@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
 
+# ===================== DJANGO ADMIN CONFIGURATION =====================
+# This file customizes how models appear and are managed in the Django admin site.
+# Register models, customize list displays, filters, and admin actions here.
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ['title', 'task_type', 'difficulty', 'assigned_by', 'assigned_to', 'status', 'created_at', 'due_date']

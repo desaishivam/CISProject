@@ -4,6 +4,11 @@ from users.models import UserProfile
 from .constants import TASK_TYPES, TASK_STATUS, DIFFICULTY_LEVELS
 import json
 
+# ===================== DATABASE MODELS =====================
+# This file defines the database schema for the app using Django ORM models.
+# Each class represents a table, and each field is a column in the table.
+# Relationships (ForeignKey, ManyToMany, etc.) define how models are linked.
+
 class Task(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)

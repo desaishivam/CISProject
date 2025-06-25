@@ -19,6 +19,16 @@ logger = logging.getLogger(__name__)
 @login_required
 def assign_task(request, patient_id=None):
     """Provider view to assign tasks to patients"""
+    # Check if user is a provider; if not, deny access
+    # If request is JSON (AJAX), handle bulk assignment via API
+    #   - Parse JSON, validate patient, check permissions
+    #   - Create Task and Notification objects
+    #   - Return JSON response
+    # If request is regular form (HTML), handle single assignment
+    #   - Validate patient, check permissions
+    #   - On POST: extract form data, create Task, Notification, and (optionally) link questionnaire template
+    #   - On GET: render assignment form with available templates and task types
+    # Handle errors and redirect as needed
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to assign tasks.')
         return redirect('home')
@@ -151,6 +161,12 @@ def assign_task(request, patient_id=None):
 @login_required
 def assign_multiple_tasks(request):
     """Provider view to assign multiple tasks to patients"""
+    # Only allow POST with JSON body
+    # Parse JSON: get patient_id and list of tasks
+    # Validate patient and provider permissions
+    # For each task in the list:
+    #   - Create Task and Notification
+    # Return JSON with summary of created tasks
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         return JsonResponse({'success': False, 'message': 'You do not have permission to assign tasks.'}, status=403)
     
@@ -233,6 +249,15 @@ def patient_tasks(request, patient_id=None):
     View for patients to see their tasks. Can also be used by providers 
     to see the tasks of a specific patient.
     """
+    # Check user profile
+    # If patient_id is provided:
+    #   - Provider is viewing a specific patient's tasks
+    #   - Validate provider-patient relationship
+    #   - Fetch and display all tasks for that patient
+    # Else:
+    #   - Patient or caregiver is viewing their own tasks
+    #   - Fetch and display their tasks
+    # Render tasks in template
     if not hasattr(request.user, 'profile'):
         messages.error(request, 'You do not have permission to view tasks.')
         return redirect('home')
@@ -274,6 +299,16 @@ def patient_tasks(request, patient_id=None):
 @login_required
 def take_task(request, task_id):
     """Patient or caregiver view to complete a task"""
+    # Check user profile and permissions for this task
+    # If task is already completed, redirect with info
+    # Get or create TaskResponse object
+    # If task is assigned, mark as in_progress
+    # On POST:
+    #   - If JSON: save responses, mark task completed, return JSON
+    #   - If form: parse responses, save, mark task completed, redirect
+    # On GET:
+    #   - Determine template to render based on task type and difficulty
+    #   - Pass config/context to template
     if not hasattr(request.user, 'profile'):
         messages.error(request, 'You do not have permission to access this task.')
         return redirect('home')
@@ -398,6 +433,12 @@ def take_task(request, task_id):
 @login_required
 def task_results(request, task_id):
     """View to display the results of a completed task"""
+    # Check user profile and permissions to view results
+    # Get TaskResponse for this task
+    # Determine back URL based on user type
+    # Determine which template to use for results
+    # If memory questionnaire, process results for display
+    # Render results template with context
     if not hasattr(request.user, 'profile'):
         messages.error(request, 'You do not have permission to view task results.')
         return redirect('home')
@@ -476,6 +517,14 @@ def task_results(request, task_id):
 
 def process_memory_questionnaire_results(responses):
     """Process memory questionnaire responses for analysis"""
+    # Define memory issues and scoring mappings
+    # For each issue:
+    #   - Extract frequency and seriousness responses
+    #   - Calculate scores and build processed list
+    # Calculate averages and distributions
+    # Extract memory techniques
+    # Identify high and moderate concern issues
+    # Return processed summary dict
     
     # Define the memory issues in order
     memory_issues = [
@@ -601,6 +650,10 @@ def process_memory_questionnaire_results(responses):
 @login_required
 def provider_task_management(request):
     """Provider view to manage all assigned tasks"""
+    # Only allow providers
+    # Fetch all tasks assigned by this provider
+    # Split into pending and completed for display
+    # Render management template
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'You do not have permission to access task management.')
         return redirect('home')
@@ -618,6 +671,11 @@ def provider_task_management(request):
 @require_POST
 def clear_completed_tasks(request):
     """Admin view to archive all completed tasks"""
+    # Only allow admins
+    # Find all completed tasks
+    # Delete related responses and notifications
+    # Delete the tasks
+    # Return JSON with count
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'admin':
         return JsonResponse({'success': False, 'message': 'Permission denied'})
     
@@ -643,6 +701,9 @@ def clear_completed_tasks(request):
 @require_POST
 def clear_all_tasks(request):
     """Admin view to remove all tasks from the system"""
+    # Only allow admins
+    # Delete all responses, notifications, and tasks
+    # Return JSON with count
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'admin':
         return JsonResponse({'success': False, 'message': 'Permission denied'})
     
@@ -665,6 +726,10 @@ def clear_all_tasks(request):
 @require_POST  
 def clear_task_responses(request):
     """Admin view to reset all task responses but keep tasks"""
+    # Only allow admins
+    # Delete all TaskResponse objects
+    # Reset status of all completed/in_progress tasks to assigned
+    # Return JSON with count
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'admin':
         return JsonResponse({'success': False, 'message': 'Permission denied'})
     
@@ -687,6 +752,7 @@ def clear_task_responses(request):
 
 def get_task_statistics():
     """Helper function to get task statistics for admin dashboard"""
+    # Return dict with total, pending, and completed task counts
     return {
         'total_tasks': Task.objects.count(),
         'pending_tasks_count': Task.objects.filter(status__in=['assigned', 'in_progress']).count(),
@@ -697,6 +763,11 @@ def get_task_statistics():
 @require_POST
 def clear_provider_completed_tasks(request):
     """Provider view to archive their completed tasks"""
+    # Only allow providers
+    # Find all completed tasks assigned by this provider
+    # Delete related responses and notifications
+    # Delete the tasks
+    # Return JSON with count
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         return JsonResponse({'success': False, 'message': 'Permission denied'})
     
@@ -725,6 +796,9 @@ def clear_provider_completed_tasks(request):
 @require_POST
 def clear_provider_all_tasks(request):
     """Provider view to remove all their assigned tasks"""
+    # Only allow providers
+    # Delete all responses, notifications, and tasks assigned by this provider
+    # Return JSON with count
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         return JsonResponse({'success': False, 'message': 'Permission denied'})
     
@@ -748,6 +822,10 @@ def clear_provider_all_tasks(request):
 @require_POST  
 def clear_provider_task_responses(request):
     """Provider view to reset all responses to their tasks but keep tasks"""
+    # Only allow providers
+    # Delete all TaskResponse objects for this provider's tasks
+    # Reset status of provider's completed/in_progress tasks to assigned
+    # Return JSON with count
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         return JsonResponse({'success': False, 'message': 'Permission denied'})
     
@@ -773,6 +851,11 @@ def clear_provider_task_responses(request):
 @require_POST
 def delete_task(request, task_id):
     """Provider view to delete a single task by ID"""
+    # Only allow providers
+    # Check if provider owns the task
+    # Delete related responses and notifications
+    # Delete the task
+    # Return JSON or redirect with result
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         if is_ajax:
@@ -814,6 +897,11 @@ def delete_task(request, task_id):
 @require_POST
 def create_appointment(request, patient_id):
     """Provider view to create an appointment with a patient"""
+    # Only allow providers
+    # Validate patient and provider relationship
+    # Parse datetime and notes from POST
+    # Create Appointment object
+    # Return JSON with appointment info
     logger.info(f"Received request to create appointment for patient_id: {patient_id}")
     logger.info(f"Request POST data: {request.POST}")
     
@@ -879,6 +967,9 @@ def create_appointment(request, patient_id):
 @login_required
 def patient_appointments(request):
     """View for patients to see their appointments"""
+    # Only allow patients
+    # Fetch all appointments for this patient
+    # Render appointments template
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'patient':
         messages.error(request, 'You do not have permission to view appointments.')
         return redirect('home')
@@ -895,6 +986,10 @@ def patient_appointments(request):
 @csrf_protect
 def delete_appointment(request, appointment_id):
     """Provider view to delete an appointment"""
+    # Only allow providers
+    # Check if provider owns the appointment
+    # Delete the appointment
+    # Return JSON with result
     print(f"Attempting to delete appointment {appointment_id}")  # Debug log
     
     if not hasattr(request.user, 'profile'):
@@ -933,6 +1028,12 @@ def delete_appointment(request, appointment_id):
 @require_POST
 def delete_all_tasks(request, patient_id):
     """Provider view to delete all tasks for a specific patient"""
+    # Only allow providers
+    # Validate provider-patient relationship
+    # Find all tasks for this patient
+    # Delete related responses and notifications
+    # Delete the tasks
+    # Return to provider dashboard with message
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
         messages.error(request, 'Permission denied.')
         return redirect('provider_dashboard')
