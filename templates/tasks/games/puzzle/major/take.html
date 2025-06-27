@@ -185,11 +185,14 @@
         if (data.redirect) {
           window.location.href = data.redirect;
         } else {
-          window.location.href = '/tasks/patient/tasks/';
+          // Fallback to patient dashboard if no redirect provided
+          window.location.href = '/patient-dashboard/';
         }
       })
       .catch(error => {
-        window.location.href = '/tasks/patient/tasks/';
+        console.error('Error submitting puzzle:', error);
+        // Fallback to patient dashboard on error
+        window.location.href = '/patient-dashboard/';
       });
     }
     function shuffleWordBank() {

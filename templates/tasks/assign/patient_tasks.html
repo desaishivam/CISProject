@@ -59,7 +59,7 @@
     </div>
     {% endif %}
 
-    <!-- Completed Tasks -->
+    <!-- Completed Tasks (only for non-patients) -->
     {% if not request.user.profile.user_type == 'patient' and completed_tasks %}
     <div class="table-section">
         <h2 class="section-title">✅ Completed Tasks</h2>

@@ -176,26 +176,13 @@
         difficulty: 'mild'
       };
       console.log('Submitting results:', results);
-      // Get CSRF token from cookie
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      }
-      fetch('/tasks/take-task/{{ task.id }}/', {
+      // Use CSRF token from hidden input
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      fetch(window.location.href, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken')
+          'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(results)
       })
@@ -204,11 +191,12 @@
         if (data.redirect) {
           window.location.href = data.redirect;
         } else {
-          window.location.href = '/tasks/patient/tasks/';
+          window.location.href = '/patient-dashboard/';
         }
       })
       .catch(error => {
-        window.location.href = '/tasks/patient/tasks/';
+        console.error('Error submitting puzzle:', error);
+        document.getElementById('result').textContent = 'Error submitting puzzle. Please try again or contact support.';
       });
     }
     function shuffleWordBank() {

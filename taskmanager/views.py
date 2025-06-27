@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, Appointment
+from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, Appointment, PatientNote
 from .constants import TASK_TYPES, TASK_TEMPLATES, DIFFICULTY_LEVELS, DIFFICULTY_CONFIGS
 from users.models import UserProfile
 import json
@@ -285,22 +285,30 @@ def patient_tasks(request, patient_id=None):
             messages.error(request, 'You do not have permission to view tasks for this patient.')
             return redirect('provider_dashboard')
             
-        tasks = Task.objects.filter(assigned_to=target_patient_profile).order_by('-created_at')
+        all_tasks = Task.objects.filter(assigned_to=target_patient_profile).order_by('-created_at')
+        pending_tasks = all_tasks.filter(status__in=['assigned', 'in_progress'])
+        completed_tasks = all_tasks.filter(status='completed')
         page_title = f"Tasks for {target_patient_profile.user.get_full_name()}"
-        
+        context = {
+            'pending_tasks': pending_tasks,
+            'completed_tasks': completed_tasks,
+            'page_title': page_title,
+        }
     else:
         # Patient or Caregiver is viewing their own assigned tasks
         if user_profile.user_type not in ['patient', 'caregiver']:
             messages.error(request, 'You must be a patient or caregiver to view this page.')
             return redirect('home')
             
-        tasks = Task.objects.filter(assigned_to=user_profile).order_by('-created_at')
+        all_tasks = Task.objects.filter(assigned_to=user_profile).order_by('-created_at')
+        pending_tasks = all_tasks.filter(status__in=['assigned', 'in_progress'])
+        completed_tasks = all_tasks.filter(status='completed')
         page_title = "My Tasks"
-
-    context = {
-        'tasks': tasks,
-        'page_title': page_title,
-    }
+        context = {
+            'pending_tasks': pending_tasks,
+            'completed_tasks': completed_tasks,
+            'page_title': page_title,
+        }
     
     return render(request, 'tasks/assign/patient_tasks.html', context)
 
@@ -356,26 +364,27 @@ def take_task(request, task_id):
     
     if request.method == 'POST':
         # Unified handler for all submissions (JSON or form)
-        
         # 1. Handle JSON submissions (modern games)
         if request.content_type == 'application/json':
             try:
                 data = json.loads(request.body)
-                task_response.responses = data
+                # For puzzle tasks, accept and save the results as-is
+                if task.task_type == 'puzzle':
+                    task_response.responses = data
+                else:
+                    task_response.responses = data
                 task.status = 'completed'
                 task.completed_by = user_profile
                 task.date_completed = timezone.now()
                 task.save()
                 task_response.save()
-                
+                logger.info(f"PUZZLE SUBMIT: Task {task.id} completed by {user_profile.user.username}. Status: {task.status}")
                 # Determine redirect URL based on user type
                 if user_profile.user_type == 'caregiver':
                     redirect_url = reverse('caregiver_dashboard')
                 else: # Default to patient
                     redirect_url = reverse('patient_dashboard')
-                
                 return JsonResponse({'success': True, 'redirect': redirect_url})
-
             except (json.JSONDecodeError, ValueError) as e:
                 logger.error(f"Error processing JSON for task {task_id}: {e}")
                 return JsonResponse({'success': False, 'message': 'Invalid data received.'}, status=400)
@@ -1070,3 +1079,101 @@ def delete_all_tasks(request, patient_id):
         messages.error(request, f'An error occurred: {str(e)}')
     
     return redirect('provider_dashboard')
+
+@login_required
+@require_POST
+def create_patient_note(request, patient_id):
+    """Provider view to create a note for a caregiver about a patient"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        return JsonResponse({'success': False, 'message': 'Permission denied'})
+    
+    try:
+        patient = UserProfile.objects.get(id=patient_id, user_type='patient')
+        if patient.provider != request.user.profile:
+            return JsonResponse({'success': False, 'message': 'You do not have permission to create notes for this patient'})
+        
+        caregiver_id = request.POST.get('caregiver_id')
+        note_content = request.POST.get('note')
+        
+        if not caregiver_id or not note_content:
+            return JsonResponse({'success': False, 'message': 'Caregiver and note content are required'})
+        
+        caregiver = UserProfile.objects.get(id=caregiver_id, user_type='caregiver')
+        if caregiver.patient != patient:
+            return JsonResponse({'success': False, 'message': 'This caregiver is not assigned to this patient'})
+        
+        PatientNote.objects.create(
+            provider=request.user.profile,
+            patient=patient,
+            caregiver=caregiver,
+            note=note_content
+        )
+        
+        return JsonResponse({'success': True, 'message': 'Note sent successfully'})
+        
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Patient or caregiver not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error creating note: {str(e)}'})
+
+@login_required
+def get_patient_notes(request, patient_id):
+    """Get notes for a specific patient (for providers and caregivers). Supports filtering by caregiver_id via GET param."""
+    if not hasattr(request.user, 'profile'):
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+    
+    try:
+        patient = UserProfile.objects.get(id=patient_id, user_type='patient')
+        caregiver_id = request.GET.get('caregiver_id')
+        
+        # Check permissions
+        if request.user.profile.user_type == 'provider':
+            if patient.provider != request.user.profile:
+                return JsonResponse({'success': False, 'message': 'Permission denied'})
+        elif request.user.profile.user_type == 'caregiver':
+            if request.user.profile.patient != patient:
+                return JsonResponse({'success': False, 'message': 'Permission denied'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Permission denied'})
+        
+        # Get notes
+        if caregiver_id:
+            notes = PatientNote.objects.filter(patient=patient, caregiver_id=caregiver_id)
+        elif request.user.profile.user_type == 'provider':
+            notes = PatientNote.objects.filter(patient=patient, provider=request.user.profile)
+        else:  # caregiver
+            notes = PatientNote.objects.filter(patient=patient, caregiver=request.user.profile)
+        
+        notes_data = []
+        for note in notes:
+            notes_data.append({
+                'id': note.id,
+                'note': note.note,
+                'created_at': note.created_at.strftime('%B %d, %Y at %I:%M %p'),
+                'provider_name': note.provider.user.get_full_name(),
+                'caregiver_name': note.caregiver.user.get_full_name()
+            })
+        
+        return JsonResponse({'success': True, 'notes': notes_data})
+        
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Patient not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error retrieving notes: {str(e)}'})
+
+@login_required
+@require_POST
+def delete_patient_note(request, note_id):
+    """Provider view to delete a note by ID"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        return JsonResponse({'success': False, 'message': 'Permission denied'})
+    try:
+        note = PatientNote.objects.get(id=note_id)
+        if note.provider != request.user.profile:
+            return JsonResponse({'success': False, 'message': 'You do not have permission to delete this note'})
+        note.delete()
+        return JsonResponse({'success': True, 'message': 'Note deleted successfully'})
+    except PatientNote.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Note not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Error deleting note: {str(e)}'})

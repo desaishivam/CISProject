@@ -6,8 +6,8 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <div class="header-info">
-            <h1>Assign Caregivers</h1>
-            <p class="subtitle">Managing caregivers for {{ patient.user.get_full_name }}</p>
+            <h1 style="color: #222;">Assign Caregivers</h1>
+            <p class="subtitle" style="color: #444;">Managing caregivers for {{ patient.user.get_full_name }}</p>
         </div>
         <a href="{% url 'provider_dashboard' %}" class="back-btn">← Back to Dashboard</a>
     </div>
@@ -200,6 +200,15 @@
             text-align: center;
             gap: 1rem;
         }
+    }
+
+    .assign-caregivers-title {
+        color: #2d3748 !important;
+        font-weight: 700;
+    }
+    .assign-caregivers-subtitle {
+        color: #4a5568 !important;
+        font-weight: 500;
     }
 </style>
 {% endblock %} 

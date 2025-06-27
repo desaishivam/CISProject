@@ -117,3 +117,17 @@ class Appointment(models.Model):
     
     class Meta:
         ordering = ['datetime']
+
+class PatientNote(models.Model):
+    """Notes from providers to caregivers about patients"""
+    provider = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='sent_notes')
+    patient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='patient_notes')
+    caregiver = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='received_notes')
+    note = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Note from {self.provider.user.get_full_name()} to {self.caregiver.user.get_full_name()} about {self.patient.user.get_full_name()}"
+    
+    class Meta:
+        ordering = ['-created_at']
