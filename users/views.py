@@ -145,7 +145,6 @@ def provider_dashboard(request):
         try:
             selected_patient = UserProfile.objects.get(id=selected_patient_id, user_type='patient', provider=provider_profile)
             patient_tasks = Task.objects.filter(assigned_to=selected_patient, assigned_by=provider_profile)
-            from taskmanager.models import DailyChecklistSubmission
             daily_checklists = DailyChecklistSubmission.objects.filter(patient=selected_patient).order_by('-submission_date')
         except UserProfile.DoesNotExist:
             selected_patient = None
@@ -290,7 +289,6 @@ def patient_dashboard(request):
         return redirect('home')
     
     # Fetch all pending tasks for the patient
-    from taskmanager.models import Task, Appointment, DailyChecklistSubmission
     pending_tasks = Task.objects.filter(
         assigned_to=request.user.profile,
         status__in=['assigned', 'in_progress']

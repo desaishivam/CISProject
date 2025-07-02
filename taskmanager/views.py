@@ -1007,6 +1007,7 @@ def delete_appointment(request, appointment_id):
     # Check if provider owns the appointment
     # Delete the appointment
     # Return JSON with result
+    
     if not hasattr(request.user, 'profile'):
         return JsonResponse({'success': False, 'message': 'User profile not found'})
         
