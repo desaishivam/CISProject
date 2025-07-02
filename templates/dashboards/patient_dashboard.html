@@ -22,6 +22,73 @@
     
     <!-- Dashboard content -->
     <div class="dashboard-section">
+        <h2 class="section-title patient">📅 Upcoming Appointments</h2>
+        {% if appointments %}
+            <div class="table-container">
+                <table class="enhanced-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Provider</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td class="appointment-datetime">
+                                {{ appt.datetime|date:"F j, Y" }}<br>
+                                <span class="time">{{ appt.datetime|date:"g:i A" }}</span>
+                            </td>
+                            <td>Dr. {{ appt.provider.user.get_full_name }}</td>
+                            <td>{{ appt.notes|default:"No notes provided." }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>📅 You have no upcoming appointments.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-section">
+        <h2 class="section-title patient">📋 Daily Checklist</h2>
+        {% if daily_checklist_submitted %}
+            <div class="daily-checklist-completed">
+                <div class="checklist-status">
+                    <span class="status-icon">✅</span>
+                    <div class="status-text">
+                        <h3>Daily Checklist Completed</h3>
+                        <p>You've already submitted today's checklist. Great job!</p>
+                        {% if today_submission %}
+                            <p class="submission-info">Submitted on {{ today_submission.created_at|date:"F j, Y" }} at {{ today_submission.created_at|time:"g:i A" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="checklist-actions">
+                    <a href="{% url 'taskmanager:daily_checklist_results' %}" class="action-btn view-btn">View Results</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="daily-checklist-pending">
+                <div class="checklist-status">
+                    <span class="status-icon">📝</span>
+                    <div class="status-text">
+                        <h3>Daily Checklist Available</h3>
+                        <p>Complete today's checklist to track your daily activities and mood.</p>
+                    </div>
+                </div>
+                <div class="checklist-actions">
+                    <a href="{% url 'taskmanager:daily_checklist_submit' %}" class="action-btn start-btn">Start Daily Checklist</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-section">
         <h2 class="section-title patient">📋 My Tasks</h2>
         {% if pending_tasks %}
         <div class="tasks-list">
@@ -60,39 +127,6 @@
             <h2>📋 No Tasks Assigned</h2>
             <p>You don't have any tasks assigned at the moment. Your healthcare provider will assign questionnaires and assessments as needed.</p>
         </div>
-        {% endif %}
-    </div>
-    <!-- Appointments section -->
-    <div class="dashboard-section">
-        <h2 class="section-title patient">📅 Upcoming Appointments</h2>
-        {% if appointments %}
-            <div class="table-container">
-                <table class="enhanced-table">
-                    <thead>
-                        <tr>
-                            <th>Date & Time</th>
-                            <th>Provider</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for appt in appointments %}
-                        <tr>
-                            <td class="appointment-datetime">
-                                {{ appt.datetime|date:"F j, Y" }}<br>
-                                <span class="time">{{ appt.datetime|date:"g:i A" }}</span>
-                            </td>
-                            <td>Dr. {{ appt.provider.user.get_full_name }}</td>
-                            <td>{{ appt.notes|default:"No notes provided." }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <p>📅 You have no upcoming appointments.</p>
-            </div>
         {% endif %}
     </div>
 </div>
@@ -198,46 +232,133 @@
         color: white;
         padding: 0.4rem 0.8rem;
         border-radius: 12px;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
     }
     
-    /* Responsive Design */
+    /* Daily Checklist Styles */
+    .daily-checklist-completed,
+    .daily-checklist-pending {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .daily-checklist-completed {
+        border-left: 4px solid #27ae60;
+        background: linear-gradient(135deg, rgba(39, 174, 96, 0.05), rgba(46, 204, 113, 0.05));
+    }
+    
+    .daily-checklist-pending {
+        border-left: 4px solid #f39c12;
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.05), rgba(241, 196, 15, 0.05));
+    }
+    
+    .checklist-status {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+    
+    .status-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .status-text h3 {
+        margin: 0 0 0.5rem 0;
+        color: #2c3e50;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .status-text p {
+        margin: 0;
+        color: #666;
+        font-size: 0.95rem;
+    }
+    
+    .submission-info {
+        font-size: 0.85rem !important;
+        color: #888 !important;
+        margin-top: 0.5rem !important;
+    }
+    
+    .checklist-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .action-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    
+    .start-btn {
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+        box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    }
+    
+    .start-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .view-btn {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .view-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
     @media (max-width: 768px) {
-        .dashboard-container {
-            padding: 1rem;
+        .daily-checklist-completed,
+        .daily-checklist-pending {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
         }
         
-        .dashboard-header {
+        .checklist-status {
             flex-direction: column;
-            gap: 1rem;
             text-align: center;
         }
         
-        .quick-actions {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-        
-        .action-card {
-            padding: 1.5rem;
-            min-height: 180px;
-        }
-        
-        .action-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .action-card h3 {
-            font-size: 1.2rem;
-        }
-        
-        .action-card p {
-            font-size: 0.9rem;
+        .checklist-actions {
+            width: 100%;
+            justify-content: center;
         }
     }
 </style>

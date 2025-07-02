@@ -9,7 +9,6 @@ Constants and configuration for the task management system.
 # Task Types Configuration
 TASK_TYPES = (
     ('memory_questionnaire', 'Memory Questionnaire'),
-    ('checklist', 'Routine Checklist'),
     ('puzzle', 'Drag & Drop Puzzle'),
     ('color', 'Color Matching'),
     ('pairs', 'Related Pairing'),
@@ -17,7 +16,7 @@ TASK_TYPES = (
 
 # Task Categories
 GAME_TYPES = ('puzzle', 'pairs', 'color')
-ASSESSMENT_TYPES = ('memory_questionnaire', 'checklist')
+ASSESSMENT_TYPES = ('memory_questionnaire',)
 
 # Difficulty Levels for Games
 DIFFICULTY_LEVELS = (
@@ -35,22 +34,6 @@ TASK_STATUS = (
 
 # Task Templates Configuration - Updated for games/non-games structure
 TASK_TEMPLATES = {
-    'checklist': {
-        'template_name': 'tasks/non-games/checklists/take.html',
-        'results_template': 'tasks/non-games/checklists/results.html',
-        'icon': '📋',
-        'description': 'Routine checklist of daily tasks and activities',
-        'templates': {
-            'mild': 'tasks/checklist/mild/take.html',
-            'moderate': 'tasks/checklist/moderate/take.html',
-            'major': 'tasks/checklist/major/take.html',
-    },
-        'results_templates': {
-            'mild': 'tasks/checklist/mild/results.html',
-            'moderate': 'tasks/checklist/moderate/results.html',
-            'major': 'tasks/checklist/major/results.html',
-        }
-    },
     'puzzle': {
         'template_name': 'tasks/games/puzzle/{difficulty}/take.html',
         'results_template': 'tasks/games/puzzle/{difficulty}/results.html',
@@ -109,23 +92,6 @@ TASK_TEMPLATES = {
 
 # Difficulty Configurations for Future Development
 DIFFICULTY_CONFIGS = {
-    'checklist': {
-        'mild': {
-            'tasks': 5,
-            'time_limit': None,
-            'description': 'Basic daily tasks'
-        },
-        'moderate': {
-            'tasks': 7,
-            'time_limit': None,
-            'description': 'Extended daily tasks'
-        },
-        'major': {
-            'tasks': 10,
-            'time_limit': None,
-            'description': 'Comprehensive daily tasks'
-        }
-    },
     'puzzle': {
         'mild': {
             'grid': '3x3',

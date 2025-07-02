@@ -51,7 +51,6 @@
                                         <option value="{{ task_type }}" 
                                                 data-has-difficulty="{% if task_type in game_types %}true{% else %}false{% endif %}">
                                             {% if task_type == 'memory_questionnaire' %}📝 
-                                            {% elif task_type == 'checklist' %}✅ 
                                             {% elif task_type in game_types %}🎮 
                                             {% endif %}
                                             {{ display_name }}
@@ -69,9 +68,9 @@
                                     <option value="">Select difficulty...</option>
                                     {% for level, display in difficulty_levels %}
                                         <option value="{{ level }}">
-                                            {% if level == 'mild' %}🟢
-                                            {% elif level == 'moderate' %}🟡
-                                            {% elif level == 'major' %}🔴
+                                            {% if level == 'mild' %}🔴
+                                            {% elif level == 'moderate' %}🟠
+                                            {% elif level == 'major' %}🟢
                                             {% endif %} {{ display }}
                                         </option>
                                     {% endfor %}
@@ -123,7 +122,7 @@
                         </div>
                         
                         {% if selected_patient %}
-                            <h5 class="patient-tasks-title">Tasks for {{ selected_patient.user.get_full_name }}</h5>
+                            <h5 class="patient-tasks-title">Tasks for {{ selected_patient.user.get_full_name }} </h5>
                             {% if patient_tasks %}
                                 <div class="table-container">
                                     <table class="enhanced-table">
@@ -143,10 +142,10 @@
                                                 <td>
                                                     {% if task.task_type in game_types %}
                                                         <span class="difficulty-badge difficulty-{{ task.difficulty }}">
-                                                            {% if task.difficulty == 'mild' %}🟢 Mild
-                                                            {% elif task.difficulty == 'moderate' %}🟡 Moderate  
-                                                            {% elif task.difficulty == 'major' %}🔴 Major
-                                                            {% else %}🟢 Mild{% endif %}
+                                                            {% if task.difficulty == 'mild' %}🔴 Mild
+                                                            {% elif task.difficulty == 'moderate' %}🟠 Moderate  
+                                                            {% elif task.difficulty == 'major' %}🟢 Major
+                                                            {% else %}🔴 Mild{% endif %}
                                                         </span>
                                                     {% else %}
                                                         <span class="text-muted">N/A</span>
@@ -206,6 +205,17 @@
                                     <a href="{% url 'manage_account' patient.user.id %}" class="action-btn outline-btn">
                                         ✏️ Edit
                                     </a>
+                                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <a href="{% url 'taskmanager:daily_checklist_results_patient' patient.id %}" class="action-btn secondary-btn">
+                                            📋 Daily Checklist Results
+                                        </a>
+                                        <form method="post" action="{% url 'taskmanager:reset_daily_checklist_patient' patient.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="action-btn danger-btn" onclick="return confirm('Are you sure you want to reset all daily checklist submissions for this patient?');">
+                                                ♻️ Reset
+                                            </button>
+                                        </form>
+                                    </span>
                                 </div>
                             </div>
                             <!-- Show relationships -->
@@ -1106,7 +1116,6 @@
             { type: 'color', hasDifficulty: true },
             { type: 'pairs', hasDifficulty: true },
             { type: 'puzzle', hasDifficulty: true },
-            { type: 'checklist', hasDifficulty: false },
             { type: 'memory_questionnaire', hasDifficulty: false }
         ];
         const tasks = allTaskTypes.map(t => t.hasDifficulty ? { task_type: t.type, difficulty: difficulty } : { task_type: t.type });

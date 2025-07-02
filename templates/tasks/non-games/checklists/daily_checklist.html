@@ -1,44 +1,44 @@
-{# Unified structure: .container, .section, .card, .mdc-button #}
 {% extends 'layouts/base.html' %}
 
-{% block title %}Routine Checklist - CogniCare{% endblock %}
+{% block title %}Daily Checklist - CogniCare{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="section">
-        <h1>Routine Checklist</h1>
-    <p class="instructions">Complete each item as you go through your day. Check off each task as you complete it. Reflect on your memory at the end of the day.</p>
+        <h1>Daily Checklist</h1>
+        <p class="instructions">Complete each item as you go through your day. Check off each task as you complete it. Reflect on your memory at the end of the day.</p>
+        <p class="note"><strong>Note:</strong> This checklist can only be submitted once per day. If you've already submitted today's checklist, you'll see a message indicating that.</p>
     </div>
     <div class="card">
-    <form method="post" id="checklist-form">
-        {% csrf_token %}
-        <ul class="checklist-items">
+        <form method="post" id="checklist-form">
+            {% csrf_token %}
+            <ul class="checklist-items">
                 <li><label><input type="checkbox" name="item_1" class="checklist-item"> Identify today's date and day of the week</label></li>
                 <li><label><input type="checkbox" name="item_2" class="checklist-item"> Read today's weather forecast aloud</label></li>
                 <li><label><input type="checkbox" name="item_3" class="checklist-item"> Look at and name 3 people in your photo album</label></li>
                 <li><label><input type="checkbox" name="item_5" class="checklist-item"> Take your scheduled medications</label></li>
                 <li><label><input type="checkbox" name="item_6" class="checklist-item"> Drink 8 cups of water</label></li>
                 <li><label><input type="checkbox" name="item_7" class="checklist-item"> Call or message a family member</label></li>
-        </ul>
-        <div class="mood-section" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 2rem;">
-            <span class="mood-label">Select your mood for today:</span>
-            <div style="display: flex; gap: 2rem; align-items: center;">
-                <label class="mood-radio"><input type="radio" name="mood" value="happy" required> <span class="emoji">😊</span></label>
-                <label class="mood-radio"><input type="radio" name="mood" value="neutral"> <span class="emoji">😐</span></label>
-                <label class="mood-radio"><input type="radio" name="mood" value="sad"> <span class="emoji">😢</span></label>
+            </ul>
+            <div class="mood-section" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 2rem;">
+                <span class="mood-label">Select your mood for today:</span>
+                <div style="display: flex; gap: 2rem; align-items: center;">
+                    <label class="mood-radio"><input type="radio" name="mood" value="happy" required> <span class="emoji">😊</span></label>
+                    <label class="mood-radio"><input type="radio" name="mood" value="neutral"> <span class="emoji">😐</span></label>
+                    <label class="mood-radio"><input type="radio" name="mood" value="sad"> <span class="emoji">😢</span></label>
+                </div>
             </div>
-        </div>
             <div class="memory-section">
                 <label for="memory_entry"><strong>Write one memory from today</strong></label>
                 <textarea id="memory_entry" name="memory_entry" rows="3" placeholder="Share your memory from today..." required></textarea>
-        </div>
-        <div class="form-actions">
-                <button type="submit" name="complete_task" class="mdc-button mdc-button--raised">
-                <span class="mdc-button__ripple"></span>
-                <span class="mdc-button__label">Mark as Complete</span>
-            </button>
-        </div>
-    </form>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="mdc-button mdc-button--raised">
+                    <span class="mdc-button__ripple"></span>
+                    <span class="mdc-button__label">Submit Daily Checklist</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -60,7 +60,16 @@
     }
     .instructions {
         color: #666;
+        margin-bottom: 1rem;
+    }
+    .note {
+        color: #e74c3c;
+        font-size: 0.9rem;
         margin-bottom: 2rem;
+        padding: 1rem;
+        background: #fdf2f2;
+        border-radius: 8px;
+        border-left: 4px solid #e74c3c;
     }
     .checklist-items {
         list-style: none;
@@ -150,8 +159,4 @@
         margin-left: 0.1rem;
     }
 </style>
-
-<script>
-// All code related to updating the progress bar
-</script>
 {% endblock %} 

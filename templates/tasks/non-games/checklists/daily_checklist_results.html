@@ -1,0 +1,202 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Daily Checklist Results - CogniCare{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1>Daily Checklist Results</h1>
+        <p class="patient-info">Patient: <strong>{{ patient.user.get_full_name }}</strong></p>
+    </div>
+    
+    {% if submissions %}
+        {% for submission in submissions %}
+        <div class="card submission-card">
+            <div class="submission-header">
+                <h2>Daily Checklist - {{ submission.submission_date|date:"F j, Y" }}</h2>
+                <p class="submitted-by">Submitted by: {{ submission.submitted_by.user.get_full_name }}</p>
+            </div>
+            
+            <div class="results-section">
+                <h3 class="section-title">✅ Checklist Responses</h3>
+                <ul class="checklist-items">
+                    <li>
+                        <span class="status-icon">{% if submission.responses.item_1 %}✔️{% else %}❌{% endif %}</span>
+                        Identify today's date and day of the week
+                    </li>
+                    <li>
+                        <span class="status-icon">{% if submission.responses.item_2 %}✔️{% else %}❌{% endif %}</span>
+                        Read today's weather forecast aloud
+                    </li>
+                    <li>
+                        <span class="status-icon">{% if submission.responses.item_3 %}✔️{% else %}❌{% endif %}</span>
+                        Look at and name 3 people in your photo album
+                    </li>
+                    <li>
+                        <span class="status-icon">{% if submission.responses.item_5 %}✔️{% else %}❌{% endif %}</span>
+                        Take your scheduled medications
+                    </li>
+                    <li>
+                        <span class="status-icon">{% if submission.responses.item_6 %}✔️{% else %}❌{% endif %}</span>
+                        Drink 8 cups of water
+                    </li>
+                    <li>
+                        <span class="status-icon">{% if submission.responses.item_7 %}✔️{% else %}❌{% endif %}</span>
+                        Call or message a family member
+                    </li>
+                </ul>
+            </div>
+
+            <div class="results-section">
+                <h3 class="section-title">😊 Mood Assessment</h3>
+                <div class="mood-display">
+                    <p>Reported Mood: <strong>{{ submission.responses.mood|default:"Not specified"|capfirst }}</strong></p>
+                </div>
+            </div>
+
+            {% if submission.responses.memory_entry %}
+            <div class="results-section">
+                <h3 class="section-title">💭 Memory Entry</h3>
+                <div class="memory-display">
+                    <p>{{ submission.responses.memory_entry }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card no-results">
+            <h2>No Daily Checklist Submissions</h2>
+            <p>No daily checklist submissions found for this patient.</p>
+        </div>
+    {% endif %}
+    
+    <div class="footer-actions">
+        {% if user_profile.user_type == 'patient' %}
+            <a href="{% url 'patient_dashboard' %}" class="action-btn outline-btn">← Back to Dashboard</a>
+        {% elif user_profile.user_type == 'caregiver' %}
+            <a href="{% url 'caregiver_dashboard' %}" class="action-btn outline-btn">← Back to Dashboard</a>
+        {% elif user_profile.user_type == 'provider' %}
+            <a href="{% url 'provider_dashboard' %}" class="action-btn outline-btn">← Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section {
+        margin-bottom: 2rem;
+    }
+    .patient-info {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .submission-card {
+        border-left: 4px solid #3498db;
+    }
+    .submission-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    .submission-header h2 {
+        color: #2c3e50;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+    }
+    .submitted-by {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    .results-section {
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        color: #2c3e50;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    .checklist-items {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .checklist-items li {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+    .status-icon {
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    .mood-display {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+    }
+    .mood-display p {
+        margin: 0;
+        font-size: 1rem;
+    }
+    .memory-display {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 6px;
+    }
+    .memory-display p {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+        font-style: italic;
+    }
+    .no-results {
+        text-align: center;
+        color: #666;
+    }
+    .no-results h2 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+    .footer-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    .action-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .outline-btn {
+        background: transparent;
+        color: #3498db;
+        border: 2px solid #3498db;
+    }
+    .outline-btn:hover {
+        background: #3498db;
+        color: white;
+    }
+</style>
+{% endblock %} 

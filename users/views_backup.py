@@ -139,18 +139,14 @@ def provider_dashboard(request):
     # New: handle patient selection for task management
     selected_patient = None
     patient_tasks = []
-    daily_checklists = []
     if request.method == 'POST' and 'selected_patient' in request.POST:
         selected_patient_id = request.POST['selected_patient']
         try:
             selected_patient = UserProfile.objects.get(id=selected_patient_id, user_type='patient', provider=provider_profile)
             patient_tasks = Task.objects.filter(assigned_to=selected_patient, assigned_by=provider_profile)
-            from taskmanager.models import DailyChecklistSubmission
-            daily_checklists = DailyChecklistSubmission.objects.filter(patient=selected_patient).order_by('-submission_date')
         except UserProfile.DoesNotExist:
             selected_patient = None
             patient_tasks = []
-            daily_checklists = []
     
     context = {
         'user': request.user,
@@ -166,7 +162,6 @@ def provider_dashboard(request):
         **task_statistics,
         'selected_patient': selected_patient,
         'patient_tasks': patient_tasks,
-        'daily_checklists': daily_checklists,
     }
     return render(request, 'dashboards/provider_dashboard.html', context)
 

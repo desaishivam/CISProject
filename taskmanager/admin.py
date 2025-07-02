@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification
+from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, DailyChecklistSubmission
 
 # ===================== DJANGO ADMIN CONFIGURATION =====================
 # This file customizes how models appear and are managed in the Django admin site.
@@ -48,3 +48,24 @@ class TaskNotificationAdmin(admin.ModelAdmin):
     list_filter = ['notification_type', 'created_at', 'read_at']
     search_fields = ['task__title', 'recipient__user__username', 'message']
     readonly_fields = ['created_at']
+
+@admin.register(DailyChecklistSubmission)
+class DailyChecklistSubmissionAdmin(admin.ModelAdmin):
+    list_display = ['patient', 'submitted_by', 'submission_date', 'created_at']
+    list_filter = ['submission_date', 'created_at']
+    search_fields = ['patient__user__username', 'submitted_by__user__username']
+    readonly_fields = ['created_at', 'submission_date']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('patient', 'submitted_by', 'submission_date')
+        }),
+        ('Responses', {
+            'fields': ('responses',),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )

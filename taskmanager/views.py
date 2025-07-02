@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, Appointment, PatientNote
+from .models import Task, QuestionnaireTemplate, TaskResponse, TaskNotification, Appointment, PatientNote, DailyChecklistSubmission
 from .constants import TASK_TYPES, TASK_TEMPLATES, DIFFICULTY_LEVELS, DIFFICULTY_CONFIGS
 from users.models import UserProfile
 import json
@@ -1007,38 +1007,29 @@ def delete_appointment(request, appointment_id):
     # Check if provider owns the appointment
     # Delete the appointment
     # Return JSON with result
-    print(f"Attempting to delete appointment {appointment_id}")  # Debug log
-    
     if not hasattr(request.user, 'profile'):
-        print("User has no profile")  # Debug log
         return JsonResponse({'success': False, 'message': 'User profile not found'})
         
     if request.user.profile.user_type != 'provider':
-        print(f"Invalid user type: {request.user.profile.user_type}")  # Debug log
         return JsonResponse({'success': False, 'message': 'Permission denied - not a provider'})
     
     try:
         appointment = Appointment.objects.get(id=appointment_id)
-        print(f"Found appointment: {appointment}")  # Debug log
         
         # Verify the provider owns this appointment
         if appointment.provider != request.user.profile:
-            print(f"Permission denied - appointment provider {appointment.provider.id} != user {request.user.profile.id}")  # Debug log
             return JsonResponse({'success': False, 'message': 'Permission denied - not your appointment'})
         
         # Delete the appointment
         appointment.delete()
-        print("Appointment deleted successfully")  # Debug log
         
         return JsonResponse({
             'success': True,
             'message': 'Appointment deleted successfully'
         })
     except Appointment.DoesNotExist:
-        print(f"Appointment {appointment_id} not found")  # Debug log
         return JsonResponse({'success': False, 'message': 'Appointment not found'})
     except Exception as e:
-        print(f"Error deleting appointment: {str(e)}")  # Debug log
         return JsonResponse({'success': False, 'message': f'Error deleting appointment: {str(e)}'})
 
 @login_required
@@ -1177,3 +1168,132 @@ def delete_patient_note(request, note_id):
         return JsonResponse({'success': False, 'message': 'Note not found'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Error deleting note: {str(e)}'})
+
+@login_required
+def daily_checklist_submit(request):
+    """Submit the daily checklist - can be done by patient or caregiver"""
+    if not hasattr(request.user, 'profile'):
+        messages.error(request, 'You do not have permission to submit the daily checklist.')
+        return redirect('home')
+    
+    user_profile = request.user.profile
+    
+    # Determine the patient
+    if user_profile.user_type == 'patient':
+        patient = user_profile
+    elif user_profile.user_type == 'caregiver':
+        if not user_profile.patient:
+            messages.error(request, 'You are not assigned to any patient.')
+            return redirect('caregiver_dashboard')
+        patient = user_profile.patient
+    else:
+        messages.error(request, 'Only patients and caregivers can submit the daily checklist.')
+        return redirect('home')
+    
+    # Check if already submitted today
+    if not DailyChecklistSubmission.can_submit_today(patient):
+        messages.info(request, 'The daily checklist has already been submitted today.')
+        if user_profile.user_type == 'patient':
+            return redirect('patient_dashboard')
+        else:
+            return redirect('caregiver_dashboard')
+    
+    if request.method == 'POST':
+        # Handle form submission
+        responses = {}
+        
+        # Collect checklist items
+        for i in [1, 2, 3, 5, 6, 7]:
+            responses[f'item_{i}'] = request.POST.get(f'item_{i}', '') == 'on'
+        
+        # Collect mood and memory entry
+        responses['mood'] = request.POST.get('mood', '')
+        responses['memory_entry'] = request.POST.get('memory_entry', '')
+        
+        # Create the submission
+        DailyChecklistSubmission.objects.create(
+            patient=patient,
+            submitted_by=user_profile,
+            responses=responses
+        )
+        
+        messages.success(request, 'Daily checklist submitted successfully!')
+        
+        # Redirect based on user type
+        if user_profile.user_type == 'patient':
+            return redirect('patient_dashboard')
+        else:
+            return redirect('caregiver_dashboard')
+    
+    # GET request - show the form
+    context = {
+        'patient': patient,
+        'submitted_by': user_profile
+    }
+    return render(request, 'tasks/non-games/checklists/daily_checklist.html', context)
+
+@login_required
+def daily_checklist_results(request, patient_id=None):
+    """View daily checklist results - for providers and caregivers"""
+    if not hasattr(request.user, 'profile'):
+        messages.error(request, 'You do not have permission to view daily checklist results.')
+        return redirect('home')
+    
+    user_profile = request.user.profile
+    
+    # Determine the patient
+    if patient_id:
+        try:
+            patient = UserProfile.objects.get(id=patient_id, user_type='patient')
+        except UserProfile.DoesNotExist:
+            messages.error(request, 'Patient not found.')
+            return redirect('home')
+    else:
+        if user_profile.user_type == 'patient':
+            patient = user_profile
+        elif user_profile.user_type == 'caregiver':
+            if not user_profile.patient:
+                messages.error(request, 'You are not assigned to any patient.')
+                return redirect('caregiver_dashboard')
+            patient = user_profile.patient
+        else:
+            messages.error(request, 'Patient ID is required for providers.')
+            return redirect('provider_dashboard')
+    
+    # Check permissions
+    if user_profile.user_type == 'provider':
+        if patient.provider != user_profile:
+            messages.error(request, 'You do not have permission to view this patient\'s results.')
+            return redirect('provider_dashboard')
+    elif user_profile.user_type == 'caregiver':
+        if user_profile.patient != patient:
+            messages.error(request, 'You do not have permission to view this patient\'s results.')
+            return redirect('caregiver_dashboard')
+    elif user_profile.user_type == 'patient':
+        if user_profile != patient:
+            messages.error(request, 'You can only view your own results.')
+            return redirect('patient_dashboard')
+    
+    # Get submissions (most recent first)
+    submissions = DailyChecklistSubmission.objects.filter(patient=patient).order_by('-submission_date')
+    
+    context = {
+        'patient': patient,
+        'submissions': submissions,
+        'user_profile': user_profile
+    }
+    return render(request, 'tasks/non-games/checklists/daily_checklist_results.html', context)
+
+@require_POST
+def reset_daily_checklist_patient(request, patient_id):
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        messages.error(request, 'You do not have permission to reset checklists.')
+        return redirect('provider_dashboard')
+    try:
+        patient = UserProfile.objects.get(id=patient_id, user_type='patient')
+        from taskmanager.models import DailyChecklistSubmission
+        count = DailyChecklistSubmission.objects.filter(patient=patient).delete()[0]
+        messages.success(request, f'Reset {count} daily checklist submission(s) for {patient.user.get_full_name()}.')
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'Patient not found.')
+    return redirect('provider_dashboard')

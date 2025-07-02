@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from users.models import UserProfile
 from .constants import TASK_TYPES, TASK_STATUS, DIFFICULTY_LEVELS
 import json
+from datetime import date
 
 # ===================== DATABASE MODELS =====================
 # This file defines the database schema for the app using Django ORM models.
@@ -131,3 +132,32 @@ class PatientNote(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+class DailyChecklistSubmission(models.Model):
+    """Daily checklist submission - one per patient per day"""
+    patient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='daily_checklist_submissions')
+    submitted_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='submitted_daily_checklists')
+    submission_date = models.DateField(auto_now_add=True)
+    responses = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['patient', 'submission_date']
+        ordering = ['-submission_date']
+    
+    def __str__(self):
+        return f"Daily Checklist - {self.patient.user.get_full_name()} - {self.submission_date}"
+    
+    @classmethod
+    def get_today_submission(cls, patient):
+        """Get today's submission for a patient, if it exists"""
+        today = date.today()
+        try:
+            return cls.objects.get(patient=patient, submission_date=today)
+        except cls.DoesNotExist:
+            return None
+    
+    @classmethod
+    def can_submit_today(cls, patient):
+        """Check if a patient can submit the daily checklist today"""
+        return cls.get_today_submission(patient) is None

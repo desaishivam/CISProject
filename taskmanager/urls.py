@@ -21,6 +21,12 @@ urlpatterns = [
     # Results
     path('task-results/<int:task_id>/', views.task_results, name='task_results'),
     
+    # Daily Checklist URLs
+    path('daily-checklist/submit/', views.daily_checklist_submit, name='daily_checklist_submit'),
+    path('daily-checklist/results/', views.daily_checklist_results, name='daily_checklist_results'),
+    path('daily-checklist/results/<int:patient_id>/', views.daily_checklist_results, name='daily_checklist_results_patient'),
+    path('daily-checklist/reset/<int:patient_id>/', views.reset_daily_checklist_patient, name='reset_daily_checklist_patient'),
+    
     # Admin task management
     path('admin/clear-completed/', views.clear_completed_tasks, name='clear_completed_tasks'),
     path('admin/clear-all/', views.clear_all_tasks, name='clear_all_tasks'),
