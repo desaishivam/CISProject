@@ -40,7 +40,7 @@
     </div>
   </div>
 
-  <button class="btn" onclick="submitPuzzle()">✅ Submit</button>
+  <button class="btn" id="submitBtn" onclick="submitPuzzle()">✅ Submit</button>
   <div class="results" id="result"></div>
 
   <style>
@@ -107,6 +107,7 @@
   <script>
     let startTime = null;
     let timerInterval = null;
+    let moveCount = 0; // Track total moves
     function startTimer() {
       if (!startTime) {
         startTime = Date.now();
@@ -128,6 +129,8 @@
       const dragged = document.getElementById(id);
       e.currentTarget.appendChild(dragged);
       e.currentTarget.classList.remove("dragover");
+      moveCount++; // Count successful move
+      updateSubmitButton(); // Update button state
     }
     document.querySelectorAll('.draggable').forEach(elem => {
       elem.addEventListener('dragstart', e => {
@@ -150,6 +153,16 @@
       return cookieValue;
     }
     function submitPuzzle() {
+      // Check if all items are placed
+      const allDraggables = document.querySelectorAll('.draggable');
+      const placedItems = document.querySelectorAll('.drop-zone .draggable');
+      
+      if (placedItems.length < allDraggables.length) {
+        const remaining = allDraggables.length - placedItems.length;
+        alert(`Please place all ${allDraggables.length} items before submitting. You still have ${remaining} item(s) to place.`);
+        return;
+      }
+      
       let score = 0;
       const total = document.querySelectorAll('.draggable').length;
       document.querySelectorAll('.draggable').forEach(elem => {
@@ -166,31 +179,64 @@
         score: score,
         total: total,
         time: elapsedSeconds,
+        moves: moveCount,
         difficulty: 'moderate'
       };
       console.log('Submitting results:', results);
-      fetch('/tasks/take-task/{{ task.id }}/', {
+      
+      // Get CSRF token from the hidden input field
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      fetch(window.location.href, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken')
+          'X-CSRFToken': csrfToken
         },
         body: JSON.stringify(results)
       })
-      .then(response => response.json())
+      .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
+        console.log('Submission successful:', data);
+        console.log('Redirect URL from server:', data.redirect);
+        console.log('User type:', '{{ user.profile.user_type }}');
         if (data.redirect) {
+          console.log('Redirecting to:', data.redirect);
           window.location.href = data.redirect;
         } else {
+          console.log('No redirect URL provided, using fallback');
           // Fallback to patient dashboard if no redirect provided
           window.location.href = '/patient-dashboard/';
         }
       })
       .catch(error => {
         console.error('Error submitting puzzle:', error);
-        // Fallback to patient dashboard on error
-        window.location.href = '/patient-dashboard/';
+        // Show error message to user
+        document.getElementById('result').textContent = 'Error submitting puzzle. Please try again or contact support.';
       });
+    }
+    
+    function updateSubmitButton() {
+      const submitBtn = document.getElementById('submitBtn');
+      const allDraggables = document.querySelectorAll('.draggable');
+      const placedItems = document.querySelectorAll('.drop-zone .draggable');
+      const remaining = allDraggables.length - placedItems.length;
+      
+      if (remaining === 0) {
+        submitBtn.textContent = '✅ Submit';
+        submitBtn.style.backgroundColor = '#4caf50';
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.textContent = `⏳ Place ${remaining} more item(s)`;
+        submitBtn.style.backgroundColor = '#ff9800';
+        submitBtn.disabled = true;
+      }
     }
     function shuffleWordBank() {
       const wordBank = document.getElementById('wordBank');
@@ -201,7 +247,10 @@
         items.splice(j, 1);
       }
     }
-    document.addEventListener('DOMContentLoaded', shuffleWordBank);
+    document.addEventListener('DOMContentLoaded', function() {
+      shuffleWordBank();
+      updateSubmitButton(); // Initialize button state
+    });
   </script>
 </div>
 {% endblock %} 

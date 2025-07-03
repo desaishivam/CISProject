@@ -365,9 +365,10 @@ def take_task(request, task_id):
     if request.method == 'POST':
         # Unified handler for all submissions (JSON or form)
         # 1. Handle JSON submissions (modern games)
-        if request.content_type == 'application/json':
+        if request.content_type == 'application/json' or (request.content_type and 'json' in request.content_type):
             try:
                 data = json.loads(request.body)
+                logger.info(f"JSON submission received for task {task_id}: {data}")
                 # For puzzle tasks, accept and save the results as-is
                 if task.task_type == 'puzzle':
                     task_response.responses = data
@@ -384,13 +385,41 @@ def take_task(request, task_id):
                     redirect_url = reverse('caregiver_dashboard')
                 else: # Default to patient
                     redirect_url = reverse('patient_dashboard')
+                logger.info(f"Redirect URL for user {user_profile.user.username} (type: {user_profile.user_type}): {redirect_url}")
                 return JsonResponse({'success': True, 'redirect': redirect_url})
             except (json.JSONDecodeError, ValueError) as e:
                 logger.error(f"Error processing JSON for task {task_id}: {e}")
                 return JsonResponse({'success': False, 'message': 'Invalid data received.'}, status=400)
+        else:
+            logger.info(f"Non-JSON submission received for task {task_id}. Content-Type: {request.content_type}")
+            # Try to parse as JSON anyway if the body looks like JSON
+            try:
+                if request.body and request.body.strip().startswith(b'{'):
+                    data = json.loads(request.body)
+                    logger.info(f"Parsed JSON from non-JSON content type for task {task_id}: {data}")
+                    # For puzzle tasks, accept and save the results as-is
+                    if task.task_type == 'puzzle':
+                        task_response.responses = data
+                    else:
+                        task_response.responses = data
+                    task.status = 'completed'
+                    task.completed_by = user_profile
+                    task.date_completed = timezone.now()
+                    task.save()
+                    task_response.save()
+                    logger.info(f"PUZZLE SUBMIT (fallback): Task {task.id} completed by {user_profile.user.username}. Status: {task.status}")
+                    # Determine redirect URL based on user type
+                    if user_profile.user_type == 'caregiver':
+                        redirect_url = reverse('caregiver_dashboard')
+                    else: # Default to patient
+                        redirect_url = reverse('patient_dashboard')
+                    logger.info(f"Redirect URL (fallback) for user {user_profile.user.username} (type: {user_profile.user_type}): {redirect_url}")
+                    return JsonResponse({'success': True, 'redirect': redirect_url})
+            except (json.JSONDecodeError, ValueError):
+                pass  # Not JSON, continue to form processing
 
         # 2. Handle standard form submissions (checklists, questionnaires, older games)
-        elif 'complete_task' in request.POST:
+        if 'complete_task' in request.POST:
             responses = {}
             if task.task_type == 'memory_questionnaire':
                 for key in request.POST:

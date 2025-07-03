@@ -56,6 +56,11 @@
     </div>
     
     <div class="stat-row">
+      <span class="stat-label">Total Moves:</span>
+      <span class="stat-value">{{ task_response.responses.moves|default:"0" }}</span>
+    </div>
+    
+    <div class="stat-row">
       <span class="stat-label">Time Taken:</span>
       <span class="stat-value" id="time-taken">{{ task_response.responses.time|default:"0" }}</span>
     </div>
