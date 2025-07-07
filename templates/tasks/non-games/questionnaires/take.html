@@ -17,6 +17,14 @@
         </div>
     </div>
 
+    {% if test_mode %}
+    <div class="test-mode-notice">
+        <h2>🧪 Test Mode - Memory Questionnaire</h2>
+        <p><strong>This is a test version of the memory questionnaire.</strong> No results will be saved. You can practice and demonstrate the questionnaire to patients.</p>
+        <button onclick="window.location.href='/provider-dashboard/'" class="back-btn">← Back to Provider Dashboard</button>
+    </div>
+    {% endif %}
+
     {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -585,6 +593,40 @@
     .message.error {
         background-color: #fee2e2;
         color: #b91c1c;
+    }
+    
+    .test-mode-notice {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .test-mode-notice h2 {
+        color: #856404;
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+    }
+    .test-mode-notice p {
+        color: #856404;
+        margin: 0;
+        font-size: 1rem;
+    }
+    
+    .back-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background-color 0.2s ease;
+    }
+    .back-btn:hover {
+        background: #0056b3;
     }
     
     /* Mobile Responsiveness */

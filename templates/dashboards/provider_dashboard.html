@@ -3,6 +3,10 @@
 
 {% block title %}Provider Dashboard - CogniCare{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/provider_dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
 <div class="dashboard-container">
@@ -416,6 +420,95 @@
                     ➕ Create Caregiver Account
                         </button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Testing Section -->
+    <div class="dashboard-section">
+        <h2 class="section-title">🎮 Game Testing & Practice</h2>
+        <div class="game-testing-container">
+            <div class="testing-intro">
+                <p class="testing-description">
+                    Test and practice all available games and assessments with your patients. 
+                    <strong>No results will be saved</strong> - this is for demonstration and practice purposes only.
+                </p>
+            </div>
+            
+            <div class="game-categories">
+                <!-- Games Category -->
+                <div class="game-category">
+                    <h3 class="category-title">🎮 Games</h3>
+                    <div class="game-grid">
+                        <!-- Puzzle Games -->
+                        <div class="game-item">
+                            <h4 class="game-title">🧩 Drag & Drop Puzzle</h4>
+                            <div class="difficulty-buttons">
+                                <button onclick="openTestGame('puzzle', 'mild')" class="test-btn difficulty-mild">
+                                    🔴 Mild
+                                </button>
+                                <button onclick="openTestGame('puzzle', 'moderate')" class="test-btn difficulty-moderate">
+                                    🟠 Moderate
+                                </button>
+                                <button onclick="openTestGame('puzzle', 'major')" class="test-btn difficulty-major">
+                                    🟢 Major
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Color Games -->
+                        <div class="game-item">
+                            <h4 class="game-title">🎨 Color Matching</h4>
+                            <div class="difficulty-buttons">
+                                <button onclick="openTestGame('color', 'mild')" class="test-btn difficulty-mild">
+                                    🔴 Mild
+                                </button>
+                                <button onclick="openTestGame('color', 'moderate')" class="test-btn difficulty-moderate">
+                                    🟠 Moderate
+                                </button>
+                                <button onclick="openTestGame('color', 'major')" class="test-btn difficulty-major">
+                                    🟢 Major
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Pairs Games -->
+                        <div class="game-item">
+                            <h4 class="game-title">🔗 Related Pairing</h4>
+                            <div class="difficulty-buttons">
+                                <button onclick="openTestGame('pairs', 'mild')" class="test-btn difficulty-mild">
+                                    🔴 Mild
+                                </button>
+                                <button onclick="openTestGame('pairs', 'moderate')" class="test-btn difficulty-moderate">
+                                    🟠 Moderate
+                                </button>
+                                <button onclick="openTestGame('pairs', 'major')" class="test-btn difficulty-major">
+                                    🟢 Major
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Assessments Category -->
+                <div class="game-category">
+                    <h3 class="category-title">📝 Assessments</h3>
+                    <div class="assessment-grid">
+                        <div class="assessment-item">
+                            <h4 class="assessment-title">📋 Memory Questionnaire</h4>
+                            <button onclick="openTestAssessment('memory_questionnaire')" class="test-btn assessment-btn">
+                                📝 Take Assessment
+                            </button>
+                        </div>
+                        
+                        <div class="assessment-item">
+                            <h4 class="assessment-title">✅ Daily Checklist</h4>
+                            <button onclick="openTestAssessment('daily_checklist')" class="test-btn assessment-btn">
+                                ✅ Take Checklist
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1531,6 +1624,50 @@
         });
         attachNoteFormListeners();
     });
+
+    // Game Testing Functions
+    function openTestGame(gameType, difficulty) {
+        const gameUrls = {
+            'puzzle': {
+                'mild': '{% url "taskmanager:test_puzzle" "mild" %}',
+                'moderate': '{% url "taskmanager:test_puzzle" "moderate" %}',
+                'major': '{% url "taskmanager:test_puzzle" "major" %}'
+            },
+            'color': {
+                'mild': '{% url "taskmanager:test_color" "mild" %}',
+                'moderate': '{% url "taskmanager:test_color" "moderate" %}',
+                'major': '{% url "taskmanager:test_color" "major" %}'
+            },
+            'pairs': {
+                'mild': '{% url "taskmanager:test_pairs" "mild" %}',
+                'moderate': '{% url "taskmanager:test_pairs" "moderate" %}',
+                'major': '{% url "taskmanager:test_pairs" "major" %}'
+            }
+        };
+        
+        const url = gameUrls[gameType][difficulty];
+        if (url) {
+            // Open in a new window/tab for testing
+            window.open(url + '?test_mode=true', '_blank');
+        } else {
+            alert('Game not available for testing.');
+        }
+    }
+
+    function openTestAssessment(assessmentType) {
+        const assessmentUrls = {
+            'memory_questionnaire': '{% url "taskmanager:test_questionnaire" %}',
+            'daily_checklist': '{% url "taskmanager:test_daily_checklist" %}'
+        };
+        
+        const url = assessmentUrls[assessmentType];
+        if (url) {
+            // Open in a new window/tab for testing
+            window.open(url + '?test_mode=true', '_blank');
+        } else {
+            alert('Assessment not available for testing.');
+        }
+    }
 </script>
 {% endblock %}
 

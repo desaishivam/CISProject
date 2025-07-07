@@ -49,4 +49,11 @@ urlpatterns = [
     path('create-patient-note/<int:patient_id>/', views.create_patient_note, name='create_patient_note'),
     path('get-patient-notes/<int:patient_id>/', views.get_patient_notes, name='get_patient_notes'),
     path('delete-patient-note/<int:note_id>/', views.delete_patient_note, name='delete_patient_note'),
+    
+    # Game Testing URLs (for provider dashboard)
+    path('test/puzzle/<str:difficulty>/', views.test_puzzle, name='test_puzzle'),
+    path('test/color/<str:difficulty>/', views.test_color, name='test_color'),
+    path('test/pairs/<str:difficulty>/', views.test_pairs, name='test_pairs'),
+    path('test/questionnaire/', views.test_questionnaire, name='test_questionnaire'),
+    path('test/daily-checklist/', views.test_daily_checklist, name='test_daily_checklist'),
 ] 

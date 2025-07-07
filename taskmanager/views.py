@@ -1316,14 +1316,235 @@ def daily_checklist_results(request, patient_id=None):
 
 @require_POST
 def reset_daily_checklist_patient(request, patient_id):
+    """Reset daily checklist submissions for a specific patient"""
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
-        messages.error(request, 'You do not have permission to reset checklists.')
-        return redirect('provider_dashboard')
+        return JsonResponse({'success': False, 'message': 'Access denied'}, status=403)
+    
     try:
         patient = UserProfile.objects.get(id=patient_id, user_type='patient')
-        from taskmanager.models import DailyChecklistSubmission
-        count = DailyChecklistSubmission.objects.filter(patient=patient).delete()[0]
-        messages.success(request, f'Reset {count} daily checklist submission(s) for {patient.user.get_full_name()}.')
+        if patient.provider != request.user.profile:
+            return JsonResponse({'success': False, 'message': 'Access denied'}, status=403)
+        
+        # Delete all daily checklist submissions for this patient
+        DailyChecklistSubmission.objects.filter(patient=patient).delete()
+        
+        return JsonResponse({'success': True, 'message': f'Daily checklist reset for {patient.user.get_full_name()}'})
     except UserProfile.DoesNotExist:
-        messages.error(request, 'Patient not found.')
-    return redirect('provider_dashboard')
+        return JsonResponse({'success': False, 'message': 'Patient not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+# Game Testing Views (for provider dashboard)
+@login_required
+def test_puzzle(request, difficulty):
+    """Test puzzle game without saving results"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        messages.error(request, 'Access denied.')
+        return redirect('provider_dashboard')
+    
+    if difficulty not in ['mild', 'moderate', 'major']:
+        messages.error(request, 'Invalid difficulty level.')
+        return redirect('provider_dashboard')
+    
+    # Handle POST submission (test mode)
+    if request.method == 'POST':
+        try:
+            # Parse JSON data if present
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                # In test mode, we don't save results, just return success
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Test completed successfully! No results saved.',
+                    'redirect': '/provider-dashboard/'
+                })
+            else:
+                # Handle form submission
+                messages.success(request, 'Test completed successfully! No results saved.')
+                return redirect('provider_dashboard')
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Test submission error: {str(e)}',
+                'redirect': '/provider-dashboard/'
+            })
+    
+    context = {
+        'difficulty': difficulty,
+        'test_mode': True,
+        'user_type': 'provider'
+    }
+    return render(request, f'tasks/games/puzzle/{difficulty}/take.html', context)
+
+@login_required
+def test_color(request, difficulty):
+    """Test color game without saving results"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        messages.error(request, 'Access denied.')
+        return redirect('provider_dashboard')
+    
+    if difficulty not in ['mild', 'moderate', 'major']:
+        messages.error(request, 'Invalid difficulty level.')
+        return redirect('provider_dashboard')
+    
+    # Handle POST submission (test mode)
+    if request.method == 'POST':
+        try:
+            # Parse JSON data if present
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                # In test mode, we don't save results, just return success
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Test completed successfully! No results saved.',
+                    'redirect': '/provider-dashboard/'
+                })
+            else:
+                # Handle form submission
+                messages.success(request, 'Test completed successfully! No results saved.')
+                return redirect('provider_dashboard')
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Test submission error: {str(e)}',
+                'redirect': '/provider-dashboard/'
+            })
+    
+    context = {
+        'difficulty': difficulty,
+        'test_mode': True,
+        'user_type': 'provider'
+    }
+    return render(request, f'tasks/games/color/{difficulty}/take.html', context)
+
+@login_required
+def test_pairs(request, difficulty):
+    """Test pairs game without saving results"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        messages.error(request, 'Access denied.')
+        return redirect('provider_dashboard')
+    
+    if difficulty not in ['mild', 'moderate', 'major']:
+        messages.error(request, 'Invalid difficulty level.')
+        return redirect('provider_dashboard')
+    
+    # Handle POST submission (test mode)
+    if request.method == 'POST':
+        try:
+            # Parse JSON data if present
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+                # In test mode, we don't save results, just return success
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Test completed successfully! No results saved.',
+                    'redirect': '/provider-dashboard/'
+                })
+            else:
+                # Handle form submission
+                messages.success(request, 'Test completed successfully! No results saved.')
+                return redirect('provider_dashboard')
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Test submission error: {str(e)}',
+                'redirect': '/provider-dashboard/'
+            })
+    
+    context = {
+        'difficulty': difficulty,
+        'test_mode': True,
+        'user_type': 'provider'
+    }
+    return render(request, f'tasks/games/pairs/{difficulty}/take.html', context)
+
+@login_required
+def test_questionnaire(request):
+    """Test memory questionnaire without saving results"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        messages.error(request, 'Access denied.')
+        return redirect('provider_dashboard')
+    
+    # Handle POST submission (test mode)
+    if request.method == 'POST':
+        messages.success(request, 'Test questionnaire completed successfully! No results saved.')
+        return redirect('provider_dashboard')
+    
+    # Create a mock task object for test mode
+    class MockTask:
+        def __init__(self):
+            self.title = "Memory Assessment Questionnaire (Test Mode)"
+            self.due_date = None
+            self.description = "This is a test version of the memory questionnaire. No results will be saved."
+            self.task_type = 'memory_questionnaire'
+    
+    # Create mock section data for the questionnaire
+    section1_issues = [
+        {'id': '01', 'text': 'Where you put things'},
+        {'id': '02', 'text': 'Faces'},
+        {'id': '03', 'text': 'Directions to places'},
+        {'id': '04', 'text': 'Appointments'},
+        {'id': '05', 'text': 'Losing the thread of thought in conversations'},
+        {'id': '06', 'text': 'Remembering things you have done (lock door, turn off the stove, etc.)'},
+        {'id': '07', 'text': 'Frequently used telephone numbers or addresses'},
+        {'id': '08', 'text': 'Knowing whether you have already told someone something'},
+        {'id': '09', 'text': 'Taking your medication at the scheduled time'},
+        {'id': '10', 'text': 'News items'},
+        {'id': '11', 'text': 'Date'},
+        {'id': '12', 'text': 'Personal events from the past'},
+        {'id': '13', 'text': 'Names of people'},
+    ]
+    
+    section2_issues = [
+        {'id': '14', 'text': 'Remembering conversations'},
+        {'id': '15', 'text': 'Finding the right word'},
+        {'id': '16', 'text': 'Remembering what you were going to do'},
+        {'id': '17', 'text': 'Remembering where you parked your car'},
+        {'id': '18', 'text': 'Remembering what you were looking for'},
+        {'id': '19', 'text': 'Remembering what you were going to say'},
+        {'id': '20', 'text': 'Remembering what you were going to buy'},
+        {'id': '21', 'text': 'Remembering what you were going to call someone about'},
+        {'id': '22', 'text': 'Remembering what you were going to write'},
+        {'id': '23', 'text': 'Remembering what you were going to ask'},
+        {'id': '24', 'text': 'Remembering what you were going to tell someone'},
+        {'id': '25', 'text': 'Remembering what you were going to do next'},
+    ]
+    
+    context = {
+        'task': MockTask(),
+        'test_mode': True,
+        'user_type': 'provider',
+        'section1_issues': section1_issues,
+        'section2_issues': section2_issues,
+        'responses': {}  # Empty responses for test mode
+    }
+    return render(request, 'tasks/non-games/questionnaires/take.html', context)
+
+@login_required
+def test_daily_checklist(request):
+    """Test daily checklist without saving results"""
+    if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'provider':
+        messages.error(request, 'Access denied.')
+        return redirect('provider_dashboard')
+    
+    # Handle POST submission (test mode)
+    if request.method == 'POST':
+        messages.success(request, 'Test daily checklist completed successfully! No results saved.')
+        return redirect('provider_dashboard')
+    
+    # Create a mock patient for test mode
+    class MockPatient:
+        def __init__(self):
+            self.user = type('MockUser', (), {
+                'first_name': 'Test',
+                'last_name': 'Patient',
+                'get_full_name': lambda: 'Test Patient'
+            })()
+    
+    context = {
+        'test_mode': True,
+        'user_type': 'provider',
+        'patient': MockPatient(),
+        'submitted_by': request.user.profile
+    }
+    return render(request, 'tasks/non-games/checklists/daily_checklist.html', context)

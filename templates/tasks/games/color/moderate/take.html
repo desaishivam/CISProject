@@ -7,6 +7,14 @@
 <form id="game-form">
     {% csrf_token %}
     <div class="container">
+        {% if test_mode %}
+        <div class="test-mode-notice">
+            <h2>🧪 Test Mode - Color Matching Game</h2>
+            <p><strong>This is a test version of the color matching game.</strong> No results will be saved. You can practice and demonstrate the game to patients.</p>
+            <button id="backBtn" class="back-btn">← Back to Provider Dashboard</button>
+        </div>
+        {% endif %}
+        
         <div class="task-header">
             <h1>Color Matching</h1>
             <p>Find all the matching color pairs as quickly as you can!</p>
@@ -153,6 +161,38 @@
       font-size: 1.1rem;
       color: #374151;
       font-weight: 600;
+    }
+    .test-mode-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .test-mode-notice h2 {
+      color: #856404;
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+    .test-mode-notice p {
+      color: #856404;
+      margin: 0;
+      font-size: 1rem;
+    }
+    .back-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .back-btn:hover {
+      background: #0056b3;
     }
 </style>
 
@@ -303,5 +343,15 @@
   }
 
   init();
+  
+  // Add event listener for back button
+  document.addEventListener('DOMContentLoaded', function() {
+      const backBtn = document.getElementById('backBtn');
+      if (backBtn) {
+          backBtn.addEventListener('click', function() {
+              window.location.href = '/provider-dashboard/';
+          });
+      }
+  });
 </script>
 {% endblock %} 
