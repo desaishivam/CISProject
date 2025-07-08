@@ -1,0 +1,20 @@
+/* Test Mode Notice Styles */
+.test-mode-notice {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.test-mode-notice h2 {
+    color: #856404;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.test-mode-notice p {
+    color: #856404;
+    margin: 0;
+ 
