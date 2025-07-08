@@ -143,7 +143,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'railway' / 'staticfiles'
 
 # Whitenoise configuration for static files (only if available)
 try:
