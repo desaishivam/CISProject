@@ -213,11 +213,12 @@
                                         <a href="{% url 'taskmanager:daily_checklist_results_patient' patient.id %}" class="action-btn secondary-btn">
                                             📋 Daily Checklist Results
                                         </a>
-                                        <form method="post" action="{% url 'taskmanager:reset_daily_checklist_patient' patient.id %}" style="display:inline;">
+                                        <form method="post" action="{% url 'taskmanager:reset_daily_checklist_patient' patient.id %}" class="reset-checklist-form" data-patient-id="{{ patient.id }}" style="display:inline;">
                                             {% csrf_token %}
                                             <button type="submit" class="action-btn danger-btn" onclick="return confirm('Are you sure you want to reset all daily checklist submissions for this patient?');">
                                                 ♻️ Reset
                                             </button>
+                                            <span class="reset-checklist-message" id="reset-checklist-message-{{ patient.id }}" style="margin-left: 0.5rem; color: #28a745; font-weight: 500;"></span>
                                         </form>
                                     </span>
                                 </div>
@@ -1672,5 +1673,36 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/provider_dashboard.js' %}"></script>
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.reset-checklist-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to reset all daily checklist submissions for this patient?')) return;
+            const patientId = form.getAttribute('data-patient-id');
+            const messageSpan = document.getElementById('reset-checklist-message-' + patientId);
+            messageSpan.textContent = '';
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    messageSpan.textContent = data.message || 'Checklist reset!';
+                } else {
+                    messageSpan.textContent = 'Reset failed.';
+                }
+            })
+            .catch(() => {
+                messageSpan.textContent = 'Reset failed.';
+            });
+        });
+    });
+});
+</script>
 {% endblock %} 
