@@ -19,6 +19,7 @@
 
         <div class="stats-container">
             <div>Moves: <span id="moves">0</span></div>
+            <div>Matches: <span id="matches">0</span></div>
             <div>Time: <span id="time">00:00</span></div>
         </div>
 
@@ -189,149 +190,145 @@
 </style>
 
 <script>
-    const emojiPairs = [
-        { id: 1, emoji: '🐶' }, { id: 1, emoji: '🐱' },
-        { id: 2, emoji: '🍎' }, { id: 2, emoji: '🍌' },
-        { id: 3, emoji: '🌞' }, { id: 3, emoji: '🌙' },
-        { id: 4, emoji: '🔥' }, { id: 4, emoji: '💧' },
-        { id: 5, emoji: '⚡' }, { id: 5, emoji: '☁️' },
-        { id: 6, emoji: '🏠' }, { id: 6, emoji: '🏢' },
-        { id: 7, emoji: '📚' }, { id: 7, emoji: '✏️' },
-        { id: 8, emoji: '🎵' }, { id: 8, emoji: '🎤' },
-        { id: 9, emoji: '🚗' }, { id: 9, emoji: '🚌' },
-        { id: 10, emoji: '🍕' }, { id: 10, emoji: '🍔' },
-        { id: 11, emoji: '🦋' }, { id: 11, emoji: '🐸' },
-        { id: 12, emoji: '🌸' }, { id: 12, emoji: '🌲' }
-    ];
+const emojiPairs = [
+    { id: 1, emoji: '🐶' }, { id: 1, emoji: '🐱' },
+    { id: 2, emoji: '🍎' }, { id: 2, emoji: '🍌' },
+    { id: 3, emoji: '🌞' }, { id: 3, emoji: '🌙' },
+    { id: 4, emoji: '🔥' }, { id: 4, emoji: '💧' },
+    { id: 5, emoji: '⚡' }, { id: 5, emoji: '☁️' },
+    { id: 6, emoji: '🏠' }, { id: 6, emoji: '🏢' },
+    { id: 7, emoji: '📚' }, { id: 7, emoji: '✏️' },
+    { id: 8, emoji: '🎵' }, { id: 8, emoji: '🎤' },
+    { id: 9, emoji: '🚗' }, { id: 9, emoji: '🚌' },
+    { id: 10, emoji: '🍕' }, { id: 10, emoji: '🍔' },
+    { id: 11, emoji: '🦋' }, { id: 11, emoji: '🐸' },
+    { id: 12, emoji: '🌸' }, { id: 12, emoji: '🌲' }
+];
 
-    let state;
+let state;
+let lockBoard = false;
 
-    function initializeGame() {
-        const pairCount = 12;
-        let selected = emojiPairs.slice(0, pairCount * 2);
-        let cards = [];
-        selected.forEach(pair => {
-            cards.push({ id: pair.id, emoji: pair.emoji, matched: false });
-            });
-        cards = cards.sort(() => Math.random() - 0.5);
-        state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, wrong: [], completed: false };
-        renderGame();
-        updateStats();
-        clearInterval(state.timer);
-        state.startTime = Date.now();
-        state.timer = setInterval(updateTimer, 1000);
-    }
+function initializeGame() {
+    const pairCount = 12;
+    let selected = emojiPairs.slice(0, pairCount * 2);
+    let cards = [];
+    selected.forEach(pair => {
+        cards.push({ id: pair.id, emoji: pair.emoji, matched: false });
+    });
+    cards = cards.sort(() => Math.random() - 0.5);
+    state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, wrong: [], completed: false };
+    renderGame();
+    updateStats();
+    clearInterval(state.timer);
+    state.startTime = Date.now();
+    state.timer = setInterval(updateTimer, 1000);
+}
 
-    function renderGame() {
-        const board = document.getElementById('gameBoard');
-        board.innerHTML = '';
-        state.cards.forEach((card, index) => {
-            const el = document.createElement('div');
-            el.className = 'card';
-            el.innerHTML = `<div>${card.emoji}</div>`;
-            if (card.matched) {
-                el.classList.add('matched');
-            } else if (state.wrong && state.wrong.includes(index)) {
-                el.classList.add('wrong');
-            } else if (state.flipped.includes(index)) {
-                el.classList.add('selected');
-            } else {
-                el.onclick = () => flipCard(index);
-            }
-            board.appendChild(el);
-        });
-    }
-
-    function flipCard(index) {
-        if (state.completed || state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) {
-            return;
+function renderGame() {
+    const board = document.getElementById('gameBoard');
+    board.innerHTML = '';
+    state.cards.forEach((card, index) => {
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `<div>${card.emoji}</div>`;
+        if (card.matched) {
+            el.classList.add('matched');
+        } else if (state.wrong && state.wrong.includes(index)) {
+            el.classList.add('wrong');
+        } else if (state.flipped.includes(index)) {
+            el.classList.add('selected');
         }
+        if (!card.matched && !state.wrong.includes(index) && !state.flipped.includes(index) && !lockBoard) {
+            el.addEventListener('click', () => flipCard(index));
+        }
+        board.appendChild(el);
+    });
+}
 
-        state.flipped.push(index);
-        renderGame();
-
-        if (state.flipped.length === 2) {
-            state.moves++;
-            updateStats();
-
-            const [i1, i2] = state.flipped;
-            if (state.cards[i1].id === state.cards[i2].id) {
+function flipCard(index) {
+    if (lockBoard || state.completed || state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) {
+        return;
+    }
+    state.flipped.push(index);
+    renderGame();
+    if (state.flipped.length === 2) {
+        lockBoard = true;
+        state.moves++;
+        updateStats();
+        const [i1, i2] = state.flipped;
+        if (state.cards[i1].id === state.cards[i2].id) {
+            // Step 1: Show both as selected (blue)
+            setTimeout(() => {
+                // Step 2: Mark as matched and re-render (turn green)
                 state.cards[i1].matched = true;
                 state.cards[i2].matched = true;
                 state.matched++;
-                updateStats();
-
-                state.flipped = [];
-                renderGame();
-
-                if (state.matched === state.cards.length / 2) {
-                    state.completed = true;
-                    setTimeout(gameCompleted, 500);
-                }
-            } else {
-                state.wrong = [i1, i2];
                 renderGame();
                 setTimeout(() => {
+                    // Step 3: Clear flipped, unlock, re-render
                     state.flipped = [];
-                    state.wrong = [];
+                    lockBoard = false;
                     renderGame();
-                }, 1000);
-            }
+                    if (state.matched === state.cards.length / 2) {
+                        state.completed = true;
+                        setTimeout(gameCompleted, 500);
+                    }
+                }, 400); // Show green for 400ms
+            }, 300); // Show blue for 300ms
+        } else {
+            state.wrong = [i1, i2];
+            renderGame();
+            setTimeout(() => {
+                state.flipped = [];
+                state.wrong = [];
+                lockBoard = false;
+                renderGame();
+            }, 1000);
         }
     }
+}
 
-    function updateStats() {
-        document.getElementById('moves').textContent = state.moves;
-    }
+function updateStats() {
+    document.getElementById('moves').textContent = state.moves;
+    document.getElementById('matches').textContent = state.matched;
+}
 
-    function updateTimer() {
-        const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-        const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
-        const sec = String(elapsed % 60).padStart(2, '0');
-        document.getElementById('time').textContent = `${min}:${sec}`;
-    }
+function updateTimer() {
+    const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+    const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const sec = String(elapsed % 60).padStart(2, '0');
+    document.getElementById('time').textContent = `${min}:${sec}`;
+}
 
-    function gameCompleted() {
-        clearInterval(state.timer);
-        const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
-        
-        const results = {
-            moves: state.moves,
-            time: elapsedSeconds
-        };
-
-        fetch(window.location.href, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify(results)
-        }).then(res => res.json())
-        .then(data => {
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            } else {
-                console.error('Redirect URL not provided by server. Falling back to patient dashboard.');
-                window.location.href = '/patient-dashboard/';
-            }
-        }).catch(error => {
-            console.error('Error submitting results:', error);
-            alert('Could not save your results. Redirecting to the dashboard.');
+function gameCompleted() {
+    clearInterval(state.timer);
+    const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+    const results = {
+        moves: state.moves,
+        time: elapsedSeconds
+    };
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(results)
+    }).then(res => res.json())
+    .then(data => {
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        } else {
+            console.error('Redirect URL not provided by server. Falling back to patient dashboard.');
             window.location.href = '/patient-dashboard/';
-        });
-    }
-
-    initializeGame();
-    
-    // Add event listener for back button
-    document.addEventListener('DOMContentLoaded', function() {
-        const backBtn = document.getElementById('backBtn');
-        if (backBtn) {
-            backBtn.addEventListener('click', function() {
-                window.location.href = '/provider-dashboard/';
-            });
         }
+    }).catch(error => {
+        console.error('Error submitting results:', error);
+        alert('Could not save your results. Redirecting to the dashboard.');
+        window.location.href = '/patient-dashboard/';
     });
+}
+
+initializeGame();
 </script>
 {% endblock %}

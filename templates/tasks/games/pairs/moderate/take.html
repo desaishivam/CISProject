@@ -19,6 +19,7 @@
 
         <div class="stats-container">
             <div>Moves: <span id="moves">0</span></div>
+            <div>Matches: <span id="matches">0</span></div>
             <div>Time: <span id="time">00:00</span></div>
         </div>
 
@@ -175,6 +176,7 @@ const allPairs = [
 ];
 
 let state;
+let lockBoard = false; // Prevents clicking while animating
 
 function initializeGame() {
     const pairCount = 10;
@@ -184,7 +186,7 @@ function initializeGame() {
         cards.push({ id: pair.id, emoji: pair.emoji, word: pair.word, matched: false });
     });
     cards = cards.sort(() => Math.random() - 0.5);
-    state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, wrong: [] };
+    state = { cards, flipped: [], matched: 0, moves: 0, startTime: null, timer: null, wrong: [], completed: false };
     renderGame();
     updateStats();
     clearInterval(state.timer);
@@ -205,45 +207,51 @@ function renderGame() {
             el.classList.add('wrong');
         } else if (state.flipped.includes(index)) {
             el.classList.add('selected');
-        } else {
-            el.onclick = () => flipCard(index);
+        }
+        if (!card.matched && !state.wrong.includes(index) && !state.flipped.includes(index) && !lockBoard) {
+            el.addEventListener('click', () => flipCard(index));
         }
         board.appendChild(el);
     });
 }
 
 function flipCard(index) {
-    if (state.completed || state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) {
+    if (lockBoard || state.completed || state.flipped.length >= 2 || state.cards[index].matched || state.flipped.includes(index)) {
         return;
     }
-
     state.flipped.push(index);
     renderGame();
-
     if (state.flipped.length === 2) {
+        lockBoard = true;
         state.moves++;
         updateStats();
-
         const [i1, i2] = state.flipped;
         if (state.cards[i1].id === state.cards[i2].id) {
-            state.cards[i1].matched = true;
-            state.cards[i2].matched = true;
-            state.matched++;
-            updateStats();
-            
-            state.flipped = [];
-            renderGame();
-
-            if (state.matched === state.cards.length / 2) {
-                state.completed = true;
-                setTimeout(gameCompleted, 500);
-            }
+            // Step 1: Show both as selected (blue)
+            setTimeout(() => {
+                // Step 2: Mark as matched and re-render (turn green)
+                state.cards[i1].matched = true;
+                state.cards[i2].matched = true;
+                state.matched++;
+                renderGame();
+                setTimeout(() => {
+                    // Step 3: Clear flipped, unlock, re-render
+                    state.flipped = [];
+                    lockBoard = false;
+                    renderGame();
+                    if (state.matched === state.cards.length / 2) {
+                        state.completed = true;
+                        setTimeout(gameCompleted, 500);
+                    }
+                }, 400); // Show green for 400ms
+            }, 300); // Show blue for 300ms
         } else {
             state.wrong = [i1, i2];
             renderGame();
             setTimeout(() => {
                 state.flipped = [];
                 state.wrong = [];
+                lockBoard = false;
                 renderGame();
             }, 1000);
         }
@@ -252,6 +260,7 @@ function flipCard(index) {
 
 function updateStats() {
     document.getElementById('moves').textContent = state.moves;
+    document.getElementById('matches').textContent = state.matched;
 }
 
 function updateTimer() {
@@ -264,12 +273,10 @@ function updateTimer() {
 function gameCompleted() {
     clearInterval(state.timer);
     const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
-    
     const results = {
         moves: state.moves,
         time: elapsedSeconds
     };
-
     fetch(window.location.href, {
         method: 'POST',
         headers: {
@@ -293,16 +300,6 @@ function gameCompleted() {
 }
 
 initializeGame();
-
-// Add event listener for back button
-document.addEventListener('DOMContentLoaded', function() {
-    const backBtn = document.getElementById('backBtn');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.location.href = '/provider-dashboard/';
-        });
-    }
-});
 </script>
 {% endblock %}
  
