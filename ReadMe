@@ -1,3 +1,7 @@
+# CogniCare: Cognitive Health Management Platform
+
+CogniCare is a web based platform for providers, patients, and caregivers to manage cognitive health. The site offers dashboards for each user type, cognitive games (puzzle, color matching, pairs) with multiple difficulty levels, daily checklists, memory questionnaires, and a test mode for providers to demonstrate games and assessments without saving results. Providers can assign tasks, track results, and manage users, all within a modern, emoji enhanced interface designed for engagement and clarity.
+
 ## Starting the Website
 
 1. Open Terminal on your Mac:
@@ -11,13 +15,13 @@
    ```
 
 3. Start the website:
-
-python3 manage.py runserver
    ```
-   
+   python3 manage.py runserver
    ```
 
 4. View your website:
    - Open web browser 
    - Go to: http://127.0.0.1:8000
    - You should see your website!
+
+

@@ -7,9 +7,27 @@
 <link rel="stylesheet" href="{% static 'css/provider_dashboard.css' %}">
 {% endblock %}
 
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/provider_dashboard.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 {% csrf_token %}
-<div class="dashboard-container">
+<div class="dashboard-container"
+     data-assign-task-url="{% url 'taskmanager:assign_task' %}"
+     data-assign-multiple-tasks-url="{% url 'taskmanager:assign_multiple_tasks' %}"
+     data-test-puzzle-mild-url="{% url 'taskmanager:test_puzzle' 'mild' %}"
+     data-test-puzzle-moderate-url="{% url 'taskmanager:test_puzzle' 'moderate' %}"
+     data-test-puzzle-major-url="{% url 'taskmanager:test_puzzle' 'major' %}"
+     data-test-color-mild-url="{% url 'taskmanager:test_color' 'mild' %}"
+     data-test-color-moderate-url="{% url 'taskmanager:test_color' 'moderate' %}"
+     data-test-color-major-url="{% url 'taskmanager:test_color' 'major' %}"
+     data-test-pairs-mild-url="{% url 'taskmanager:test_pairs' 'mild' %}"
+     data-test-pairs-moderate-url="{% url 'taskmanager:test_pairs' 'moderate' %}"
+     data-test-pairs-major-url="{% url 'taskmanager:test_pairs' 'major' %}"
+     data-test-questionnaire-url="{% url 'taskmanager:test_questionnaire' %}"
+     data-test-daily-checklist-url="{% url 'taskmanager:test_daily_checklist' %}">
     <div class="dashboard-header provider">
         <div class="header-info">
     <h1>Welcome, {{ user.first_name }}!</h1>
@@ -82,16 +100,17 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Task Assignment Buttons -->
                     <div class="button-row">
-                        <button onclick="quickAssignTask()" class="action-btn primary-btn">
-                                    🎯 Assign Task
-                                </button>
-                        <button onclick="assignAllTasksToPatient()" class="action-btn outline-btn">
+                        <button id="quick-assign-btn" class="action-btn primary-btn">
+                            🎯 Assign Task
+                        </button>
+                        <button id="assign-all-tasks-btn" class="action-btn outline-btn">
                             📋 Assign All Tasks
-                                </button>
-                        <button onclick="assignAllDifficulties()" class="action-btn outline-btn">
-                                    🎮 Assign All Difficulties
-                                </button>
+                        </button>
+                        <button id="assign-all-difficulties-btn" class="action-btn outline-btn">
+                            🎮 Assign All Difficulties
+                        </button>
                     </div>
                 </div>
                 
@@ -240,7 +259,7 @@
                                     {% endwith %}
                                 </div>
                                 <div style="margin-top: 1rem;">
-                                    <button onclick="openScheduleModal('{{ patient.user.get_full_name }}', {{ patient.id }})" class="action-btn secondary-btn">
+                                    <button class="action-btn secondary-btn schedule-appointment-btn" data-patient-name="{{ patient.user.get_full_name }}" data-patient-id="{{ patient.id }}">
                                         📅 Schedule Appointment
                                     </button>
                                 </div>
@@ -259,7 +278,7 @@
                                                                     <span class="time">{{ appt.datetime|date:"g:i A" }}</span>
                                                                 </td>
                                                                 <td>
-                                                                    <button class="action-btn danger-btn" onclick="deleteAppointment({{ appt.id }})">
+                                                                    <button class="action-btn danger-btn delete-appointment-btn" data-appointment-id="{{ appt.id }}">
                                                                         Delete
                                                                     </button>
                                                                 </td>
@@ -446,13 +465,13 @@
                         <div class="game-item">
                             <h4 class="game-title">🧩 Drag & Drop Puzzle</h4>
                             <div class="difficulty-buttons">
-                                <button onclick="openTestGame('puzzle', 'mild')" class="test-btn difficulty-mild">
+                                <button class="test-btn difficulty-mild test-game-btn" data-game="puzzle" data-difficulty="mild">
                                     🔴 Mild
                                 </button>
-                                <button onclick="openTestGame('puzzle', 'moderate')" class="test-btn difficulty-moderate">
+                                <button class="test-btn difficulty-moderate test-game-btn" data-game="puzzle" data-difficulty="moderate">
                                     🟠 Moderate
                                 </button>
-                                <button onclick="openTestGame('puzzle', 'major')" class="test-btn difficulty-major">
+                                <button class="test-btn difficulty-major test-game-btn" data-game="puzzle" data-difficulty="major">
                                     🟢 Major
                                 </button>
                             </div>
@@ -462,13 +481,13 @@
                         <div class="game-item">
                             <h4 class="game-title">🎨 Color Matching</h4>
                             <div class="difficulty-buttons">
-                                <button onclick="openTestGame('color', 'mild')" class="test-btn difficulty-mild">
+                                <button class="test-btn difficulty-mild test-game-btn" data-game="color" data-difficulty="mild">
                                     🔴 Mild
                                 </button>
-                                <button onclick="openTestGame('color', 'moderate')" class="test-btn difficulty-moderate">
+                                <button class="test-btn difficulty-moderate test-game-btn" data-game="color" data-difficulty="moderate">
                                     🟠 Moderate
                                 </button>
-                                <button onclick="openTestGame('color', 'major')" class="test-btn difficulty-major">
+                                <button class="test-btn difficulty-major test-game-btn" data-game="color" data-difficulty="major">
                                     🟢 Major
                                 </button>
                             </div>
@@ -478,13 +497,13 @@
                         <div class="game-item">
                             <h4 class="game-title">🔗 Related Pairing</h4>
                             <div class="difficulty-buttons">
-                                <button onclick="openTestGame('pairs', 'mild')" class="test-btn difficulty-mild">
+                                <button class="test-btn difficulty-mild test-game-btn" data-game="pairs" data-difficulty="mild">
                                     🔴 Mild
                                 </button>
-                                <button onclick="openTestGame('pairs', 'moderate')" class="test-btn difficulty-moderate">
+                                <button class="test-btn difficulty-moderate test-game-btn" data-game="pairs" data-difficulty="moderate">
                                     🟠 Moderate
                                 </button>
-                                <button onclick="openTestGame('pairs', 'major')" class="test-btn difficulty-major">
+                                <button class="test-btn difficulty-major test-game-btn" data-game="pairs" data-difficulty="major">
                                     🟢 Major
                                 </button>
                             </div>
@@ -498,14 +517,14 @@
                     <div class="assessment-grid">
                         <div class="assessment-item">
                             <h4 class="assessment-title">📋 Memory Questionnaire</h4>
-                            <button onclick="openTestAssessment('memory_questionnaire')" class="test-btn assessment-btn">
+                            <button class="test-btn assessment-btn test-assessment-btn" data-assessment="memory_questionnaire">
                                 📝 Take Assessment
                             </button>
                         </div>
                         
                         <div class="assessment-item">
                             <h4 class="assessment-title">✅ Daily Checklist</h4>
-                            <button onclick="openTestAssessment('daily_checklist')" class="test-btn assessment-btn">
+                            <button class="test-btn assessment-btn test-assessment-btn" data-assessment="daily_checklist">
                                 ✅ Take Checklist
                             </button>
                         </div>
@@ -1141,568 +1160,4 @@
     }
 </style>
 
-<script>
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    function quickAssignTask() {
-        const patientId = document.getElementById('quick_assign_patient').value;
-        const taskType = document.getElementById('quick_assign_task').value;
-        const difficulty = document.getElementById('quick_assign_difficulty').value;
-        const hasDifficulty = document.getElementById('quick_assign_task').options[document.getElementById('quick_assign_task').selectedIndex].dataset.hasDifficulty === 'true';
-
-        if (!patientId || !taskType) {
-            alert(`Please select a ${!patientId ? 'patient' : 'task type'} first.`);
-            return;
-        }
-
-        if (hasDifficulty && !difficulty) {
-            alert('Please select a difficulty level first.');
-            return;
-        }
-
-        const payload = { patient_id: patientId, task_type: taskType };
-        if (hasDifficulty) payload.difficulty = difficulty;
-
-        fetch("{% url 'taskmanager:assign_task' %}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-            body: JSON.stringify(payload)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message || 'Task assigned successfully!');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Could not assign task.'));
-            }
-        })
-        .catch(error => console.error('Error assigning task:', error));
-    }
-
-    function assignAllTasksToPatient() {
-        const patientId = document.getElementById('quick_assign_patient').value;
-        const difficulty = document.getElementById('quick_assign_difficulty').value;
-        if (!patientId) {
-            alert('Please select a patient first.');
-            return;
-        }
-        if (!difficulty) {
-            alert('Please select a difficulty level first.');
-            return;
-        }
-
-        // List of all task types and which require difficulty
-        const allTaskTypes = [
-            { type: 'color', hasDifficulty: true },
-            { type: 'pairs', hasDifficulty: true },
-            { type: 'puzzle', hasDifficulty: true },
-            { type: 'memory_questionnaire', hasDifficulty: false }
-        ];
-        const tasks = allTaskTypes.map(t => t.hasDifficulty ? { task_type: t.type, difficulty: difficulty } : { task_type: t.type });
-
-        fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-            body: JSON.stringify({ patient_id: patientId, tasks: tasks })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert((data.tasks ? data.tasks.length : 0) + ' tasks assigned to the patient.');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Could not assign tasks.'));
-            }
-        })
-        .catch(error => console.error('Error assigning multiple tasks:', error));
-    }
-
-    function assignAllDifficulties() {
-        const patientId = document.getElementById('quick_assign_patient').value;
-        const taskType = document.getElementById('quick_assign_task').value;
-
-        if (!patientId || !taskType) {
-            alert(`Please select a ${!patientId ? 'patient' : 'task type'} first.`);
-            return;
-        }
-
-        const selectedOption = document.getElementById('quick_assign_task').options[document.getElementById('quick_assign_task').selectedIndex];
-        if (selectedOption.dataset.hasDifficulty !== 'true') {
-            alert('This task type does not have difficulty levels.');
-            return;
-        }
-
-        const difficulties = ['mild', 'moderate', 'major'];
-        const tasks = difficulties.map(difficulty => ({ task_type: taskType, difficulty: difficulty }));
-
-        fetch("{% url 'taskmanager:assign_multiple_tasks' %}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-            body: JSON.stringify({ patient_id: patientId, tasks: tasks })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`All difficulties for ${selectedOption.text.trim()} assigned.`);
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Could not assign tasks.'));
-            }
-        })
-        .catch(error => console.error('Error assigning difficulties:', error));
-    }
-
-    function deleteAllTasks() {
-        const patientId = document.getElementById('selected_patient').value;
-        if (!patientId) {
-            alert('Please select a patient first.');
-            return;
-        }
-
-        if (confirm('Are you sure you want to delete all tasks for this patient?')) {
-            fetch(`/tasks/delete-all-tasks/${patientId}/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Tasks deleted.');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Could not delete tasks.'));
-                }
-            })
-            .catch(error => console.error('Error deleting tasks:', error));
-        }
-    }
-
-    window.openScheduleModal = function(patientName, patientId) {
-        const modal = document.getElementById('appointmentModal');
-        const patientIdInput = document.getElementById('patient_id');
-        const modalTitle = modal.querySelector('.modal-header h2');
-        
-        if (modalTitle) modalTitle.textContent = `Schedule Appointment for ${patientName}`;
-        if (patientIdInput) patientIdInput.value = patientId;
-        
-        const dateInput = document.getElementById('appointment_datetime');
-        if (dateInput) {
-            const today = new Date();
-            dateInput.min = today.toISOString().slice(0, 16);
-            dateInput.value = today.toISOString().slice(0, 16);
-        }
-        
-        if (modal) modal.style.display = 'block';
-    };
-
-    window.deleteAppointment = function(appointmentId) {
-        if (confirm('Are you sure you want to delete this appointment?')) {
-            fetch(`/taskmanager/delete-appointment/${appointmentId}/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken'), 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Appointment deleted successfully.');
-                    location.reload();
-                } else {
-                    throw new Error(data.message || 'Failed to delete appointment');
-                }
-            })
-            .catch(error => alert('Error: ' + error.message));
-        }
-    };
-
-    window.openNoteModal = function(patientName, patientId, caregiverId, caregiverName) {
-        const modal = document.getElementById('noteModal');
-        const patientIdInput = document.getElementById('note_patient_id');
-        const modalTitle = modal.querySelector('.modal-header h2');
-        const caregiverSelect = document.getElementById('note_caregiver');
-        
-        if (modalTitle) modalTitle.textContent = `Send Note to Caregiver for ${patientName}`;
-        if (patientIdInput) patientIdInput.value = patientId;
-        
-        // Populate caregiver dropdown
-        if (caregiverSelect) {
-            caregiverSelect.innerHTML = '<option value="">Choose a caregiver...</option>';
-            // Get caregivers for this patient from the page data
-            const patientCard = document.querySelector(`[data-patient-id="${patientId}"]`);
-            if (patientCard) {
-                const caregivers = patientCard.querySelectorAll('.relationship-item[data-caregiver-id]');
-                caregivers.forEach(caregiver => {
-                    const caregiverId = caregiver.getAttribute('data-caregiver-id');
-                    const caregiverName = caregiver.getAttribute('data-caregiver-name');
-                    const option = document.createElement('option');
-                    option.value = caregiverId;
-                    option.textContent = caregiverName;
-                    caregiverSelect.appendChild(option);
-                });
-            }
-        }
-        
-        if (modal) modal.style.display = 'block';
-        
-        // Load existing notes
-        loadPatientNotes(patientId);
-    };
-
-    function loadPatientNotes(patientId) {
-        fetch(`/taskmanager/get-patient-notes/${patientId}/`, {
-            method: 'GET',
-            headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayNotes(patientId, data.notes);
-            } else {
-                console.error('Error loading notes:', data.message);
-            }
-        })
-        .catch(error => console.error('Error loading notes:', error));
-    }
-
-    function displayNotes(patientId, notes) {
-        const notesContainer = document.getElementById(`notes-list-${patientId}`);
-        if (!notesContainer) return;
-        
-        if (notes.length === 0) {
-            notesContainer.innerHTML = '<p class="no-notes">No notes sent yet.</p>';
-            return;
-        }
-        
-        let notesHtml = '';
-        notes.forEach(note => {
-            notesHtml += `
-                <div class="note-item">
-                    <div class="note-header">
-                        <span class="note-date">${note.created_at}</span>
-                        <span class="note-to">To: ${note.caregiver_name}</span>
-                    </div>
-                    <div class="note-content">${note.note}</div>
-                </div>
-            `;
-        });
-        notesContainer.innerHTML = notesHtml;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('appointmentModal');
-        if (modal) {
-            const span = modal.querySelector('.close');
-            if (span) span.onclick = () => modal.style.display = "none";
-            window.onclick = (event) => {
-                if (event.target == modal) modal.style.display = "none";
-            };
-            
-            const appointmentForm = document.getElementById('appointmentForm');
-            if (appointmentForm) {
-                appointmentForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = new FormData(this);
-                    const patientId = formData.get('patient_id');
-                    // Note: Using 'create-appointment' URL which matches urls.py
-                    const url = `/taskmanager/create-appointment/${patientId}/`;
-                    
-                    fetch(url, {
-                        method: 'POST',
-                        body: new URLSearchParams(formData),
-                        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded' }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message || 'Appointment scheduled!');
-                            modal.style.display = 'none';
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Could not schedule appointment.'));
-                        }
-                    })
-                    .catch(error => console.error('Scheduling error:', error));
-                });
-            }
-        }
-
-        // Handle notes modal
-        const noteModal = document.getElementById('noteModal');
-        if (noteModal) {
-            const span = noteModal.querySelector('.close');
-            if (span) span.onclick = () => noteModal.style.display = "none";
-            
-            const noteForm = document.getElementById('noteForm');
-            if (noteForm) {
-                noteForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const formData = new FormData(this);
-                    const patientId = formData.get('patient_id');
-                    const url = `/taskmanager/create-patient-note/${patientId}/`;
-                    
-                    fetch(url, {
-                        method: 'POST',
-                        body: new URLSearchParams(formData),
-                        headers: { 'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded' }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Note sent successfully!');
-                            noteModal.style.display = 'none';
-                            // Reload notes for this patient
-                            loadPatientNotes(patientId);
-                            // Clear form
-                            noteForm.reset();
-                        } else {
-                            alert('Error: ' + (data.message || 'Could not send note.'));
-                        }
-                    })
-                    .catch(error => console.error('Note sending error:', error));
-                });
-            }
-        }
-
-        const taskSelect = document.getElementById('quick_assign_task');
-        const difficultySelect = document.getElementById('quick_assign_difficulty');
-        if (taskSelect && difficultySelect) {
-            const toggleDifficulty = () => {
-                const hasDifficulty = taskSelect.options[taskSelect.selectedIndex].dataset.hasDifficulty === 'true';
-                difficultySelect.required = hasDifficulty;
-                difficultySelect.disabled = !hasDifficulty;
-            };
-            taskSelect.addEventListener('change', toggleDifficulty);
-            toggleDifficulty();
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // For each caregiver card, load notes for the assigned patient-caregiver pair
-        document.querySelectorAll('[id^="notes-list-provider-"]').forEach(function(container) {
-            const matches = container.id.match(/^notes-list-provider-(\d+)-(\d+)$/);
-            if (!matches) return;
-            const patientId = matches[1];
-            const caregiverId = matches[2];
-            loadProviderNotes(patientId, caregiverId, container);
-        });
-    });
-
-    function loadProviderNotes(patientId, caregiverId, container) {
-        fetch(`/taskmanager/get-patient-notes/${patientId}/?caregiver_id=${caregiverId}`, {
-            method: 'GET',
-            headers: { 'X-CSRFToken': getCookie('csrftoken') }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayProviderNotes(container, data.notes);
-            } else {
-                container.innerHTML = '<div class="empty-state"><p>Error loading notes: ' + data.message + '</p></div>';
-            }
-        })
-        .catch(error => {
-            console.error('Error loading notes:', error);
-            container.innerHTML = '<div class="empty-state"><p>Error loading notes.</p></div>';
-        });
-    }
-
-    function displayProviderNotes(container, notes) {
-        if (notes.length === 0) {
-            container.innerHTML = '<div class="empty-state"><p>📝 No notes from provider yet.</p></div>';
-            return;
-        }
-        let notesHtml = '<div class="notes-list">';
-        notes.forEach(note => {
-            notesHtml += `
-                <div class="note-item">
-                    <div class="note-header">
-                        <span class="note-date">${note.created_at}</span>
-                        <span class="note-from">From: Dr. ${note.provider_name}</span>
-                        <button class="action-btn danger-btn delete-note-btn" data-note-id="${note.id}" style="float:right; margin-left:1rem;">🗑️ Delete</button>
-                    </div>
-                    <div class="note-content">${note.note}</div>
-                </div>
-            `;
-        });
-        notesHtml += '</div>';
-        container.innerHTML = notesHtml;
-        attachDeleteNoteListeners(container);
-    }
-
-    function attachDeleteNoteListeners(container) {
-        container.querySelectorAll('.delete-note-btn').forEach(function(btn) {
-            btn.onclick = function() {
-                const noteId = btn.getAttribute('data-note-id');
-                if (!noteId) return;
-                if (!confirm('Are you sure you want to delete this note?')) return;
-                const csrfToken = getCookie('csrftoken');
-                fetch(`/taskmanager/delete-patient-note/${noteId}/`, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': csrfToken }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Find the parent .note-item and remove it, or reload notes
-                        const noteItem = btn.closest('.note-item');
-                        if (noteItem) noteItem.remove();
-                        // Optionally reload the notes list for full sync
-                        // location.reload();
-                    } else {
-                        alert('Error: ' + (data.message || 'Could not delete note.'));
-                    }
-                })
-                .catch(error => alert('Error deleting note: ' + error));
-            };
-        });
-    }
-
-    function attachNoteFormListeners() {
-        document.querySelectorAll('.note-inline-form').forEach(function(form) {
-            if (form.dataset.listenerAttached) return; // Prevent double binding
-            form.dataset.listenerAttached = 'true';
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const patientId = form.getAttribute('data-patient-id');
-                const caregiverId = form.getAttribute('data-caregiver-id');
-                const textarea = form.querySelector('.note-content-input');
-                const note = textarea.value.trim();
-                if (!note) return;
-                const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
-                const url = `/taskmanager/create-patient-note/${patientId}/`;
-                const formData = new URLSearchParams();
-                formData.append('caregiver_id', caregiverId);
-                formData.append('note', note);
-                formData.append('csrfmiddlewaretoken', csrfToken);
-                const notesContainer = document.getElementById(`notes-list-provider-${patientId}-${caregiverId}`);
-                // Show loading
-                if (notesContainer) notesContainer.innerHTML = '<div class="loading-notes">Sending note...</div>';
-                fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        textarea.value = '';
-                        // Reload notes for this caregiver-patient pair
-                        if (notesContainer) loadProviderNotes(patientId, caregiverId, notesContainer);
-                    } else {
-                        alert('Error: ' + (data.message || 'Could not send note.'));
-                        if (notesContainer) loadProviderNotes(patientId, caregiverId, notesContainer);
-                    }
-                })
-                .catch(error => {
-                    alert('Error sending note: ' + error);
-                    if (notesContainer) loadProviderNotes(patientId, caregiverId, notesContainer);
-                });
-            });
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // For each caregiver card, load notes for the assigned patient-caregiver pair
-        document.querySelectorAll('[id^="notes-list-provider-"]').forEach(function(container) {
-            const matches = container.id.match(/^notes-list-provider-(\d+)-(\d+)$/);
-            if (!matches) return;
-            const patientId = matches[1];
-            const caregiverId = matches[2];
-            loadProviderNotes(patientId, caregiverId, container);
-        });
-        attachNoteFormListeners();
-    });
-
-    // Game Testing Functions
-    function openTestGame(gameType, difficulty) {
-        const gameUrls = {
-            'puzzle': {
-                'mild': '{% url "taskmanager:test_puzzle" "mild" %}',
-                'moderate': '{% url "taskmanager:test_puzzle" "moderate" %}',
-                'major': '{% url "taskmanager:test_puzzle" "major" %}'
-            },
-            'color': {
-                'mild': '{% url "taskmanager:test_color" "mild" %}',
-                'moderate': '{% url "taskmanager:test_color" "moderate" %}',
-                'major': '{% url "taskmanager:test_color" "major" %}'
-            },
-            'pairs': {
-                'mild': '{% url "taskmanager:test_pairs" "mild" %}',
-                'moderate': '{% url "taskmanager:test_pairs" "moderate" %}',
-                'major': '{% url "taskmanager:test_pairs" "major" %}'
-            }
-        };
-        
-        const url = gameUrls[gameType][difficulty];
-        if (url) {
-            // Open in a new window/tab for testing
-            window.open(url + '?test_mode=true', '_blank');
-        } else {
-            alert('Game not available for testing.');
-        }
-    }
-
-    function openTestAssessment(assessmentType) {
-        const assessmentUrls = {
-            'memory_questionnaire': '{% url "taskmanager:test_questionnaire" %}',
-            'daily_checklist': '{% url "taskmanager:test_daily_checklist" %}'
-        };
-        
-        const url = assessmentUrls[assessmentType];
-        if (url) {
-            // Open in a new window/tab for testing
-            window.open(url + '?test_mode=true', '_blank');
-        } else {
-            alert('Assessment not available for testing.');
-        }
-    }
-</script>
-{% endblock %}
-
-{% block extra_js %}
-{{ block.super }}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.reset-checklist-form').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (!confirm('Are you sure you want to reset all daily checklist submissions for this patient?')) return;
-            const patientId = form.getAttribute('data-patient-id');
-            const messageSpan = document.getElementById('reset-checklist-message-' + patientId);
-            messageSpan.textContent = '';
-            fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    messageSpan.textContent = data.message || 'Checklist reset!';
-                } else {
-                    messageSpan.textContent = 'Reset failed.';
-                }
-            })
-            .catch(() => {
-                messageSpan.textContent = 'Reset failed.';
-            });
-        });
-    });
-});
-</script>
 {% endblock %} 
