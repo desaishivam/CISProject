@@ -1,6 +1,6 @@
 // Wait for DOM to be loaded - all elements available first
 document.addEventListener('DOMContentLoaded', function () {
-    // Helper to get CSRF cookie
+    // Get token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-    // Existing delete task AJAX logic
+    // Existing delete logic
     document.querySelectorAll('.patient-task-management table form[action*="delete-task"]').forEach(function(form) {
         // add submit to each form
         form.addEventListener('submit', function(e) {
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-    // Reset daily checklist AJAX
+    // Reset daily checklist
     document.querySelectorAll('.reset-checklist-form').forEach(function(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -288,5 +288,4 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-    // Add more refactored JS from provider_dashboard.html here as needed
 });
