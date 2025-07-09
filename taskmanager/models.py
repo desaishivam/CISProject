@@ -5,17 +5,13 @@ from .constants import TASK_TYPES, TASK_STATUS, DIFFICULTY_LEVELS
 import json
 from datetime import date
 
-# ===================== DATABASE MODELS =====================
-# This file defines the database schema for the app using Django ORM models.
-# Each class represents a table, and each field is a column in the table.
-# Relationships (ForeignKey, ManyToMany, etc.) define how models are linked.
-
+# DB models and their relations
 class Task(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     task_type = models.CharField(max_length=50, choices=TASK_TYPES)
     
-    # Difficulty level (only for games)
+    # Difficulty level - games
     difficulty = models.CharField(
         max_length=50, 
         choices=DIFFICULTY_LEVELS, 
@@ -39,14 +35,14 @@ class Task(models.Model):
     due_date = models.DateTimeField(blank=True, null=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
-    # Task configuration (JSON field for flexibility)
+    # Task configuration - json for persistance
     task_config = models.JSONField(default=dict, blank=True)
     
     def __str__(self):
         return f"{self.title} - {self.assigned_to.user.username}"
     
     def get_difficulty_display_for_games(self):
-        """Only show difficulty for games, not assessments"""
+        # only difficulty is shown on games
         from .constants import GAME_TYPES
         if self.task_type in GAME_TYPES:
             return self.get_difficulty_display()
@@ -56,13 +52,21 @@ class Task(models.Model):
         ordering = ['-created_at']
 
 class QuestionnaireTemplate(models.Model):
-    """Template for different types of tasks and assessments"""
+    """
+    Templates to create questionnaies and assessments.
+
+    Blueprint for task types. Create template once and reuse them to assign tasks to patients.
+    """
+    # Fields - Unique ID, Description, Type of Task
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     task_type = models.CharField(max_length=50, choices=TASK_TYPES)
-    questions = models.JSONField(default=list)  # List of question objects
+    # JSON array to store questions
+    questions = models.JSONField(default=list) 
+    # Date fields
     created_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Currently working on
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
@@ -72,12 +76,22 @@ class QuestionnaireTemplate(models.Model):
         ordering = ['name']
 
 class TaskResponse(models.Model):
-    """Patient responses to tasks"""
+    """
+    Records the aptients response for assigned tasks
+
+    Grabs interactions and answers from patients for tasks (all types)
+    Scores raw responses and score calculations
+    """
+    # Each task has at most one response
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='response')
-    responses = models.JSONField(default=dict)  # Question ID -> Answer mapping
+
+    # JSON object mapping question IDs to answers
+    responses = models.JSONField(default=dict)
+    # Dates
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    score = models.FloatField(null=True, blank=True)  # For scored tasks and games
+    # For scored tasks and games
+    score = models.FloatField(null=True, blank=True)  
     notes = models.TextField(blank=True)
     
     def __str__(self):
@@ -87,15 +101,24 @@ class TaskResponse(models.Model):
         ordering = ['-started_at']
 
 class TaskNotification(models.Model):
-    """Notifications related to tasks"""
+    """
+    Notifications system for task events
+
+    Tracks and manages notifications sent to users about task assignments, reminders, completions, etc
+    Tracks task status, changes, upcoming deadlines
+    """
+    # Task linking to the notification
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='notifications')
+    # Who receives the notification
     recipient = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    # What the message is
     message = models.CharField(max_length=500)
     notification_type = models.CharField(max_length=50, choices=[
         ('assigned', 'Task Assigned'),
         ('reminder', 'Task Reminder'),
         ('completed', 'Task Completed'),
     ])
+    # Dates
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)
     
@@ -106,10 +129,17 @@ class TaskNotification(models.Model):
         ordering = ['-created_at']
 
 class Appointment(models.Model):
-    """Appointments between providers and patients"""
+    """
+    Schedluing system for provider-patient meetings.
+
+    Manages the appointments beteween healhcare providers and patients.
+    """
+    # Provider - Patient relation
     provider = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='provided_appointments')
     patient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='appointments')
+    # Time
     datetime = models.DateTimeField()
+    # notes and additional context for appointment
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -120,10 +150,19 @@ class Appointment(models.Model):
         ordering = ['datetime']
 
 class PatientNote(models.Model):
-    """Notes from providers to caregivers about patients"""
+    """
+    Communication notes between proviers and caregivers surrounding patient care.
+
+    Providers can share observations, recommendations, or updates about a patient directly with their caregivers.
+    Notes keep continuity of care and keep caregivers informed.
+    """
+
+    # Provider / Patient / Caregiver relations
     provider = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='sent_notes')
     patient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='patient_notes')
     caregiver = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='received_notes')
+
+    # The note to send
     note = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -134,14 +173,25 @@ class PatientNote(models.Model):
         ordering = ['-created_at']
 
 class DailyChecklistSubmission(models.Model):
-    """Daily checklist submission - one per patient per day"""
+    """
+    Daily checklist submission - one per patient each day
+
+    Tracks daily health and wellness check-ins for patients.
+    Monitoring with one submission per day. 
+    Submitted by patient OR a caregiver working with them.
+    """
+    # the patient checklist is assigned to
     patient = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='daily_checklist_submissions')
+    # Dates
     submitted_by = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='submitted_daily_checklists')
     submission_date = models.DateField(auto_now_add=True)
+    # Response in JSON format to the checklist
     responses = models.JSONField(default=dict)
+    # Assigned at?
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
+        # One submission per day per patient enforced in DB
         unique_together = ['patient', 'submission_date']
         ordering = ['-submission_date']
     
@@ -150,7 +200,12 @@ class DailyChecklistSubmission(models.Model):
     
     @classmethod
     def get_today_submission(cls, patient):
-        """Get today's submission for a patient, if it exists"""
+        """
+        Get today's submission for a patient, if it exists
+        
+        Returns:
+            DailyChecklistSubmission or None if not submitted today
+        """
         today = date.today()
         try:
             return cls.objects.get(patient=patient, submission_date=today)
@@ -159,5 +214,10 @@ class DailyChecklistSubmission(models.Model):
     
     @classmethod
     def can_submit_today(cls, patient):
-        """Check if a patient can submit the daily checklist today"""
+        """
+        Check if a patient can submit the daily checklist today
+        
+        Returns:
+            bool: True if no submission for today, False otherwise
+        """
         return cls.get_today_submission(patient) is None

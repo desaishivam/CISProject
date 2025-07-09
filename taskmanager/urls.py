@@ -3,11 +3,11 @@ from . import views
 
 app_name = 'taskmanager'
 
-# ===================== URL ROUTING =====================
-# This file maps URL patterns to view functions/classes.
-# Each path() or re_path() connects a URL to a view, optionally with parameters.
-# Used by Django to route incoming HTTP requests to the correct logic.
+"""
+URL Config
 
+Defines URL patterns for app, mapping corresponding functions to role and functionality.
+"""
 urlpatterns = [
     # Provider URLs
     path('assign-task/', views.assign_task, name='assign_task'),
@@ -50,7 +50,7 @@ urlpatterns = [
     path('get-patient-notes/<int:patient_id>/', views.get_patient_notes, name='get_patient_notes'),
     path('delete-patient-note/<int:note_id>/', views.delete_patient_note, name='delete_patient_note'),
     
-    # Game Testing URLs (for provider dashboard)
+    # Game Testing URLs
     path('test/puzzle/<str:difficulty>/', views.test_puzzle, name='test_puzzle'),
     path('test/color/<str:difficulty>/', views.test_color, name='test_color'),
     path('test/pairs/<str:difficulty>/', views.test_pairs, name='test_pairs'),

@@ -1,10 +1,4 @@
-"""
-Constants and configuration for the task management system.
-"""
-
-# ===================== APP CONSTANTS =====================
-# This file defines constants used throughout the app, such as task types, difficulty levels, and template configs.
-# These are used for consistency and to avoid magic strings in the codebase.
+# Constants to use throughout the app
 
 # Task Types Configuration
 TASK_TYPES = (
@@ -25,14 +19,14 @@ DIFFICULTY_LEVELS = (
     ('major', 'Major'),
 )
 
-# Task Status Configuration
+# Task Status Config
 TASK_STATUS = (
     ('assigned', 'Assigned'),
     ('in_progress', 'In Progress'),
     ('completed', 'Completed'),
 )
 
-# Task Templates Configuration - Updated for games/non-games structure
+# Task Templates Configuration
 TASK_TEMPLATES = {
     'puzzle': {
         'template_name': 'tasks/games/puzzle/{difficulty}/take.html',
@@ -90,7 +84,7 @@ TASK_TEMPLATES = {
     },
 }
 
-# Difficulty Configurations for Future Development
+# Difficulty Configurations
 DIFFICULTY_CONFIGS = {
     'puzzle': {
         'mild': {

@@ -1,6 +1,8 @@
-/* static/css/pages.css */
+/*
+    Styles for pages
+*/
 
-/* Enhanced Landing page styles */
+/* Landing page */
 .hero-section {
     text-align: center;
     padding: 4rem 1rem;
@@ -124,7 +126,7 @@
     line-height: 1.6;
 }
 
-/* Enhanced About and Services pages */
+/* About + Service */
 .about-container h1, 
 .services-container h1 {
     background: linear-gradient(135deg, var(--neutral-800), var(--provider-primary));
@@ -182,7 +184,7 @@
     display: block;
 }
 
-/* Enhanced CogniCon styles */
+/* CogniCon */
 .cognicon-container {
     max-width: 1200px;
     margin: 0 auto;

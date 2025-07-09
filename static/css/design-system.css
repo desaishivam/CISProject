@@ -1,9 +1,3 @@
-/* ========================================
-   COGNICARE DESIGN SYSTEM (Simplified)
-   ========================================
-   This file contains reusable components and utilities
-   for basic, classic styling.
-======================================== */
 
 /* FORM COMPONENTS */
 .form-page { 
@@ -199,7 +193,7 @@
     color: white;
 }
 
-/* BASIC LAYOUT UTILS */
+/* Layout Overriding */
 .mt-1 { margin-top: 0.5rem; }
 .mt-2 { margin-top: 1rem; }
 .mt-3 { margin-top: 1.5rem; }
@@ -243,10 +237,8 @@
 .h-full { height: 100%; }
 .h-screen { height: 100vh; }
 
-/* ========================================
-   TASK COMPONENTS
-======================================== */
 
+/* For Tasks */
 .task-container {
     max-width: 800px;
     margin: 0 auto;
@@ -332,10 +324,7 @@
     color: #2c3e50;
 }
 
-/* ========================================
-   CARD COMPONENTS
-======================================== */
-
+/* For Cards */
 .card {
     background: white;
     border-radius: 16px;
@@ -373,10 +362,8 @@
     border-top: 1px solid #dee2e6;
 }
 
-/* ========================================
-   GRID SYSTEM
-======================================== */
 
+/* For Grids */
 .grid {
     display: grid;
     gap: 1.5rem;
@@ -391,9 +378,7 @@
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-/* ========================================
-   RESPONSIVE DESIGN
-======================================== */
+/* Responsiveness + media queries */
 
 @media (max-width: 768px) {
     .form-page {

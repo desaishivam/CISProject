@@ -136,7 +136,7 @@ def provider_dashboard(request):
         assigned_by=provider_profile
     ).select_related('assigned_to__user').order_by('-created_at')[:10]
     
-    # New: handle patient selection for task management
+    # Handle patient selection for task management
     selected_patient = None
     patient_tasks = []
     if request.method == 'POST' and 'selected_patient' in request.POST:
@@ -284,7 +284,7 @@ def patient_dashboard(request):
         messages.error(request, 'You do not have permission to access the patient dashboard.')
         return redirect('home')
     
-    # Fetch all pending tasks for the patient
+    # Get all pending tasks for the patient
     from taskmanager.models import Task, Appointment, DailyChecklistSubmission
     pending_tasks = Task.objects.filter(
         assigned_to=request.user.profile,

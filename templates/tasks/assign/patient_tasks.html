@@ -59,7 +59,7 @@
     </div>
     {% endif %}
 
-    <!-- Completed Tasks (only for non-patients) -->
+    <!-- Completed Tasks -->
     {% if not request.user.profile.user_type == 'patient' and completed_tasks %}
     <div class="table-section">
         <h2 class="section-title">✅ Completed Tasks</h2>
@@ -274,15 +274,15 @@
     }
     
     .difficulty-dot.mild {
-        background-color: #e74c3c; /* Red (most severe) */
+        background-color: #e74c3c; 
     }
     
     .difficulty-dot.moderate {
-        background-color: #f39c12; /* Orange/Yellow (medium) */
+        background-color: #f39c12;
     }
     
     .difficulty-dot.major {
-        background-color: #2ecc71; /* Green (least severe) */
+        background-color: #2ecc71;
     }
     
     .difficulty-mild {

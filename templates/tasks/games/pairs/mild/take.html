@@ -257,9 +257,9 @@ function flipCard(index) {
         updateStats();
         const [i1, i2] = state.flipped;
         if (state.cards[i1].id === state.cards[i2].id) {
-            // Step 1: Show both as selected (blue)
+            // Step 1: Show both as selected
             setTimeout(() => {
-                // Step 2: Mark as matched and re-render (turn green)
+                // Step 2: Mark as matched and re-render
                 state.cards[i1].matched = true;
                 state.cards[i2].matched = true;
                 state.matched++;
@@ -273,8 +273,8 @@ function flipCard(index) {
                         state.completed = true;
                         setTimeout(gameCompleted, 500);
                     }
-                }, 400); // Show green for 400ms
-            }, 300); // Show blue for 300ms
+                }, 400);
+            }, 300);
         } else {
             state.wrong = [i1, i2];
             renderGame();

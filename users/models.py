@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     USER_TYPES = (
         ('admin', 'Administrator'),  # Admin users
-        ('provider', 'Healthcare Provider'),  # Docs + Nurses
+        ('provider', 'Healthcare Provider'),  # Providers
         ('caregiver', 'Caregiver'),  # Caregivers
         ('patient', 'Patient'),  # All patients
     )

@@ -49,14 +49,14 @@
     </main>
 
     <script>
-        // Initialize all MDC components
+        // Init components
         window.addEventListener('load', function() {
             document.querySelectorAll('.mdc-button').forEach(function(button) {
                 mdc.ripple.MDCRipple.attachTo(button);
             });
         });
 
-        // Mobile menu functionality
+        // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const navLinks = document.getElementById('navLinks');
@@ -72,7 +72,7 @@
                     }
                 });
 
-                // Close mobile menu when clicking outside
+                // Auto close mobile menu clicking outside
                 document.addEventListener('click', function(e) {
                     if (!mobileMenuBtn.contains(e.target) && !navLinks.contains(e.target)) {
                         navLinks.classList.remove('mobile-open');
@@ -83,7 +83,7 @@
             }
         });
 
-        // Add smooth scrolling for anchor links
+        // Smooth scrolling
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
@@ -99,7 +99,7 @@
             });
         });
 
-        // Set the theme based on user type
+        // Theme setting
         document.addEventListener('DOMContentLoaded', function() {
             const userType = "{{ user.profile.user_type|default:'default' }}";
             if (document.body) {

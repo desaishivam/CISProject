@@ -149,18 +149,18 @@
       const dragged = document.getElementById(id);
       const expected = dragged.dataset.category;
       const dropZoneId = e.currentTarget.id;
-      // Snap-back if incorrect
+      // Incorrect
       if (dropZoneId !== expected) {
         wordBank.appendChild(dragged); // move it back
         alert("Oops! That's not the right category.");
         moveCount++; // Count as a move even if incorrect
-        updateSubmitButton(); // Update button state
+        updateSubmitButton(); // Update button
         return;
       }
       e.currentTarget.appendChild(dragged);
       e.currentTarget.classList.remove("dragover");
       moveCount++; // Count successful move
-      updateSubmitButton(); // Update button state
+      updateSubmitButton(); // Update button
     }
     document.querySelectorAll('.draggable').forEach(elem => {
       elem.addEventListener('dragstart', e => {
@@ -228,7 +228,7 @@
       };
       console.log('Submitting results:', results);
       
-      // Get CSRF token from the hidden input field
+      // Grab token
       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       
       fetch(window.location.href, {
@@ -256,7 +256,7 @@
           window.location.href = data.redirect;
         } else {
           console.log('No redirect URL provided, using fallback');
-          // Fallback to patient dashboard if no redirect provided
+          // Dashboard redirect fallback
           window.location.href = '/patient-dashboard/';
         }
       })

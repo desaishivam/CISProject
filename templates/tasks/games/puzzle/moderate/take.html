@@ -155,7 +155,7 @@
       e.currentTarget.appendChild(dragged);
       e.currentTarget.classList.remove("dragover");
       moveCount++; // Count successful move
-      updateSubmitButton(); // Update button state
+      updateSubmitButton(); // Update button
     }
     document.querySelectorAll('.draggable').forEach(elem => {
       elem.addEventListener('dragstart', e => {
@@ -209,7 +209,7 @@
       };
       console.log('Submitting results:', results);
       
-      // Get CSRF token from the hidden input field
+      // Grab token
       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       
       fetch(window.location.href, {
@@ -236,7 +236,7 @@
           window.location.href = data.redirect;
         } else {
           console.log('No redirect URL provided, using fallback');
-          // Fallback to patient dashboard if no redirect provided
+          // Patient dashboard fallback
           window.location.href = '/patient-dashboard/';
         }
       })
@@ -274,7 +274,7 @@
     }
     document.addEventListener('DOMContentLoaded', function() {
       shuffleWordBank();
-      updateSubmitButton(); // Initialize button state
+      updateSubmitButton(); // Initialize button 
     });
   </script>
 </div>

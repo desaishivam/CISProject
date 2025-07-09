@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="landing-page">
-    <!-- Enhanced Hero Section -->
+    <!-- Hero -->
 <div class="hero-section">
     <div class="hero-content">
             <div class="hero-badge">
@@ -13,18 +13,10 @@
             </div>
             <h1>Transform Memory Care with CogniCare</h1>
             <p class="hero-tagline">Empowering patients, caregivers, and healthcare professionals through innovative technology and compassionate care solutions.</p>
-            <div class="hero-stats">
-                <!-- Removed stat-item/stat-number/stat-label blocks -->
-            </div>
         </div>
     </div>
 
-    <!-- Enhanced Features Section -->
-    <!-- Features section removed as requested -->
-
-    <!-- Solutions Overview Section removed as requested -->
-
-    <!-- Quick Access Section -->
+    <!-- Quick Access -->
     <div class="quick-access-section">
         <div class="section-header">
             <h2>Access Your Portal</h2>
@@ -72,7 +64,7 @@
         padding: 0;
     }
 
-    /* Enhanced Hero Section */
+    /* Hero */
     .hero-section {
         background: linear-gradient(135deg, 
             rgba(255, 255, 255, 0.95) 0%, 
@@ -164,7 +156,7 @@
         margin-top: 0.5rem;
     }
 
-    /* Enhanced Sections */
+    /* Sections */
     .features-section,
     .quick-access-section {
         margin-bottom: 5rem;
@@ -193,7 +185,7 @@
         margin: 0 auto;
     }
 
-    /* Enhanced Feature Cards */
+    /* Feature Cards */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -278,7 +270,7 @@
         border: 1px solid var(--tag-border, rgba(30, 58, 138, 0.2));
     }
 
-    /* Theme-specific styling */
+    /* Theme styling */
     .patient-theme {
         --card-gradient: linear-gradient(135deg, var(--patient-primary), var(--patient-accent));
         --icon-bg: linear-gradient(135deg, var(--patient-primary), var(--patient-secondary));
@@ -456,7 +448,7 @@
         transform: translateX(5px);
     }
 
-    /* Access card specific themes */
+    /* Card specific themes */
     .patient-access:hover {
         border-color: var(--patient-primary);
         background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(124, 58, 237, 0.05));
@@ -507,7 +499,7 @@
         color: var(--provider-primary);
     }
 
-    /* Responsive Design */
+    /* Responsive */
     @media (max-width: 768px) {
         .hero-content h1 {
             font-size: 2.5rem;

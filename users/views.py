@@ -73,7 +73,7 @@ def admin_dashboard(request):
         'providers': providers,
         'caregivers': caregivers,
         'patients': patients,
-        **task_statistics  # Unpack task statistics into context
+        **task_statistics  # Push task stats to context
     }
     return render(request, 'dashboards/admin_dashboard.html', context)
 
@@ -136,7 +136,7 @@ def provider_dashboard(request):
         assigned_by=provider_profile
     ).select_related('assigned_to__user').order_by('-created_at')[:10]
     
-    # New: handle patient selection for task management
+    # Handle patient selection for task management
     selected_patient = None
     patient_tasks = []
     daily_checklists = []

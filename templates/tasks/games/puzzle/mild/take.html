@@ -138,7 +138,7 @@
   </style>
   <script>
     // Set test mode flag from template
-    const isTestMode = {% if test_mode %}true{% else %}false{% endif %};
+    const isTestMode = window.isTestMode;
     
     const correctCategories = {
       Apple: "fruit",
@@ -182,7 +182,7 @@
       e.currentTarget.appendChild(dragged);
       e.currentTarget.classList.remove("dragover");
       moveCount++; // Count successful move
-      updateSubmitButton(); // Update button state
+      updateSubmitButton(); // Update button
     }
     document.querySelectorAll('.draggable').forEach(elem => {
       elem.addEventListener('dragstart', e => {
@@ -218,7 +218,7 @@
         difficulty: 'mild'
       };
       console.log('Submitting results:', results);
-      // Use CSRF token from hidden input
+      // Grab token
       const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       fetch(window.location.href, {
         method: 'POST',
@@ -244,7 +244,7 @@
           window.location.href = data.redirect;
         } else {
           console.log('No redirect URL provided, using fallback');
-          // Check if we're in test mode and redirect accordingly
+          // Check test mode and redirect accordingly
           if (isTestMode) {
             window.location.href = '/provider-dashboard/';
           } else {
@@ -285,7 +285,7 @@
     }
     document.addEventListener('DOMContentLoaded', function() {
       shuffleWordBank();
-      updateSubmitButton(); // Initialize button state
+      updateSubmitButton(); // Initialize button
     });
   </script>
 </div>

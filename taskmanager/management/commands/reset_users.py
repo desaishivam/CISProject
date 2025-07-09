@@ -3,17 +3,18 @@ from django.contrib.auth.models import User
 from users.models import UserProfile
 from django.db import transaction
 
+# default standard users for demo / testing
 class Command(BaseCommand):
     help = 'Reset all users to only the 4 standard accounts'
 
     def handle(self, *args, **options):
         with transaction.atomic():
-            # Delete all existing users (this will cascade to UserProfile)
+            # clear all users
             User.objects.all().delete()
             self.stdout.write(self.style.SUCCESS('Deleted all existing users'))
             
-            # Create the 4 standard accounts
-            # --- Superuser ---
+            # 4 standard accounts
+            # Admin
             admin_user = User.objects.create_superuser(
                 username='admin',
                 email='admin@example.com',
@@ -21,7 +22,7 @@ class Command(BaseCommand):
             )
             UserProfile.objects.create(user=admin_user, user_type='admin')
             
-            # --- Provider ---
+            # Provider
             provider_user = User.objects.create_user(
                 username='provider',
                 password='provider',
@@ -30,7 +31,7 @@ class Command(BaseCommand):
             )
             provider_profile = UserProfile.objects.create(user=provider_user, user_type='provider')
             
-            # --- Patient ---
+            # Patient
             patient_user = User.objects.create_user(
                 username='patient',
                 password='patient',
@@ -39,7 +40,7 @@ class Command(BaseCommand):
             )
             patient_profile = UserProfile.objects.create(user=patient_user, user_type='patient', provider=provider_profile)
             
-            # --- Caregiver ---
+            # Caregiver
             caregiver_user = User.objects.create_user(
                 username='caregiver',
                 password='caregiver',
@@ -53,7 +54,8 @@ class Command(BaseCommand):
                 patient=patient_profile
             )
             
-            self.stdout.write(self.style.SUCCESS('Successfully created superuser: admin/admin'))
+            # success messages
+            self.stdout.write(self.style.SUCCESS('Successfully created admin: admin/admin'))
             self.stdout.write(self.style.SUCCESS('Successfully created provider: provider/provider'))
             self.stdout.write(self.style.SUCCESS('Successfully created patient: patient/patient'))
             self.stdout.write(self.style.SUCCESS('Successfully created caregiver: caregiver/caregiver'))

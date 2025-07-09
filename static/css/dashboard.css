@@ -1,6 +1,8 @@
-/* static/css/dashboard.css */
+/*
+Styles for dashboards
+*/
 
-/* Dashboard Container */
+/* Container */
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -8,7 +10,7 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Dashboard Header - Base styles */
+/* Header - Base */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -20,7 +22,7 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* Role-specific header gradients */
+/* Role-specific */
 .dashboard-header.patient {
     background: linear-gradient(135deg, var(--patient-primary) 0%, var(--patient-secondary) 100%);
 }
@@ -76,7 +78,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* Dashboard Sections */
+/* Sections */
 .dashboard-section {
     background: white;
     border-radius: 16px;

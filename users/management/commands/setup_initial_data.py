@@ -3,12 +3,17 @@ from django.contrib.auth.models import User
 from users.models import UserProfile
 from django.db import transaction
 
+"""
+Setting users for the application
+
+Updates passwords as well.
+"""
 class Command(BaseCommand):
     help = 'Set up initial data for the application, updating passwords if users exist.'
 
     def handle(self, *args, **options):
         with transaction.atomic():
-            # --- Superuser ---
+            # Admin
             try:
                 superuser = User.objects.get(username='admin')
                 superuser.set_password('admin')
@@ -20,7 +25,7 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(self.style.SUCCESS('Successfully created superuser: admin/admin'))
 
-            # --- Provider ---
+            # Provider
             try:
                 provider_user = User.objects.get(username='provider')
                 provider_user.set_password('provider')
@@ -35,7 +40,7 @@ class Command(BaseCommand):
 
             provider_profile = UserProfile.objects.get(user=provider_user)
 
-            # --- Patient ---
+            # Patient
             try:
                 patient_user = User.objects.get(username='patient')
                 patient_user.set_password('patient')
@@ -50,7 +55,7 @@ class Command(BaseCommand):
             
             patient_profile = UserProfile.objects.get(user=patient_user)
 
-            # --- Caregiver ---
+            # Caregiver
             try:
                 caregiver_user = User.objects.get(username='caregiver')
                 caregiver_user.set_password('caregiver')

@@ -1,4 +1,9 @@
-/* Game Testing Section Styles */
+/*
+    Styles for the provider dashboard
+*/
+
+/* Game Testing Section */
+
 .game-testing-container {
     background: #f8f9fa;
     border-radius: 12px;
@@ -137,7 +142,7 @@
     background: #0056b3;
 }
 
-/* Responsive Design */
+/* Responsiveness */
 @media (max-width: 768px) {
     .game-testing-container {
         padding: 1rem;

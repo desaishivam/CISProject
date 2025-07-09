@@ -13,17 +13,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Use BASE_DIR for subpaths throughout project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-n&@ufrn8f-t)wxz%9jlv%9*)6s)!#!s1y(2^b#*(ai77976tl0')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = [
@@ -53,7 +51,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'taskmanager',
-    # 'questionnaires',  # Removed since the app no longer exists
 ]
 
 MIDDLEWARE = [
@@ -66,7 +63,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Add whitenoise middleware if available (for production)
 try:
     import whitenoise
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
@@ -145,7 +141,6 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'railway' / 'staticfiles'
 
-# Whitenoise configuration for static files (only if available)
 try:
     import whitenoise
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -157,7 +152,7 @@ except ImportError:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Authentication settings
+# Auth settings
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'

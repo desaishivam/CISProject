@@ -26,13 +26,13 @@ urlpatterns = [
     path('carecenter/', TemplateView.as_view(template_name='pages/carecenter.html'), name='carecenter'),
     path('cognicon/', TemplateView.as_view(template_name='pages/cognicon.html'), name='cognicon'),
     
-    # Include user authentication URLs
+    # User auth urls
     path('', include('users.urls')),
     
-    # Include questionnaires URLs
+    # Questionaire URLs
     path('taskmanager/', include('taskmanager.urls')),
     
-    # Account management URLs
+    # Account management
     path('create-provider/', users_views.create_provider, name='create_provider'),
     path('create-patient/', users_views.create_patient, name='create_patient'),
     path('create-caregiver/', users_views.create_caregiver, name='create_caregiver'),
