@@ -51,8 +51,13 @@
     <h1>Related Pairing Results</h1>
     
     <div class="stat-row">
-      <span class="stat-label">Moves Made:</span>
-      <span class="stat-value">{{ task_response.responses.moves }}</span>
+      <span class="stat-label">Score:</span>
+      <span class="stat-value">{{ task_response.responses.score|default:"0" }} / {{ task_response.responses.total|default:"0" }}</span>
+    </div>
+    
+    <div class="stat-row">
+      <span class="stat-label">Total Moves:</span>
+      <span class="stat-value">{{ task_response.responses.moves|default:"0" }}</span>
     </div>
     
     <div class="stat-row">

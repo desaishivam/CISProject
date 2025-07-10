@@ -255,10 +255,12 @@
 
   function finish() {
     clearInterval(timer);
+    const totalColors = colors.length;
     const results = {
-      score: matches * 10,
+      score: matches,
+      total: totalColors,
       moves: moves,
-      time: timerEl.textContent,
+      time: seconds,
       difficulty: 'major'
     };
     fetch(window.location.href, {
@@ -270,7 +272,11 @@
       body: JSON.stringify(results)
     }).then((res) => res.json())
     .then((data) => {
-      window.location.href = '/patient-dashboard/';
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      } else {
+        window.location.href = '/patient-dashboard/';
+      }
     }).catch((err) => {
       console.error('Error submitting results:', err);
       window.location.href = '/patient-dashboard/';

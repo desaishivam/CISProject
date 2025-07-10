@@ -147,16 +147,6 @@
       e.preventDefault();
       const id = e.dataTransfer.getData("text");
       const dragged = document.getElementById(id);
-      const expected = dragged.dataset.category;
-      const dropZoneId = e.currentTarget.id;
-      // Incorrect
-      if (dropZoneId !== expected) {
-        wordBank.appendChild(dragged); // move it back
-        alert("Oops! That's not the right category.");
-        moveCount++; // Count as a move even if incorrect
-        updateSubmitButton(); // Update button
-        return;
-      }
       e.currentTarget.appendChild(dragged);
       e.currentTarget.classList.remove("dragover");
       moveCount++; // Count successful move

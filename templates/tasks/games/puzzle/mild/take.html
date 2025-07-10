@@ -244,12 +244,7 @@
           window.location.href = data.redirect;
         } else {
           console.log('No redirect URL provided, using fallback');
-          // Check test mode and redirect accordingly
-          if (isTestMode) {
-            window.location.href = '/provider-dashboard/';
-          } else {
-            window.location.href = '/patient-dashboard/';
-          }
+          window.location.href = '/patient-dashboard/';
         }
       })
       .catch(error => {

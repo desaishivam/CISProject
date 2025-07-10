@@ -271,9 +271,13 @@ function updateTimer() {
 function gameCompleted() {
     clearInterval(state.timer);
     const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+    const totalPairs = state.cards.length / 2;
     const results = {
+        score: state.matched,
+        total: totalPairs,
         moves: state.moves,
-        time: elapsedSeconds
+        time: elapsedSeconds,
+        difficulty: 'major'
     };
     fetch(window.location.href, {
         method: 'POST',
