@@ -43,7 +43,7 @@ def assign_task(request, patient_id=None):
             
             logger.info(f'Assigning task: {data} for patient_id={patient_id} by provider={request.user.profile.id}')
             task_type = data.get('task_type')
-            difficulty = data.get('difficulty', 'mild')
+            difficulty = data.get('difficulty', 'hard')
             
             # Always set title to the display name for the selected task_type
             type_dict = dict(TASK_TYPES)
@@ -105,7 +105,7 @@ def assign_task(request, patient_id=None):
             description = request.POST.get('description')
             due_date = request.POST.get('due_date')
             template_id = request.POST.get('template_id')
-            difficulty = request.POST.get('difficulty', 'mild')  # Default to mild
+            difficulty = request.POST.get('difficulty', 'hard')  # Default to hard
             
             # Always set title to the display name for the selected task_type
             type_dict = dict(TASK_TYPES)
@@ -202,8 +202,8 @@ def assign_multiple_tasks(request):
             if task_type in GAME_TYPES:
                 difficulty = task_data.get('difficulty')
                 if not difficulty:
-                    # If missing, skip or default to 'mild'
-                    difficulty = 'mild'
+                    # If missing, skip or default to 'hard'
+                    difficulty = 'hard'
             else:
                 difficulty = None
             
@@ -1342,7 +1342,7 @@ def test_puzzle(request, difficulty):
         messages.error(request, 'Access denied.')
         return redirect('provider_dashboard')
     
-    if difficulty not in ['mild', 'moderate', 'major']:
+    if difficulty not in ['hard', 'medium', 'easy']:
         messages.error(request, 'Invalid difficulty level.')
         return redirect('provider_dashboard')
     
@@ -1383,7 +1383,7 @@ def test_color(request, difficulty):
         messages.error(request, 'Access denied.')
         return redirect('provider_dashboard')
     
-    if difficulty not in ['mild', 'moderate', 'major']:
+    if difficulty not in ['hard', 'medium', 'easy']:
         messages.error(request, 'Invalid difficulty level.')
         return redirect('provider_dashboard')
     
@@ -1424,7 +1424,7 @@ def test_pairs(request, difficulty):
         messages.error(request, 'Access denied.')
         return redirect('provider_dashboard')
     
-    if difficulty not in ['mild', 'moderate', 'major']:
+    if difficulty not in ['hard', 'medium', 'easy']:
         messages.error(request, 'Invalid difficulty level.')
         return redirect('provider_dashboard')
     

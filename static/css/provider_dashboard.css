@@ -86,30 +86,30 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-.difficulty-mild {
+.difficulty-hard {
     background: #dc3545;
     color: white;
 }
 
-.difficulty-mild:hover {
+.difficulty-hard:hover {
     background: #c82333;
 }
 
-.difficulty-moderate {
+.difficulty-medium {
     background: #fd7e14;
     color: white;
 }
 
-.difficulty-moderate:hover {
+.difficulty-medium:hover {
     background: #e8690b;
 }
 
-.difficulty-major {
+.difficulty-easy {
     background: #28a745;
     color: white;
 }
 
-.difficulty-major:hover {
+.difficulty-easy:hover {
     background: #218838;
 }
 

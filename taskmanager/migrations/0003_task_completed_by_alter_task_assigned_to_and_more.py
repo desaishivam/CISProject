@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='task',
             name='difficulty',
-            field=models.CharField(blank=True, choices=[('mild', 'Mild'), ('moderate', 'Moderate'), ('major', 'Major')], help_text='Cognitive difficulty level for games', max_length=50, null=True),
+            field=models.CharField(blank=True, choices=[('hard', 'Hard'), ('medium', 'Medium'), ('easy', 'Easy')], help_text='Cognitive difficulty level for games', max_length=50, null=True),
         ),
         migrations.AlterField(
             model_name='task',

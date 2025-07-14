@@ -14,9 +14,9 @@ ASSESSMENT_TYPES = ('memory_questionnaire',)
 
 # Difficulty Levels for Games
 DIFFICULTY_LEVELS = (
-    ('mild', 'Mild'),
-    ('moderate', 'Moderate'), 
-    ('major', 'Major'),
+    ('hard', 'Hard'),
+    ('medium', 'Medium'), 
+    ('easy', 'Easy'),
 )
 
 # Task Status Config
@@ -34,14 +34,14 @@ TASK_TEMPLATES = {
         'icon': '🧩',
         'description': 'Drag & Drop Puzzle game',
         'templates': {
-            'mild': 'tasks/games/puzzle/mild/take.html',
-            'moderate': 'tasks/games/puzzle/moderate/take.html',
-            'major': 'tasks/games/puzzle/major/take.html',
+            'hard': 'tasks/games/puzzle/hard/take.html',
+            'medium': 'tasks/games/puzzle/medium/take.html',
+            'easy': 'tasks/games/puzzle/easy/take.html',
         },
         'results_templates': {
-            'mild': 'tasks/games/puzzle/mild/results.html',
-            'moderate': 'tasks/games/puzzle/moderate/results.html',
-            'major': 'tasks/games/puzzle/major/results.html',
+            'hard': 'tasks/games/puzzle/hard/results.html',
+            'medium': 'tasks/games/puzzle/medium/results.html',
+            'easy': 'tasks/games/puzzle/easy/results.html',
         }
     },
     'color': {
@@ -50,14 +50,14 @@ TASK_TEMPLATES = {
         'icon': '🎨',
         'description': 'Color Matching game',
         'templates': {
-            'mild': 'tasks/games/color/mild/take.html',
-            'moderate': 'tasks/games/color/moderate/take.html',
-            'major': 'tasks/games/color/major/take.html',
+            'hard': 'tasks/games/color/hard/take.html',
+            'medium': 'tasks/games/color/medium/take.html',
+            'easy': 'tasks/games/color/easy/take.html',
         },
         'results_templates': {
-            'mild': 'tasks/games/color/mild/results.html',
-            'moderate': 'tasks/games/color/moderate/results.html',
-            'major': 'tasks/games/color/major/results.html',
+            'hard': 'tasks/games/color/hard/results.html',
+            'medium': 'tasks/games/color/medium/results.html',
+            'easy': 'tasks/games/color/easy/results.html',
         }
     },
     'pairs': {
@@ -66,14 +66,14 @@ TASK_TEMPLATES = {
         'icon': '🎮',
         'description': 'Related Pairing game',
         'templates': {
-            'mild': 'tasks/games/pairs/mild/take.html',
-            'moderate': 'tasks/games/pairs/moderate/take.html',
-            'major': 'tasks/games/pairs/major/take.html',
+            'hard': 'tasks/games/pairs/hard/take.html',
+            'medium': 'tasks/games/pairs/medium/take.html',
+            'easy': 'tasks/games/pairs/easy/take.html',
         },
         'results_templates': {
-            'mild': 'tasks/games/pairs/mild/results.html',
-            'moderate': 'tasks/games/pairs/moderate/results.html',
-            'major': 'tasks/games/pairs/major/results.html',
+            'hard': 'tasks/games/pairs/hard/results.html',
+            'medium': 'tasks/games/pairs/medium/results.html',
+            'easy': 'tasks/games/pairs/easy/results.html',
         }
     },
     'memory_questionnaire': {
@@ -87,51 +87,51 @@ TASK_TEMPLATES = {
 # Difficulty Configurations
 DIFFICULTY_CONFIGS = {
     'puzzle': {
-        'mild': {
+        'hard': {
             'grid': '3x3',
             'time_limit': 300,
             'description': 'Simple 3x3 grid puzzle'
         },
-        'moderate': {
+        'medium': {
             'grid': '4x4',
             'time_limit': 600,
             'description': 'Medium 4x4 grid puzzle'
         },
-        'major': {
+        'easy': {
             'grid': '5x5',
             'time_limit': 900,
             'description': 'Complex 5x5 grid puzzle'
         }
     },
     'pairs': {
-        'mild': {
+        'hard': {
             'pairs': 6,
             'time_limit': None,
             'description': 'Basic pairs matching'
         },
-        'moderate': {
+        'medium': {
             'pairs': 8,
             'time_limit': None,
             'description': 'Extended pairs matching'
         },
-        'major': {
+        'easy': {
             'pairs': 10,
             'time_limit': None,
             'description': 'Complex pairs matching'
         }
     },
     'color': {
-        'mild': {
+        'hard': {
             'rounds': 5,
             'time_limit': 60,
             'description': 'Basic color matching'
         },
-        'moderate': {
+        'medium': {
             'rounds': 8,
             'time_limit': 90,
             'description': 'Intermediate color matching'
         },
-        'major': {
+        'easy': {
             'rounds': 12,
             'time_limit': 120,
             'description': 'Advanced color matching'

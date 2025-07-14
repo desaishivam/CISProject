@@ -1,6 +1,6 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %}Puzzle Results – Mild{% endblock %}
+{% block title %}Color Matching Results – Hard{% endblock %}
 
 {% block content %}
 <div class="results-container">
@@ -48,7 +48,7 @@
   </style>
 
   <div class="results-card">
-    <h1>Puzzle Results</h1>
+    <h1>Color Matching Results</h1>
     
     <div class="stat-row">
       <span class="stat-label">Score:</span>
@@ -62,7 +62,7 @@
     
     <div class="stat-row">
       <span class="stat-label">Time Taken:</span>
-      <span class="stat-value" id="time-taken">{{ task_response.responses.time|default:"0" }}</span>
+      <span class="stat-value" id="time-taken">{{ task_response.responses.time }}</span>
     </div>
 
     <a href="{{ back_url }}" class="back-btn">
@@ -70,14 +70,17 @@
     </a>
   </div>
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const timeValueEl = document.getElementById('time-taken');
-    const timeInSeconds = parseInt(timeValueEl.textContent, 10);
-    if (!isNaN(timeInSeconds)) {
+    const timeEl = document.getElementById('time-taken');
+    let timeVal = timeEl.textContent.trim();
+    // Tiem conversions
+    if (/^\d+$/.test(timeVal)) {
+      const timeInSeconds = parseInt(timeVal, 10);
       const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
       const seconds = (timeInSeconds % 60).toString().padStart(2, '0');
-      timeValueEl.textContent = `${minutes}:${seconds} seconds`;
+      timeEl.textContent = `${minutes}:${seconds}`;
     }
   });
 </script>

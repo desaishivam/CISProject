@@ -1,6 +1,6 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %}Color Matching Results – Major{% endblock %}
+{% block title %}Related Pairing Results – Easy{% endblock %}
 
 {% block content %}
 <div class="results-container">
@@ -48,7 +48,7 @@
   </style>
 
   <div class="results-card">
-    <h1>Color Matching Results</h1>
+    <h1>Related Pairing Results</h1>
     
     <div class="stat-row">
       <span class="stat-label">Score:</span>
@@ -73,15 +73,12 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const timeEl = document.getElementById('time-taken');
-    let timeVal = timeEl.textContent.trim();
-    // Time conversions
-    if (/^\d+$/.test(timeVal)) {
-      const timeInSeconds = parseInt(timeVal, 10);
+    const timeInSeconds = parseInt(document.getElementById('time-taken').textContent, 10);
+    if (!isNaN(timeInSeconds)) {
       const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
       const seconds = (timeInSeconds % 60).toString().padStart(2, '0');
-      timeEl.textContent = `${minutes}:${seconds}`;
+      document.getElementById('time-taken').textContent = `${minutes}:${seconds} seconds`;
     }
   });
 </script>
-{% endblock %} 
+{% endblock %}

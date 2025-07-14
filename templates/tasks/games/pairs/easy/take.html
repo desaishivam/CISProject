@@ -73,7 +73,7 @@
         display: grid;
         gap: 12px;
         width: 100%;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
     .card {
         background: white;
@@ -170,16 +170,14 @@ const allPairs = [
     { id: 5, emoji: '⚡', word: 'Lightning' }, { id: 5, emoji: '☁️', word: 'Cloud' },
     { id: 6, emoji: '🏠', word: 'House' }, { id: 6, emoji: '🏢', word: 'Building' },
     { id: 7, emoji: '📚', word: 'Book' }, { id: 7, emoji: '✏️', word: 'Pencil' },
-    { id: 8, emoji: '🎵', word: 'Music' }, { id: 8, emoji: '🎤', word: 'Microphone' },
-    { id: 9, emoji: '🚗', word: 'Car' }, { id: 9, emoji: '🚌', word: 'Bus' },
-    { id: 10, emoji: '🍕', word: 'Pizza' }, { id: 10, emoji: '🍔', word: 'Burger' }
+    { id: 8, emoji: '🎵', word: 'Music' }, { id: 8, emoji: '🎤', word: 'Microphone' }
 ];
 
 let state;
-let lockBoard = false; // Prevents clicking while animating
+let lockBoard = false;
 
 function initializeGame() {
-    const pairCount = 10;
+    const pairCount = 8;
     let selected = allPairs.slice(0, pairCount * 2);
     let cards = [];
     selected.forEach(pair => {
@@ -243,8 +241,8 @@ function flipCard(index) {
                         state.completed = true;
                         setTimeout(gameCompleted, 500);
                     }
-                }, 400);
-            }, 300);
+                }, 400); 
+            }, 300); 
         } else {
             state.wrong = [i1, i2];
             renderGame();
@@ -279,7 +277,7 @@ function gameCompleted() {
         total: totalPairs,
         moves: state.moves,
         time: elapsedSeconds,
-        difficulty: 'moderate'
+        difficulty: 'easy'
     };
     fetch(window.location.href, {
         method: 'POST',
@@ -306,4 +304,3 @@ function gameCompleted() {
 initializeGame();
 </script>
 {% endblock %}
- 

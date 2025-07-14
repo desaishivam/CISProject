@@ -23,19 +23,19 @@ document.addEventListener('DOMContentLoaded', function () {
     // Game/assessment test URLs
     const testUrls = {
         puzzle: {
-            mild: dashboard ? dashboard.dataset.testPuzzleMildUrl : '',
-            moderate: dashboard ? dashboard.dataset.testPuzzleModerateUrl : '',
-            major: dashboard ? dashboard.dataset.testPuzzleMajorUrl : ''
+            hard: dashboard ? dashboard.dataset.testPuzzleHardUrl : '',
+            medium: dashboard ? dashboard.dataset.testPuzzleMediumUrl : '',
+            easy: dashboard ? dashboard.dataset.testPuzzleEasyUrl : ''
         },
         color: {
-            mild: dashboard ? dashboard.dataset.testColorMildUrl : '',
-            moderate: dashboard ? dashboard.dataset.testColorModerateUrl : '',
-            major: dashboard ? dashboard.dataset.testColorMajorUrl : ''
+            hard: dashboard ? dashboard.dataset.testColorHardUrl : '',
+            medium: dashboard ? dashboard.dataset.testColorMediumUrl : '',
+            easy: dashboard ? dashboard.dataset.testColorEasyUrl : ''
         },
         pairs: {
-            mild: dashboard ? dashboard.dataset.testPairsMildUrl : '',
-            moderate: dashboard ? dashboard.dataset.testPairsModerateUrl : '',
-            major: dashboard ? dashboard.dataset.testPairsMajorUrl : ''
+            hard: dashboard ? dashboard.dataset.testPairsHardUrl : '',
+            medium: dashboard ? dashboard.dataset.testPairsMediumUrl : '',
+            easy: dashboard ? dashboard.dataset.testPairsEasyUrl : ''
         }
     };
     const testQuestionnaireUrl = dashboard ? dashboard.dataset.testQuestionnaireUrl : '';
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('This task type does not have difficulty levels.');
                 return;
             }
-            const difficulties = ['mild', 'moderate', 'major'];
+            const difficulties = ['hard', 'medium', 'easy'];
             const tasks = difficulties.map(difficulty => ({ task_type: taskType, difficulty: difficulty }));
             fetch(assignMultipleTasksUrl, {
                 method: 'POST',

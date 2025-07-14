@@ -48,7 +48,7 @@
                     <label for="difficulty">Difficulty Level</label>
                     <select id="difficulty" name="difficulty">
                         {% for value, label in difficulty_levels %}
-                            <option value="{{ value }}" {% if value == 'mild' %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ value }}" {% if value == 'hard' %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                     <small class="help-text">Select cognitive difficulty level for games</small>

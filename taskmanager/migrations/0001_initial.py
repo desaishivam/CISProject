@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=200)),
                 ('description', models.TextField(blank=True, null=True)),
                 ('task_type', models.CharField(choices=[('memory_questionnaire', 'Memory Questionnaire'), ('checklist', 'Routine Checklist'), ('puzzle', 'Drag & Drop Puzzle'), ('color', 'Color Matching'), ('pairs', 'Related Pairing')], max_length=50)),
-                ('difficulty', models.CharField(choices=[('mild', 'Mild'), ('moderate', 'Moderate'), ('major', 'Major')], default='mild', help_text='Cognitive difficulty level for games', max_length=20)),
+                ('difficulty', models.CharField(choices=[('hard', 'Hard'), ('medium', 'Medium'), ('easy', 'Easy')], default='hard', help_text='Cognitive difficulty level for games', max_length=20)),
                 ('status', models.CharField(choices=[('assigned', 'Assigned'), ('in_progress', 'In Progress'), ('completed', 'Completed')], default='assigned', max_length=20)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('assigned_at', models.DateTimeField(auto_now_add=True)),

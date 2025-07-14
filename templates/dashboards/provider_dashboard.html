@@ -17,15 +17,15 @@
 <div class="dashboard-container"
      data-assign-task-url="{% url 'taskmanager:assign_task' %}"
      data-assign-multiple-tasks-url="{% url 'taskmanager:assign_multiple_tasks' %}"
-     data-test-puzzle-mild-url="{% url 'taskmanager:test_puzzle' 'mild' %}"
-     data-test-puzzle-moderate-url="{% url 'taskmanager:test_puzzle' 'moderate' %}"
-     data-test-puzzle-major-url="{% url 'taskmanager:test_puzzle' 'major' %}"
-     data-test-color-mild-url="{% url 'taskmanager:test_color' 'mild' %}"
-     data-test-color-moderate-url="{% url 'taskmanager:test_color' 'moderate' %}"
-     data-test-color-major-url="{% url 'taskmanager:test_color' 'major' %}"
-     data-test-pairs-mild-url="{% url 'taskmanager:test_pairs' 'mild' %}"
-     data-test-pairs-moderate-url="{% url 'taskmanager:test_pairs' 'moderate' %}"
-     data-test-pairs-major-url="{% url 'taskmanager:test_pairs' 'major' %}"
+     data-test-puzzle-hard-url="{% url 'taskmanager:test_puzzle' 'hard' %}"
+     data-test-puzzle-medium-url="{% url 'taskmanager:test_puzzle' 'medium' %}"
+     data-test-puzzle-easy-url="{% url 'taskmanager:test_puzzle' 'easy' %}"
+     data-test-color-hard-url="{% url 'taskmanager:test_color' 'hard' %}"
+     data-test-color-medium-url="{% url 'taskmanager:test_color' 'medium' %}"
+     data-test-color-easy-url="{% url 'taskmanager:test_color' 'easy' %}"
+     data-test-pairs-hard-url="{% url 'taskmanager:test_pairs' 'hard' %}"
+     data-test-pairs-medium-url="{% url 'taskmanager:test_pairs' 'medium' %}"
+     data-test-pairs-easy-url="{% url 'taskmanager:test_pairs' 'easy' %}"
      data-test-questionnaire-url="{% url 'taskmanager:test_questionnaire' %}"
      data-test-daily-checklist-url="{% url 'taskmanager:test_daily_checklist' %}">
     <div class="dashboard-header provider">
@@ -90,9 +90,9 @@
                                     <option value="">Select difficulty...</option>
                                     {% for level, display in difficulty_levels %}
                                         <option value="{{ level }}">
-                                            {% if level == 'mild' %}🔴
-                                            {% elif level == 'moderate' %}🟠
-                                            {% elif level == 'major' %}🟢
+                                            {% if level == 'hard' %}🔴
+                                            {% elif level == 'medium' %}🟠
+                                            {% elif level == 'easy' %}🟢
                                             {% endif %} {{ display }}
                                         </option>
                                     {% endfor %}
@@ -165,10 +165,10 @@
                                                 <td>
                                                     {% if task.task_type in game_types %}
                                                         <span class="difficulty-badge difficulty-{{ task.difficulty }}">
-                                                            {% if task.difficulty == 'mild' %}🔴 Mild
-                                                            {% elif task.difficulty == 'moderate' %}🟠 Moderate  
-                                                            {% elif task.difficulty == 'major' %}🟢 Major
-                                                            {% else %}🔴 Mild{% endif %}
+                                                            {% if task.difficulty == 'hard' %}🔴 Hard
+                                                            {% elif task.difficulty == 'medium' %}🟠 Medium  
+                                                            {% elif task.difficulty == 'easy' %}🟢 Easy
+                                                            {% else %}🔴 Hard{% endif %}
                                                         </span>
                                                     {% else %}
                                                         <span class="text-muted">N/A</span>
@@ -465,14 +465,14 @@
                         <div class="game-item">
                             <h4 class="game-title">🧩 Drag & Drop Puzzle</h4>
                             <div class="difficulty-buttons">
-                                <button class="test-btn difficulty-mild test-game-btn" data-game="puzzle" data-difficulty="mild">
-                                    🔴 Mild
+                                <button class="test-btn difficulty-hard test-game-btn" data-game="puzzle" data-difficulty="hard">
+                                    🔴 Hard
                                 </button>
-                                <button class="test-btn difficulty-moderate test-game-btn" data-game="puzzle" data-difficulty="moderate">
-                                    🟠 Moderate
+                                <button class="test-btn difficulty-medium test-game-btn" data-game="puzzle" data-difficulty="medium">
+                                    🟠 Medium
                                 </button>
-                                <button class="test-btn difficulty-major test-game-btn" data-game="puzzle" data-difficulty="major">
-                                    🟢 Major
+                                <button class="test-btn difficulty-easy test-game-btn" data-game="puzzle" data-difficulty="easy">
+                                    🟢 Easy
                                 </button>
                             </div>
                         </div>
@@ -481,14 +481,14 @@
                         <div class="game-item">
                             <h4 class="game-title">🎨 Color Matching</h4>
                             <div class="difficulty-buttons">
-                                <button class="test-btn difficulty-mild test-game-btn" data-game="color" data-difficulty="mild">
-                                    🔴 Mild
+                                <button class="test-btn difficulty-hard test-game-btn" data-game="color" data-difficulty="hard">
+                                    🔴 Hard
                                 </button>
-                                <button class="test-btn difficulty-moderate test-game-btn" data-game="color" data-difficulty="moderate">
-                                    🟠 Moderate
+                                <button class="test-btn difficulty-medium test-game-btn" data-game="color" data-difficulty="medium">
+                                    🟠 Medium
                                 </button>
-                                <button class="test-btn difficulty-major test-game-btn" data-game="color" data-difficulty="major">
-                                    🟢 Major
+                                <button class="test-btn difficulty-easy test-game-btn" data-game="color" data-difficulty="easy">
+                                    🟢 Easy
                                 </button>
                             </div>
                         </div>
@@ -497,14 +497,14 @@
                         <div class="game-item">
                             <h4 class="game-title">🔗 Related Pairing</h4>
                             <div class="difficulty-buttons">
-                                <button class="test-btn difficulty-mild test-game-btn" data-game="pairs" data-difficulty="mild">
-                                    🔴 Mild
+                                <button class="test-btn difficulty-hard test-game-btn" data-game="pairs" data-difficulty="hard">
+                                    🔴 Hard
                                 </button>
-                                <button class="test-btn difficulty-moderate test-game-btn" data-game="pairs" data-difficulty="moderate">
-                                    🟠 Moderate
+                                <button class="test-btn difficulty-medium test-game-btn" data-game="pairs" data-difficulty="medium">
+                                    🟠 Medium
                                 </button>
-                                <button class="test-btn difficulty-major test-game-btn" data-game="pairs" data-difficulty="major">
-                                    🟢 Major
+                                <button class="test-btn difficulty-easy test-game-btn" data-game="pairs" data-difficulty="easy">
+                                    🟢 Easy
                                 </button>
                             </div>
                         </div>
