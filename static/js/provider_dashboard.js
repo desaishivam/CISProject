@@ -289,3 +289,77 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// Robust Appointment Scheduling
+(function() {
+    const appointmentForm = document.getElementById('appointmentForm');
+    if (!appointmentForm) return;
+    // Remove any previous event listeners
+    appointmentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const patientId = document.getElementById('patient_id').value;
+        const datetime = document.getElementById('appointment_datetime').value;
+        const notes = document.getElementById('appointment_notes').value;
+        const submitBtn = appointmentForm.querySelector('button[type="submit"]');
+        if (!patientId || !datetime) {
+            alert('Please select a patient and date/time.');
+            return;
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Scheduling...';
+        }
+        // Get CSRF token from cookie (Django default)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrfToken = getCookie('csrftoken');
+        const url = `/taskmanager/create-appointment/${patientId}/`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+            body: new URLSearchParams({
+                'datetime': datetime,
+                'notes': notes
+            })
+        })
+        .then(res => res.json().catch(() => ({ success: false, message: 'Invalid server response' })))
+        .then(data => {
+            console.log('Appointment response:', data);
+            if (data.success) {
+                alert(data.message || 'Appointment scheduled!');
+                // Reset form and close modal
+                appointmentForm.reset();
+                document.getElementById('appointmentModal').style.display = 'none';
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to schedule appointment.');
+            }
+        })
+        .catch((err) => {
+            console.error('Appointment scheduling error:', err);
+            alert('An error occurred while scheduling the appointment.');
+        })
+        .finally(() => {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Schedule Appointment';
+            }
+        });
+    });
+})();
