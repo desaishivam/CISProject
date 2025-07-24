@@ -35,7 +35,7 @@ class Task(models.Model):
     due_date = models.DateTimeField(blank=True, null=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
-    # Task configuration - json for persistance
+    # Task configuration - json to keep data easy to use
     task_config = models.JSONField(default=dict, blank=True)
     
     def __str__(self):

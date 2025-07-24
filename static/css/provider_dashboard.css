@@ -1,5 +1,5 @@
 /*
-    Styles for the provider dashboard
+Styles for the provider dashboard
 */
 
 /* Game Testing Section */
@@ -142,7 +142,7 @@
     background: #0056b3;
 }
 
-/* Responsiveness */
+/* Responsiveness + Media Queries */
 @media (max-width: 768px) {
     .game-testing-container {
         padding: 1rem;

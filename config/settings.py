@@ -24,6 +24,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-n&@ufrn8f-t)wxz%9jlv%
 
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
+# Allowed Hosts changed for Railway deployment
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
