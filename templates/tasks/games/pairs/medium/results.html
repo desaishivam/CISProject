@@ -1,52 +1,18 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}Related Pairing Results – Medium{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/games.js' %}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="results-container">
-  <style>
-    .results-container {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      text-align: center;
-    }
-    .results-card {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 15px 0;
-      padding: 10px;
-      background: #f8fafc;
-      border-radius: 8px;
-    }
-    .stat-label {
-      font-weight: bold;
-      color: #4a5568;
-    }
-    .stat-value {
-      color: #2d3748;
-    }
-    .back-btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #4299e1;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-    .back-btn:hover {
-      background: #3182ce;
-    }
-  </style>
-
   <div class="results-card">
     <h1>Related Pairing Results</h1>
     
@@ -70,15 +36,4 @@
     </a>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const timeInSeconds = parseInt(document.getElementById('time-taken').textContent, 10);
-    if (!isNaN(timeInSeconds)) {
-      const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
-      const seconds = (timeInSeconds % 60).toString().padStart(2, '0');
-      document.getElementById('time-taken').textContent = `${minutes}:${seconds} seconds`;
-    }
-  });
-</script>
 {% endblock %}

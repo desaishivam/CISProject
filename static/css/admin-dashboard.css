@@ -1,0 +1,425 @@
+/* Admin Dashboard Styles */
+
+.admin-dashboard {
+    background: #f8f9fa;
+}
+
+.admin-dashboard .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.admin-dashboard .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 30%, #4a5568 70%, #2c5530 100%);
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(26, 32, 44, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-dashboard .dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+}
+
+.admin-dashboard .header-info h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.admin-dashboard .logout-btn {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.admin-dashboard .logout-btn:hover {
+    background: rgba(251, 191, 36, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.admin-dashboard .user-type {
+    color: rgba(251, 191, 36, 0.9);
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.admin-dashboard .dashboard-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    border: 1px solid rgba(251, 191, 36, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.admin-dashboard .dashboard-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+}
+
+.admin-dashboard .dashboard-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.admin-dashboard .dashboard-section:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.admin-dashboard .dashboard-section:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.admin-dashboard .section-title {
+    color: #1a202c;
+    margin: 0 0 2rem 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(217, 119, 6, 0.05));
+    border-radius: 10px;
+    border-left: 4px solid #fbbf24;
+}
+
+.admin-dashboard .tab-title {
+    color: #1a202c;
+    margin: 0 0 1.5rem 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.admin-dashboard .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.admin-dashboard .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.admin-dashboard .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.admin-dashboard .form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f7fafc;
+    color: #2d3748;
+    box-sizing: border-box;
+}
+
+.admin-dashboard .form-input:focus {
+    outline: none;
+    border-color: #fbbf24;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+}
+
+.admin-dashboard .action-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    min-width: 120px;
+    margin: 0.2rem;
+}
+
+.admin-dashboard .primary-btn {
+    background: linear-gradient(135deg, #1a202c, #2d3748);
+    color: #fbbf24;
+    box-shadow: 0 2px 10px rgba(26, 32, 44, 0.3);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.admin-dashboard .primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(26, 32, 44, 0.4);
+    background: linear-gradient(135deg, #2d3748, #4a5568);
+}
+
+.admin-dashboard .outline-btn {
+    background: white;
+    color: #1a202c;
+    border: 2px solid #fbbf24;
+}
+
+.admin-dashboard .outline-btn:hover {
+    background: #fbbf24;
+    color: #1a202c;
+    transform: translateY(-2px);
+}
+
+.admin-dashboard .large-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 200px;
+}
+
+.admin-dashboard .tabs {
+    display: flex;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.admin-dashboard .tab-button {
+    padding: 1rem 2rem;
+    background: none;
+    border: none;
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.admin-dashboard .tab-button.active,
+.admin-dashboard .tab-button:hover {
+    color: #1a202c;
+    border-bottom-color: #fbbf24;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(217, 119, 6, 0.02));
+}
+
+.admin-dashboard .tab-content {
+    display: none;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0 12px 12px 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.admin-dashboard .tab-content.active {
+    display: block;
+}
+
+.admin-dashboard .user-accounts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.admin-dashboard .user-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.admin-dashboard .user-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    transition: width 0.3s ease;
+}
+
+.admin-dashboard .user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.admin-dashboard .user-card:hover::before {
+    width: 6px;
+}
+
+.admin-dashboard .user-card:nth-child(1) { animation-delay: 0.1s; }
+.admin-dashboard .user-card:nth-child(2) { animation-delay: 0.2s; }
+.admin-dashboard .user-card:nth-child(3) { animation-delay: 0.3s; }
+.admin-dashboard .user-card:nth-child(4) { animation-delay: 0.4s; }
+
+.admin-dashboard .user-name {
+    color: #1a202c;
+    margin: 0 0 1rem 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.admin-dashboard .user-info p {
+    margin: 0.5rem 0;
+    color: #4a5568;
+}
+
+.admin-dashboard .relationship-title {
+    color: #2d3748;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem 0;
+}
+
+.admin-dashboard .relationship-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-dashboard .relationship-item {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), rgba(217, 119, 6, 0.05));
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin: 0.3rem 0;
+    color: #1a202c;
+    font-weight: 500;
+    border-left: 3px solid #fbbf24;
+}
+
+.admin-dashboard .no-relationships {
+    color: #e53e3e;
+    font-style: italic;
+    margin: 0.5rem 0;
+}
+
+.admin-dashboard .user-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.admin-dashboard .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #4a5568;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(217, 119, 6, 0.02));
+    border-radius: 12px;
+    border: 2px dashed #fbbf24;
+}
+
+.admin-dashboard .empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.admin-dashboard .messages {
+    margin-bottom: 2rem;
+}
+
+.admin-dashboard .message {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.admin-dashboard .message.success {
+    background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+    color: #2f855a;
+    border: 1px solid #9ae6b4;
+}
+
+.admin-dashboard .message.error {
+    background: linear-gradient(135deg, #fed7d7, #feb2b2);
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+.admin-dashboard .message.info {
+    background: linear-gradient(135deg, #bee3f8, #90cdf4);
+    color: #2c5282;
+    border: 1px solid #90cdf4;
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-dashboard .dashboard-container {
+        padding: 1rem;
+    }
+
+    .admin-dashboard .dashboard-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .admin-dashboard .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-dashboard .user-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .admin-dashboard .user-actions {
+        justify-content: center;
+    }
+    
+    .admin-dashboard .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .admin-dashboard .tab-button {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+} 

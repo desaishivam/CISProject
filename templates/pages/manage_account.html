@@ -1,6 +1,11 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}Manage Account - CogniCare{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="form-container">
@@ -53,93 +58,4 @@
         </div>
     </form>
 </div>
-
-<style>
-    .form-container {
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-    
-    .subtitle {
-        color: #666;
-        margin-bottom: 1.5rem;
-    }
-    
-    .edit-form {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        padding: 1.5rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #2c3e50;
-        font-weight: 500;
-    }
-    
-    .form-group input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-    }
-    
-    .form-group input:focus {
-        border-color: #4299e1;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-    }
-    
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-    
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-    
-    .message {
-        padding: 0.75rem 1rem;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .message.success {
-        background-color: #d1fae5;
-        color: #065f46;
-    }
-    
-    .message.error {
-        background-color: #fee2e2;
-        color: #b91c1c;
-    }
-    
-    .danger-btn {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-left: auto; 
-    }
-    
-    .danger-btn:hover {
-        background-color: #c82333;
-    }
-</style>
 {% endblock %} 

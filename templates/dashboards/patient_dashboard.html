@@ -1,6 +1,11 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}Patient Dashboard - CogniCare{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/patient-dashboard.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
@@ -21,7 +26,8 @@
     {% endif %}
     
     <!-- Dashboard content -->
-    <div class="dashboard-section">
+    <div class="patient-dashboard">
+        <div class="dashboard-section">
         <h2 class="section-title patient">📅 Upcoming Appointments</h2>
         {% if appointments %}
             <div class="table-container">
@@ -129,237 +135,8 @@
         </div>
         {% endif %}
     </div>
+    </div>
 </div>
 
-<style>
-    /* Patient Dashboard Specific Styles */
-    
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-    }
-    
-    .action-card {
-        position: relative;
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        text-decoration: none;
-        color: inherit;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.05);
-        overflow: hidden;
-        min-height: 220px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    .action-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-    }
-    
-    .action-card:hover::before {
-        transform: scaleX(1);
-    }
-    
-    .action-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-        text-decoration: none;
-        color: inherit;
-    }
-    
-    .tasks-card:hover {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-    }
-    
-    .appointments-card:hover {
-        background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), rgba(241, 196, 15, 0.05));
-    }
-    
-    .action-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1.5rem;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-        transition: transform 0.3s ease;
-    }
-    
-    .action-card:hover .action-icon {
-        transform: scale(1.1);
-    }
-    
-    .action-card h3 {
-        color: #2c3e50;
-        margin: 0 0 1rem 0;
-        font-size: 1.4rem;
-        font-weight: 600;
-        transition: color 0.3s ease;
-    }
-    
-    .action-card:hover h3 {
-        color: #667eea;
-    }
-    
-    .action-card p {
-        color: #7f8c8d;
-        margin: 0;
-        font-size: 1rem;
-        line-height: 1.5;
-        transition: color 0.3s ease;
-    }
-    
-    .action-card:hover p {
-        color: #5a6c7d;
-    }
-    
-    .coming-soon {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: linear-gradient(135deg, #e74c3c, #c0392b);
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    /* Daily Checklist Styles */
-    .daily-checklist-completed,
-    .daily-checklist-pending {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        border: 1px solid rgba(0,0,0,0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    
-    .daily-checklist-completed {
-        border-left: 4px solid #27ae60;
-        background: linear-gradient(135deg, rgba(39, 174, 96, 0.05), rgba(46, 204, 113, 0.05));
-    }
-    
-    .daily-checklist-pending {
-        border-left: 4px solid #f39c12;
-        background: linear-gradient(135deg, rgba(243, 156, 18, 0.05), rgba(241, 196, 15, 0.05));
-    }
-    
-    .checklist-status {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex: 1;
-    }
-    
-    .status-icon {
-        font-size: 2rem;
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: white;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .status-text h3 {
-        margin: 0 0 0.5rem 0;
-        color: #2c3e50;
-        font-size: 1.2rem;
-        font-weight: 600;
-    }
-    
-    .status-text p {
-        margin: 0;
-        color: #666;
-        font-size: 0.95rem;
-    }
-    
-    .submission-info {
-        font-size: 0.85rem !important;
-        color: #888 !important;
-        margin-top: 0.5rem !important;
-    }
-    
-    .checklist-actions {
-        display: flex;
-        gap: 1rem;
-    }
-    
-    .action-btn {
-        display: inline-block;
-        padding: 0.75rem 1.5rem;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        font-size: 0.9rem;
-    }
-    
-    .start-btn {
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-        color: white;
-        box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
-    }
-    
-    .start-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-    
-    .view-btn {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-    }
-    
-    .view-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-    
-    @media (max-width: 768px) {
-        .daily-checklist-completed,
-        .daily-checklist-pending {
-            flex-direction: column;
-            text-align: center;
-            gap: 1rem;
-        }
-        
-        .checklist-status {
-            flex-direction: column;
-            text-align: center;
-        }
-        
-        .checklist-actions {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-</style>
+
 {% endblock %} 

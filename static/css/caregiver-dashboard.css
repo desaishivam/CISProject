@@ -1,0 +1,266 @@
+/* Caregiver Dashboard Styles */
+
+.caregiver-dashboard .patient-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.caregiver-dashboard .patient-header h2 {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.caregiver-dashboard .patient-details {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.caregiver-dashboard .patient-details span {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* Caregiver-specific table header styling */
+.caregiver-dashboard .enhanced-table th {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+}
+
+.caregiver-dashboard .enhanced-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.caregiver-dashboard .enhanced-table tr:hover td {
+    background-color: #f0fdf4;
+}
+
+.caregiver-dashboard .task-title {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Caregiver-specific button styles */
+.caregiver-dashboard .complete-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    box-shadow: 0 2px 10px rgba(46, 204, 113, 0.3);
+}
+
+.caregiver-dashboard .complete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}
+
+.caregiver-dashboard .view-btn {
+    background: linear-gradient(135deg, #16a085, #138d75);
+    color: white;
+    box-shadow: 0 2px 10px rgba(22, 160, 133, 0.3);
+}
+
+.caregiver-dashboard .view-btn:hover {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    transform: translateY(-2px);
+}
+
+.caregiver-dashboard .appointment-datetime {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.caregiver-dashboard .appointment-datetime .time {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.caregiver-dashboard .difficulty-dot {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.caregiver-dashboard .difficulty-dot.hard {
+    background-color: #e74c3c;
+}
+
+.caregiver-dashboard .difficulty-dot.medium {
+    background-color: #f39c12;
+}
+
+.caregiver-dashboard .difficulty-dot.easy {
+    background-color: #2ecc71;
+}
+
+/* Notes styling */
+.caregiver-dashboard .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.caregiver-dashboard .note-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.caregiver-dashboard .note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.caregiver-dashboard .note-date {
+    font-weight: 500;
+}
+
+.caregiver-dashboard .note-from {
+    font-style: italic;
+}
+
+.caregiver-dashboard .note-content {
+    color: #374151;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.caregiver-dashboard .loading-notes {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+    padding: 1rem;
+}
+
+/* Daily Checklist Styles */
+.caregiver-dashboard .daily-checklist-completed,
+.caregiver-dashboard .daily-checklist-pending {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.caregiver-dashboard .daily-checklist-completed {
+    border-left: 4px solid #27ae60;
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.05), rgba(46, 204, 113, 0.05));
+}
+
+.caregiver-dashboard .daily-checklist-pending {
+    border-left: 4px solid #f39c12;
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.05), rgba(241, 196, 15, 0.05));
+}
+
+.caregiver-dashboard .checklist-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.caregiver-dashboard .status-icon {
+    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.caregiver-dashboard .status-text h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.caregiver-dashboard .status-text p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.caregiver-dashboard .submission-info {
+    font-size: 0.8rem !important;
+    color: #888 !important;
+    margin-top: 0.5rem !important;
+}
+
+.caregiver-dashboard .checklist-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.caregiver-dashboard .start-btn {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+.caregiver-dashboard .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.caregiver-dashboard .view-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.caregiver-dashboard .view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .caregiver-dashboard .patient-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .caregiver-dashboard .daily-checklist-completed,
+    .caregiver-dashboard .daily-checklist-pending {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .caregiver-dashboard .checklist-status {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .caregiver-dashboard .checklist-actions {
+        width: 100%;
+        justify-content: center;
+    }
+} 

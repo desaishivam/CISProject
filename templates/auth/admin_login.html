@@ -1,27 +1,32 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}Admin Login - CogniCare{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="login-page">
-    <div class="login-background">
-<div class="login-container">
-            <div class="login-header">
-                <div class="login-icon">🔒</div>
+<div class="auth-page">
+    <div class="auth-background">
+<div class="auth-container">
+            <div class="auth-header">
+                <div class="auth-icon">🔒</div>
                 <h1>Administrator Portal</h1>
-                <p class="login-description">Secure access to system management and administrative controls</p>
+                <p class="auth-description">Secure access to system management and administrative controls</p>
             </div>
     
     {% if messages %}
-    <div class="messages">
+    <div class="auth-messages">
         {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
+            <div class="auth-message {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     </div>
     {% endif %}
     
-            <div class="login-form-container">
-    <form method="post" action="{% url 'admin_login' %}" class="login-form">
+            <div class="auth-form-container">
+    <form method="post" action="{% url 'admin_login' %}" class="auth-form">
         {% csrf_token %}
         <div class="form-group">
                         <label for="username">
@@ -43,334 +48,18 @@
                         </div>
         </div>
         
-                    <button type="submit" class="login-btn">
+                    <button type="submit" class="auth-btn">
                         <span class="btn-icon">⚡</span>
                         <span class="btn-text">Access Control Panel</span>
         </button>
     </form>
     
-            <div class="login-footer">
+            <div class="auth-footer">
                 <p>Comprehensive administrative control for healthcare system management.</p>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .login-page {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        padding: 2rem;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .login-page::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23fbbf24" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        pointer-events: none;
-    }
-    
-    .login-background {
-        width: 100%;
-        max-width: 500px;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .login-container {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 20px;
-        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(251, 191, 36, 0.1);
-        overflow: hidden;
-        position: relative;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(251, 191, 36, 0.2);
-    }
-    
-    .login-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: #1a202c;
-    }
-    
-    .login-header {
-        text-align: center;
-        padding: 2.5rem 2rem 1.5rem;
-        background: #f8f9fa;
-        position: relative;
-    }
-    
-    .login-header::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 2px;
-        background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        border-radius: 2px;
-    }
-    
-    .login-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
-        filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.3));
-    }
-    
-    .login-header h1 {
-        margin: 0 0 0.5rem 0;
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1a202c;
-        letter-spacing: -0.5px;
-    }
-    
-    .login-description {
-        margin: 0;
-        color: #4a5568;
-        font-size: 1.1rem;
-        line-height: 1.5;
-        font-weight: 500;
-    }
-    
-    .login-form-container {
-        padding: 2rem;
-    }
-    
-    .login-form {
-        margin-bottom: 2rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    label {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.8rem;
-        font-weight: 600;
-        color: #2d3748;
-        font-size: 1rem;
-    }
-    
-    .label-icon {
-        margin-right: 0.5rem;
-        font-size: 1.1rem;
-    }
-    
-    .input-wrapper {
-        position: relative;
-    }
-    
-    .form-input {
-        width: 100%;
-        padding: 1rem 1.2rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: #f7fafc;
-        color: #2d3748;
-        box-sizing: border-box;
-    }
-    
-    .form-input:focus {
-        outline: none;
-        border-color: #fbbf24;
-        background: white;
-        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
-        transform: translateY(-2px);
-    }
-    
-    .form-input::placeholder {
-        color: #a0aec0;
-    }
-    
-    .login-btn {
-        width: 100%;
-        padding: 1rem 1.5rem;
-        background: #1a202c;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        box-shadow: 0 4px 15px rgba(26, 32, 44, 0.4);
-        margin-top: 1rem;
-    }
-    
-    .login-btn:active {
-        transform: translateY(0);
-    }
-    
-    .btn-icon,
-    .btn-text {
-        position: relative;
-        z-index: 1;
-    }
-    
-    .btn-icon {
-        font-size: 1.2rem;
-    }
-    
-    .btn-text {
-        font-weight: 600;
-    }
-    
-    .login-footer {
-        text-align: center;
-        padding: 1.5rem 2rem 2rem;
-        border-top: 1px solid #f1f5f9;
-        background: #fafbfc;
-    }
-    
-    .login-footer p {
-        margin: 0;
-        color: #4a5568;
-        font-size: 0.95rem;
-        font-style: italic;
-        font-weight: 500;
-    }
-    
-    .messages {
-        margin: 0 2rem 1rem;
-    }
-    
-    .message {
-        padding: 1rem 1.2rem;
-        border-radius: 10px;
-        margin-bottom: 1rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-    }
-    
-    .message.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
-    .message.error::before {
-        content: '❌';
-        margin-right: 0.5rem;
-    }
-    
-    .message.success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    
-    .message.success::before {
-        content: '✅';
-        margin-right: 0.5rem;
-    }
-    
-    .message.info {
-        background: linear-gradient(135deg, #bee3f8, #90cdf4);
-        color: #2c5282;
-        border: 1px solid #90cdf4;
-    }
-    
-    .message.info::before {
-        content: 'ℹ️';
-        margin-right: 0.5rem;
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .login-page {
-            padding: 1rem;
-        }
-        
-        .login-header {
-            padding: 2rem 1.5rem 1.5rem;
-        }
-        
-        .login-icon {
-            font-size: 3rem;
-        }
-        
-        .login-header h1 {
-            font-size: 1.8rem;
-        }
-        
-        .login-description {
-            font-size: 1rem;
-        }
-        
-        .login-form-container {
-            padding: 1.5rem;
-        }
-        
-        .form-input {
-            padding: 0.9rem 1rem;
-        }
-        
-        .login-btn {
-            padding: 0.9rem 1.2rem;
-            font-size: 1rem;
-        }
-        
-        .messages {
-            margin: 0 1.5rem 1rem;
-        }
-    }
-    
-    /* Animation for form elements */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .login-container {
-        animation: fadeInUp 0.6s ease-out;
-    }
-    
-    .form-group {
-        animation: fadeInUp 0.6s ease-out;
-        animation-fill-mode: both;
-    }
-    
-    .form-group:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-    
-    .form-group:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-    
-    .login-btn {
-        animation: fadeInUp 0.6s ease-out 0.3s both;
-    }
-</style>
+
 {% endblock %} 

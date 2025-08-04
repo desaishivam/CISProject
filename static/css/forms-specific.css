@@ -1,0 +1,407 @@
+/* Form Specific Styles */
+
+/* Login Form Styles */
+.login-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.login-container h1 {
+    text-align: center;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.login-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.login-form input:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.login-form .btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-form .btn:hover {
+    background: #3182ce;
+}
+
+.login-form .error-message {
+    color: #e53e3e;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Account Management Forms */
+.account-form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.account-form h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.2rem;
+}
+
+.account-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.account-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.account-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.account-form input,
+.account-form select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.account-form input:focus,
+.account-form select:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.account-form .btn {
+    padding: 0.75rem 1.5rem;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.account-form .btn:hover {
+    background: #3182ce;
+}
+
+.account-form .btn-secondary {
+    background: #6b7280;
+}
+
+.account-form .btn-secondary:hover {
+    background: #4b5563;
+}
+
+/* Task Assignment Forms */
+.task-assignment-form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.task-assignment-form h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.2rem;
+}
+
+.task-assignment-form .task-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.task-assignment-form .task-type-card {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.task-assignment-form .task-type-card:hover {
+    border-color: #4299e1;
+    background: #f8fafc;
+}
+
+.task-assignment-form .task-type-card.selected {
+    border-color: #4299e1;
+    background: #ebf8ff;
+}
+
+.task-assignment-form .task-type-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.task-assignment-form .task-type-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.task-assignment-form .difficulty-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.task-assignment-form .difficulty-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e9ecef;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.task-assignment-form .difficulty-btn.active {
+    background: #4299e1;
+    color: white;
+    border-color: #4299e1;
+}
+
+/* Questionnaire Forms */
+.questionnaire-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.questionnaire-form h2 {
+    margin: 0 0 1.5rem 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.questionnaire-form .section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.questionnaire-form .section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.questionnaire-form .section h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.2rem;
+}
+
+.questionnaire-form .question {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.questionnaire-form .question h4 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.questionnaire-form .options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.questionnaire-form .option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.questionnaire-form .option input[type="radio"] {
+    width: auto;
+    margin: 0;
+}
+
+.questionnaire-form .option label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.questionnaire-form .text-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.questionnaire-form .text-input:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Daily Checklist Forms */
+.checklist-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.checklist-form h2 {
+    margin: 0 0 1.5rem 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.checklist-form .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.checklist-form .checklist-item input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    transform: scale(1.2);
+}
+
+.checklist-form .checklist-item label {
+    margin: 0;
+    cursor: pointer;
+    flex: 1;
+}
+
+.checklist-form .mood-section,
+.checklist-form .memory-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.checklist-form .mood-section h3,
+.checklist-form .memory-section h3 {
+    margin: 0 0 1rem 0;
+    color: #2d3748;
+    font-size: 1.2rem;
+}
+
+.checklist-form .mood-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.checklist-form .mood-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checklist-form .mood-option input[type="radio"] {
+    width: auto;
+    margin: 0;
+}
+
+.checklist-form .mood-option label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.checklist-form .memory-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.checklist-form .memory-input:focus {
+    border-color: #4299e1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .account-form .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .task-assignment-form .task-type-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .questionnaire-form .options {
+        flex-direction: column;
+    }
+    
+    .checklist-form .mood-options {
+        flex-direction: column;
+    }
+} 

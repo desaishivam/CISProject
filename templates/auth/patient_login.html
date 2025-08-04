@@ -1,121 +1,63 @@
 {% extends 'layouts/base.html' %}
+{% load static %}
 
 {% block title %}Patient Login - CogniCare{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="form-page patient">
-    <div class="form-container patient">
-        <div class="form-header">
-            <div class="form-icon">🩺</div>
-            <h1>Patient Portal</h1>
-            <p class="form-description">Access your health dashboard and manage your healthcare activities</p>
-        </div>
+<div class="auth-page">
+    <div class="auth-background">
+<div class="auth-container">
+            <div class="auth-header">
+                <div class="auth-icon">🩺</div>
+                <h1>Patient Portal</h1>
+                <p class="auth-description">Access your health dashboard and manage your healthcare activities</p>
+            </div>
     
     {% if messages %}
-    <div class="messages">
+    <div class="auth-messages">
         {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
+            <div class="auth-message {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     </div>
     {% endif %}
     
-        <div class="form-content">
-            <form method="post" action="{% url 'patient_login' %}" class="form">
+            <div class="auth-form-container">
+    <form method="post" action="{% url 'patient_login' %}" class="auth-form">
         {% csrf_token %}
         <div class="form-group">
-                    <label class="form-label" for="username">
-                        <span class="label-icon">👤</span>
-                        Username
-                    </label>
-                    <input type="text" id="username" name="username" class="form-input patient" required placeholder="Enter your username">
+                        <label for="username">
+                            <span class="label-icon">👤</span>
+                            Username
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" name="username" class="form-input" required placeholder="Enter your username">
+                        </div>
         </div>
         
         <div class="form-group">
-                    <label class="form-label" for="password">
-                        <span class="label-icon">🔒</span>
-                        Password
-                    </label>
-                    <input type="password" id="password" name="password" class="form-input patient" required placeholder="Enter your password">
+                        <label for="password">
+                            <span class="label-icon">🔒</span>
+                            Password
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" name="password" class="form-input" required placeholder="Enter your password">
+                        </div>
         </div>
         
-                <button type="submit" class="btn patient full-width">
-                    <span>🚀</span>
-                    <span>Sign In</span>
+                    <button type="submit" class="auth-btn">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Sign In</span>
         </button>
     </form>
     
-            <div class="form-footer">
+            <div class="auth-footer">
                 <p>Need help? Contact your healthcare provider for assistance.</p>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    /* Minimal custom CSS only for login-specific elements */
-    .test-credentials {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid #dee2e6;
-        margin-bottom: 1.5rem;
-    }
-    
-    .test-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-        gap: 0.5rem;
-    }
-    
-    .test-header h3 {
-        margin: 0;
-        color: #495057;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-    
-    .credentials {
-        display: flex;
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    
-    .credential-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.8rem 1rem;
-        background: white;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-    }
-    
-    .cred-label {
-        font-weight: 600;
-        color: #6c757d;
-    }
-    
-    .cred-value {
-        color: #495057;
-        font-family: 'Courier New', monospace;
-        background: #f8f9fa;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.9rem;
-    }
-    
-    .form-footer {
-        text-align: center;
-        padding: 1.5rem 2rem;
-        background: #f8f9fa;
-        color: #6c757d;
-        font-size: 0.95rem;
-        line-height: 1.4;
-    }
-    /* All form styling now handled by design system in base template! */
-    .form-page.patient {
-        background: #f8f9fa;
-    }
-</style>
 {% endblock %} 
